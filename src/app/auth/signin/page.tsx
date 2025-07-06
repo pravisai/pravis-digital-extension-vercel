@@ -5,6 +5,25 @@ import { Label } from "@/components/ui/label";
 import { BrainCircuit, LogIn } from "lucide-react";
 import Link from "next/link";
 
+const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg role="img" viewBox="0 0 24 24" {...props}>
+      <path
+        fill="currentColor"
+        d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.3 1.62-3.92 1.62-3.32 0-6.03-2.75-6.03-6.12s2.7-6.12 6.03-6.12c1.88 0 3.12.79 3.86 1.52l2.48-2.48C18.25.36 15.68 0 12.48 0 5.88 0 .5 5.34.5 12s5.38 12 11.98 12c3.24 0 5.92-1.08 7.9-3.02 2.05-2.01 2.6-5.02 2.6-7.72v-.92h-9.52z"
+      />
+    </svg>
+);
+  
+const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
+<svg role="img" viewBox="0 0 24 24" {...props}>
+    <path
+    fill="currentColor"
+    d="M23.998 12c0-6.627-5.373-12-12-12S0 5.373 0 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.61 22.954 23.998 17.99 23.998 12z"
+    />
+</svg>
+);
+
+
 export default function SignInPage() {
   return (
     <div className="flex min-h-svh items-center justify-center bg-background p-4">
@@ -34,9 +53,32 @@ export default function SignInPage() {
               Sign In
             </Link>
           </Button>
-          <p className="text-sm text-muted-foreground">
+
+          <div className="relative w-full py-2">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          <div className="grid w-full grid-cols-2 gap-4">
+            <Button variant="outline" className="w-full">
+              <GoogleIcon className="mr-2 h-4 w-4"/>
+              Google
+            </Button>
+            <Button variant="outline" className="w-full">
+              <FacebookIcon className="mr-2 h-4 w-4"/>
+              Facebook
+            </Button>
+          </div>
+
+          <p className="text-sm text-muted-foreground pt-2">
             Don't have an account?{" "}
-            <Link href="#" className="text-primary hover:underline">
+            <Link href="#" className="text-primary hover:underline font-semibold">
               Sign up
             </Link>
           </p>
