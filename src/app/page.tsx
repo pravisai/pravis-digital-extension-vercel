@@ -77,8 +77,11 @@ export default function Home() {
       <main className="flex-1">
         <section id="hero" className="py-20 md:py-32 text-center">
           <div className="container mx-auto px-4">
-            <BrainCircuit className="w-16 h-16 mx-auto text-primary animate-pulse" />
-            <h1 className="font-headline text-5xl md:text-7xl font-bold mt-4 text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-foreground to-accent">
+            <div className="relative w-20 h-20 mx-auto">
+              <div className="absolute -inset-2 bg-primary rounded-full opacity-50 blur-xl animate-pulse"></div>
+              <BrainCircuit className="relative w-20 h-20 mx-auto text-primary-foreground" />
+            </div>
+            <h1 className="font-headline text-5xl md:text-7xl font-bold mt-8 text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary-foreground">
               PRAVIS
             </h1>
             <p className="font-headline text-2xl md:text-4xl mt-2 text-primary-foreground">
@@ -109,7 +112,7 @@ export default function Home() {
             <h2 className="font-headline text-4xl font-bold text-center">Core Capabilities</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
               {features.map((feature, index) => (
-                <Card key={index} className="bg-card/80 border-border/50 hover:border-primary/50 hover:shadow-[0_0_20px_0px_hsl(var(--primary)/0.2)] transition-all duration-300">
+                <Card key={index} className="bg-card/80 border-border/50 hover:border-primary hover:shadow-[0_0_20px_0px_hsl(var(--primary)/0.2)] transition-all duration-300">
                   <CardHeader className="items-center">
                     {feature.icon}
                     <CardTitle className="font-headline text-2xl text-center mt-4">{feature.title}</CardTitle>
@@ -130,7 +133,7 @@ export default function Home() {
               Experience the core functions of Pravis. Use these tools to find clarity, spark creativity, and communicate effectively.
             </p>
             <Tabs defaultValue="chat" className="mt-12 max-w-4xl mx-auto">
-              <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 bg-background">
+              <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 bg-secondary">
                 <TabsTrigger value="chat" className="font-headline text-base">Clarity Chat</TabsTrigger>
                 <TabsTrigger value="creative" className="font-headline text-base">Creative Partner</TabsTrigger>
                 <TabsTrigger value="email" className="font-headline text-base">Email Assistant</TabsTrigger>

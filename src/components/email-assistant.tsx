@@ -60,7 +60,7 @@ export function EmailAssistant() {
   }
 
   return (
-    <Card className="w-full shadow-lg border-primary/20 shadow-primary/5">
+    <Card className="w-full shadow-lg border-primary/40 shadow-primary/10">
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Email Assistant</CardTitle>
         <CardDescription>Draft thoughtful and effective email replies with ease.</CardDescription>

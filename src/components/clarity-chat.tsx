@@ -49,7 +49,7 @@ export function ClarityChat() {
   }
 
   return (
-    <Card className="w-full shadow-lg border-primary/20 shadow-primary/5">
+    <Card className="w-full shadow-lg border-primary/40 shadow-primary/10">
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Clarity Chat</CardTitle>
         <CardDescription>Engage with Pravis to untangle complex thoughts and gain valuable insights.</CardDescription>
@@ -66,7 +66,7 @@ export function ClarityChat() {
                     </AvatarFallback>
                   </Avatar>
                 )}
-                <div className={`rounded-lg p-3 max-w-md ${message.role === "user" ? "bg-primary text-primary-foreground" : "bg-secondary"}`}>
+                <div className={`rounded-2xl p-3 max-w-md ${message.role === "user" ? "bg-primary text-primary-foreground" : "bg-secondary"}`}>
                   <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                 </div>
                 {message.role === "user" && (
@@ -85,7 +85,7 @@ export function ClarityChat() {
                     <BrainCircuit className="w-4 h-4 text-primary animate-pulse" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="rounded-lg p-3 bg-secondary animate-pulse">
+                <div className="rounded-2xl p-3 bg-secondary animate-pulse">
                   <div className="h-4 w-32 rounded-md bg-muted"></div>
                 </div>
               </div>
