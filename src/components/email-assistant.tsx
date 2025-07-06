@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Archive,
   FileText,
@@ -18,7 +18,14 @@ import {
   Forward,
   ArrowLeft,
   Menu,
+  Loader2,
 } from 'lucide-react'
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+
+import { draftEmailReplies } from '@/ai/flows/draft-email-replies'
+import { useToast } from '@/hooks/use-toast'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -27,6 +34,11 @@ import { cn } from '@/lib/utils'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { Skeleton } from './ui/skeleton'
+import { Label } from './ui/label'
 
 
 const mockEmails = [
@@ -97,9 +109,60 @@ const categories = [
   { name: 'Promotions', icon: Tag, color: 'text-rose-400' },
 ]
 
+const replyFormSchema = z.object({
+  tone: z.string().min(1, { message: "Please select a tone." }),
+  parameters: z.string(),
+});
+
+
 export function EmailAssistant() {
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null)
   const [isNavCollapsed, setIsNavCollapsed] = useState(false)
+  const { toast } = useToast()
+  
+  const [isDrafting, setIsDrafting] = useState(false);
+  const [draftedReply, setDraftedReply] = useState("");
+
+  const form = useForm<z.infer<typeof replyFormSchema>>({
+    resolver: zodResolver(replyFormSchema),
+    defaultValues: {
+      tone: "Friendly",
+      parameters: "Reply to the main points of the email.",
+    },
+  });
+
+  useEffect(() => {
+    if (selectedEmail) {
+      form.reset();
+      setDraftedReply('');
+    }
+  }, [selectedEmail, form]);
+
+  async function onDraftReply(values: z.infer<typeof replyFormSchema>) {
+    if (!selectedEmail) return;
+
+    setIsDrafting(true);
+    setDraftedReply("");
+
+    try {
+      const result = await draftEmailReplies({
+        emailContent: selectedEmail.body,
+        tone: values.tone,
+        parameters: values.parameters,
+      });
+      setDraftedReply(result.reply);
+    } catch (error) {
+      console.error("Failed to draft reply:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to draft reply. Please try again.",
+      });
+    } finally {
+      setIsDrafting(false);
+    }
+  }
+
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -273,22 +336,89 @@ export function EmailAssistant() {
                     {selectedEmail.body}
                   </p>
                 </ScrollArea>
-                <div className="p-6 border-t border-border/50 bg-background space-y-4">
+                 <div className="p-6 border-t border-border/50 bg-background space-y-4">
                   <div className="flex items-center gap-2">
                     <Button variant="outline"><Reply className="mr-2 h-4 w-4" /> Reply</Button>
                     <Button variant="outline"><ReplyAll className="mr-2 h-4 w-4" /> Reply All</Button>
                     <Button variant="outline"><Forward className="mr-2 h-4 w-4" /> Forward</Button>
                   </div>
                   <Card className="border-primary/20 bg-primary/5">
-                    <CardHeader className="flex-row items-center gap-3 space-y-0 pb-2">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"></path>
-                          <path d="M12 17.5c-3.03 0-5.5-2.47-5.5-5.5S8.97 6.5 12 6.5s5.5 2.47 5.5 5.5-2.47 5.5-5.5 5.5zm0-9c-1.93 0-3.5 1.57-3.5 3.5s1.57 3.5 3.5 3.5 3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5z" fill="currentColor"></path>
-                      </svg>
-                      <CardTitle className="text-base font-semibold">Pravis Summary</CardTitle>
+                    <CardHeader>
+                      <CardTitle className="text-base font-semibold">Draft a reply with Pravis</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">Could not generate summary for this email.</p>
+                    <CardContent className="space-y-4">
+                      <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onDraftReply)} className="space-y-4">
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="tone"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Tone of Reply</FormLabel>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select a tone" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="Friendly">Friendly</SelectItem>
+                                      <SelectItem value="Formal">Formal</SelectItem>
+                                      <SelectItem value="Casual">Casual</SelectItem>
+                                      <SelectItem value="Professional">Professional</SelectItem>
+                                      <SelectItem value="Direct">Direct</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="parameters"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Specific Instructions</FormLabel>
+                                  <FormControl>
+                                    <Textarea placeholder="e.g., Acknowledge receipt and say you'll reply in full tomorrow." {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <Button type="submit" disabled={isDrafting} className="w-full">
+                            {isDrafting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PenSquare className="mr-2 h-4 w-4" />}
+                            Draft Reply
+                          </Button>
+                        </form>
+                      </Form>
+                      {(isDrafting || draftedReply) && (
+                        <div className="space-y-2 pt-4">
+                          <Label>Generated Reply</Label>
+                          {isDrafting && !draftedReply ? (
+                            <div className="space-y-2 rounded-md border border-input p-4">
+                              <Skeleton className="h-4 w-full" />
+                              <Skeleton className="h-4 w-full" />
+                              <Skeleton className="h-4 w-3/4" />
+                            </div>
+                          ) : (
+                            <Textarea
+                              value={draftedReply}
+                              readOnly
+                              rows={5}
+                              className="bg-background"
+                            />
+                          )}
+                          {draftedReply && !isDrafting && (
+                            <div className="flex justify-end gap-2 pt-2">
+                              <Button variant="ghost" onClick={() => setDraftedReply('')}>Discard</Button>
+                              <Button><Send className="mr-2 h-4 w-4" /> Send</Button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
