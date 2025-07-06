@@ -3,6 +3,7 @@ import {
   type UserCredential,
   GoogleAuthProvider,
   signInWithPopup,
+  signOut,
 } from 'firebase/auth';
 import { auth } from './config';
 
@@ -14,7 +15,16 @@ export const signInWithGoogle = async (): Promise<UserCredential | null> => {
     return result;
   } catch (error) {
     console.error('Error signing in with Google:', error);
-    // Handle specific errors (e.g., account exists with different credential) here if needed
-    return null;
+    // The component will now handle displaying the error.
+    throw error;
+  }
+};
+
+export const signOutUser = async (): Promise<void> => {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error('Error signing out: ', error);
+    throw error;
   }
 };

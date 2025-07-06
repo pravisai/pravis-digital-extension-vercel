@@ -14,13 +14,32 @@ import {
   SidebarInset,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { BrainCircuit, Lightbulb, Mail, MessageSquare, Settings, User, Zap, LayoutDashboard } from "lucide-react"
+import { BrainCircuit, Lightbulb, Mail, MessageSquare, Settings, User, Zap, LayoutDashboard, LogOut } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { signOutUser } from "@/lib/firebase/auth"
+import { useToast } from "@/hooks/use-toast"
 
 function PravisSidebar() {
   const pathname = usePathname();
   const { isMobile } = useSidebar();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      await signOutUser();
+      toast({ title: "Signed Out", description: "You have been successfully signed out." });
+      router.push('/');
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'Sign Out Failed',
+        description: 'Could not sign out. Please try again.',
+      });
+    }
+  };
   
   const menuItems = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard" },
@@ -67,6 +86,12 @@ function PravisSidebar() {
                 <User />
                 <span>Dr. Pranav Shimpi</span>
               </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+             <SidebarMenuButton onClick={handleSignOut} tooltip={{children: 'Sign Out'}}>
+                <LogOut />
+                <span>Sign Out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
