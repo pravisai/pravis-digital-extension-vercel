@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent } from "@/components/ui/card";
-import { BrainCircuit, Calendar, Mail, Share2, Wand2 } from "lucide-react";
+import { BrainCircuit, Calendar, Mail, Share2 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import React, { useState, useEffect } from "react"
@@ -37,13 +37,6 @@ const featureItems = [
         color: "text-destructive",
         borderColor: "border-destructive shadow-destructive/20",
     },
-    {
-        href: "#",
-        icon: Wand2,
-        title: "Test AI Key",
-        color: "text-primary",
-        borderColor: "border-primary shadow-primary/20",
-    }
 ];
 
 export function DailyRhythms() {
@@ -84,7 +77,7 @@ export function DailyRhythms() {
 
             <section>
                 <h2 className="text-2xl font-bold font-headline mb-4">For You</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {featureItems.map((feature, index) => (
                         <Link href={feature.href} key={index} className="transform hover:-translate-y-1 transition-transform duration-300">
                             <Card className={`bg-card/80 hover:bg-card/100 border-2 ${feature.borderColor} flex flex-col items-center justify-center text-center p-6 aspect-square rounded-2xl shadow-lg`}>
