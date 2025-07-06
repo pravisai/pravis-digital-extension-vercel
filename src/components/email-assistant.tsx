@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -99,14 +98,19 @@ const categories = [
 ]
 
 export function EmailAssistant() {
-  const [selectedEmail, setSelectedEmail] = useState<Email | null>(mockEmails[0])
+  const [selectedEmail, setSelectedEmail] = useState<Email | null>(null)
   const [isNavCollapsed, setIsNavCollapsed] = useState(false)
 
   return (
     <TooltipProvider delayDuration={0}>
       <div className="h-full w-full flex flex-col text-foreground bg-background">
         <div
-          className="flex-1 flex md:grid md:grid-cols-[var(--nav-width)_400px_1fr] overflow-hidden transition-all duration-300"
+          className={cn(
+            "flex-1 flex md:grid overflow-hidden transition-all duration-300",
+            selectedEmail
+              ? "md:grid-cols-[var(--nav-width)_400px_1fr]"
+              : "md:grid-cols-[var(--nav-width)_1fr]"
+          )}
           style={{'--nav-width': isNavCollapsed ? '80px' : '240px'} as React.CSSProperties}
         >
           <div className={cn(
@@ -147,7 +151,7 @@ export function EmailAssistant() {
                     <Button
                       variant={link.name === 'Inbox' ? "secondary" : "ghost"}
                       className={cn(
-                        'w-full justify-start gap-3 px-3 h-10 text-base',
+                        'w-full justify-start gap-3 px-3 h-11 text-base',
                         isNavCollapsed && 'justify-center h-11 w-11 p-0'
                       )}
                     >
@@ -192,7 +196,13 @@ export function EmailAssistant() {
             </nav>
           </div>
 
-          <div className={cn("flex flex-col border-r border-border/50 w-full md:w-auto", selectedEmail && "hidden md:flex")}>
+          <div className={cn(
+            "flex flex-col border-r border-border/50 w-full md:w-auto",
+            selectedEmail && "hidden md:flex"
+          )}>
+            <div className="p-4 border-b border-border/50 text-xl font-bold">
+              Inbox
+            </div>
             <ScrollArea className="flex-1">
               <div className="flex flex-col">
                 {mockEmails.map((email) => (
@@ -216,9 +226,8 @@ export function EmailAssistant() {
             </ScrollArea>
           </div>
 
-          <div className={cn("flex flex-col bg-background flex-1", !selectedEmail && "hidden md:flex")}>
-            {selectedEmail ? (
-              <>
+          {selectedEmail && (
+            <div className="flex flex-col bg-background flex-1">
                 <div className="p-4 flex justify-between items-center border-b border-border/50">
                   <div className="flex items-center gap-4">
                     <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSelectedEmail(null)}>
@@ -283,15 +292,8 @@ export function EmailAssistant() {
                     </CardContent>
                   </Card>
                 </div>
-              </>
-            ) : (
-              <div className="flex-1 flex-col items-center justify-center text-muted-foreground hidden md:flex">
-                <Inbox className="h-16 w-16 mb-4 text-muted-foreground/50"/>
-                <p className="text-lg">Select an email to read</p>
-                <p className="text-sm text-muted-foreground">Nothing to see here yet.</p>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </TooltipProvider>
