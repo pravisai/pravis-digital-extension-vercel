@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -169,10 +170,8 @@ export function EmailAssistant() {
       <div className="h-full w-full flex flex-col text-foreground bg-background">
         <div
           className={cn(
-            "flex-1 flex md:grid overflow-hidden transition-all duration-300",
-            selectedEmail
-              ? "md:grid-cols-[var(--nav-width)_400px_1fr]"
-              : "md:grid-cols-[var(--nav-width)_1fr]"
+            "flex-1 flex md:grid overflow-hidden",
+            "md:grid-cols-[var(--nav-width)_1fr]"
           )}
           style={{'--nav-width': isNavCollapsed ? '80px' : '240px'} as React.CSSProperties}
         >
@@ -260,8 +259,8 @@ export function EmailAssistant() {
           </div>
 
           <div className={cn(
-            "flex flex-col border-r border-border/50 w-full md:w-auto",
-            selectedEmail && "hidden md:flex"
+            "flex flex-col border-r border-border/50 w-full",
+            selectedEmail && "hidden"
           )}>
             <div className="p-4 border-b border-border/50 text-xl font-bold">
               Inbox
@@ -293,7 +292,7 @@ export function EmailAssistant() {
             <div className="flex flex-col bg-background flex-1">
                 <div className="p-4 flex justify-between items-center border-b border-border/50">
                   <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSelectedEmail(null)}>
+                    <Button variant="ghost" size="icon" onClick={() => setSelectedEmail(null)}>
                       <ArrowLeft className="h-5 w-5" />
                     </Button>
                     <Avatar className="h-11 w-11">
