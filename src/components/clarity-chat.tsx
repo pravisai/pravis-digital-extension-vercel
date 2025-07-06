@@ -49,7 +49,7 @@ export function ClarityChat() {
   }
 
   return (
-    <Card className="w-full shadow-lg border-primary/40 shadow-primary/10">
+    <Card className="w-full max-w-3xl shadow-lg border-primary/40 shadow-primary/10">
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Clarity Chat</CardTitle>
         <CardDescription>Engage with Pravis to untangle complex thoughts and gain valuable insights.</CardDescription>

@@ -64,14 +64,14 @@ export function DailyRhythms() {
 
     return (
         <div className="space-y-8">
-            <header className="flex justify-between items-start">
-                <div>
-                    <h1 className="text-4xl font-bold font-headline text-primary-foreground/90">{greeting}, {displayName}</h1>
+            <header className="flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+                <div className="flex-1">
+                    <h1 className="text-3xl md:text-4xl font-bold font-headline text-primary-foreground/90">{greeting}, {displayName}</h1>
                     <p className="text-muted-foreground mt-2">Ready to be present and authentic?</p>
                 </div>
-                <Avatar className="h-24 w-24 border-2 border-primary/50">
+                <Avatar className="h-20 w-20 md:h-24 md:w-24 border-2 border-primary/50">
                   <AvatarImage src={user?.photoURL || undefined} alt={user?.displayName || "User"} />
-                  <AvatarFallback className="text-4xl">{user?.displayName?.charAt(0) || 'D'}</AvatarFallback>
+                  <AvatarFallback className="text-3xl md:text-4xl">{user?.displayName?.charAt(0) || 'D'}</AvatarFallback>
                 </Avatar>
             </header>
 
