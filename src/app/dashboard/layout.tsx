@@ -14,17 +14,28 @@ import {
   SidebarInset,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { BrainCircuit, Lightbulb, Mail, MessageSquare, Settings, User, Zap, LayoutDashboard, LogOut } from "lucide-react"
+import { BrainCircuit, Lightbulb, Mail, MessageSquare, Settings, User, LayoutDashboard, LogOut } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { signOutUser } from "@/lib/firebase/auth"
 import { useToast } from "@/hooks/use-toast"
+import React, { useState, useEffect } from "react"
+import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth"
+import { auth } from "@/lib/firebase/config"
 
 function PravisSidebar() {
   const pathname = usePathname();
   const { isMobile } = useSidebar();
   const router = useRouter();
   const { toast } = useToast();
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -81,10 +92,10 @@ function PravisSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-             <SidebarMenuButton asChild tooltip={{children: 'Profile'}}>
+             <SidebarMenuButton asChild tooltip={{children: user ? user.displayName : 'Profile'}}>
               <Link href="#">
                 <User />
-                <span>Dr. Pranav Shimpi</span>
+                <span>{user ? user.displayName : "Profile"}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
