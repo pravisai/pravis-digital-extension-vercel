@@ -39,7 +39,7 @@ export default function SignInPage() {
       console.error(error);
       let description = 'Could not sign in. Please try again.';
       if (error.code === 'auth/unauthorized-domain') {
-        description = 'This domain is not authorized. Go to your Firebase console -> Authentication -> Settings -> Authorized domains and add it.';
+        description = `This domain (${window.location.host}) is not authorized. Please add it to your Firebase project's authorized domains.`;
       }
       toast({
         variant: 'destructive',
