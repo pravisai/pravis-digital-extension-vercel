@@ -14,7 +14,7 @@ import {
   SidebarInset,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { BrainCircuit, Lightbulb, Mail, MessageSquare, Settings, User, LayoutDashboard, LogOut } from "lucide-react"
+import { BrainCircuit, Lightbulb, Mail, MessageSquare, Settings, User, LogOut } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { signOutUser } from "@/lib/firebase/auth"
@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast"
 import React, { useState, useEffect } from "react"
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
+import { cn } from "@/lib/utils"
 
 function PravisSidebar() {
   const pathname = usePathname();
@@ -115,6 +116,9 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname();
+  const isEmailPage = pathname === '/dashboard/email-assistant';
+
   return (
     <SidebarProvider>
       <PravisSidebar />
@@ -123,7 +127,7 @@ export default function DashboardLayout({
            <SidebarTrigger className="md:hidden" />
            <h1 className="text-2xl font-headline ml-4">Dashboard</h1>
         </header>
-        <main className="flex-1 p-4 md:p-6 bg-background/50">
+        <main className={cn("flex-1 bg-background/50", !isEmailPage && "p-4 md:p-6")}>
           {children}
         </main>
       </SidebarInset>

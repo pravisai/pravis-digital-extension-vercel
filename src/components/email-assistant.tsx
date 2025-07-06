@@ -101,7 +101,7 @@ export function EmailAssistant() {
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(mockEmails[0])
 
   return (
-    <div className="h-full w-full flex flex-col text-foreground bg-background rounded-lg border border-border/20 shadow-lg">
+    <div className="h-full w-full flex flex-col text-foreground bg-background">
       <div className="flex-1 grid grid-cols-[240px_350px_1fr] overflow-hidden">
         <div className="bg-card/30 border-r border-border/20 p-3 flex flex-col gap-4">
           <div className="px-2">
