@@ -7,7 +7,6 @@ import {
   FileText,
   Inbox,
   PenSquare,
-  Search,
   Send,
   Star,
   Trash2,
@@ -19,10 +18,10 @@ import {
   ReplyAll,
   Forward,
   ArrowLeft,
+  Menu,
 } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
@@ -101,50 +100,99 @@ const categories = [
 
 export function EmailAssistant() {
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(mockEmails[0])
+  const [isNavCollapsed, setIsNavCollapsed] = useState(false)
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={0}>
       <div className="h-full w-full flex flex-col text-foreground bg-background">
-        <div className="flex-1 flex md:grid md:grid-cols-[240px_400px_1fr] overflow-hidden">
-          <div className="bg-background border-r border-border/50 p-4 hidden md:flex flex-col gap-4">
-            <div className="px-2">
-              <Button variant="secondary" className="w-full h-11">
-                <PenSquare className="mr-2" />
-                Compose
+        <div
+          className="flex-1 flex md:grid md:grid-cols-[var(--nav-width)_400px_1fr] overflow-hidden transition-all duration-300"
+          style={{'--nav-width': isNavCollapsed ? '80px' : '240px'} as React.CSSProperties}
+        >
+          <div className={cn(
+            "bg-background border-r border-border/50 p-3 hidden md:flex flex-col gap-4 transition-all duration-300",
+            isNavCollapsed && "items-center px-2"
+          )}>
+            <div className={cn(
+              "flex items-center w-full pb-2",
+              isNavCollapsed ? "justify-center" : "justify-between"
+            )}>
+              <span className={cn("font-bold text-lg", isNavCollapsed && "hidden")}>Inbox</span>
+              <Button variant="ghost" size="icon" onClick={() => setIsNavCollapsed(!isNavCollapsed)} className="shrink-0">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle Navigation</span>
               </Button>
             </div>
-            <nav className="flex flex-col gap-1">
+
+            <div className="w-full">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="secondary" className="w-full h-11">
+                    <PenSquare className={cn(isNavCollapsed ? "h-5 w-5" : "mr-2")} />
+                    <span className={cn(isNavCollapsed && "hidden")}>Compose</span>
+                  </Button>
+                </TooltipTrigger>
+                {isNavCollapsed && (
+                  <TooltipContent side="right">
+                    <p>Compose</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </div>
+
+            <nav className="flex flex-col gap-1 w-full">
               {navLinks.map((link) => (
-                <Button
-                  key={link.name}
-                  variant={link.name === 'Inbox' ? "secondary" : "ghost"}
-                  className='w-full justify-start gap-3 px-3 h-10 text-base'
-                >
-                  <link.icon className="w-5 h-5" />
-                  {link.name}
-                  {link.count && <span className="ml-auto bg-primary/20 text-primary text-xs font-bold px-2 py-0.5 rounded-full">{link.count}</span>}
-                </Button>
+                <Tooltip key={link.name}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={link.name === 'Inbox' ? "secondary" : "ghost"}
+                      className={cn(
+                        'w-full justify-start gap-3 px-3 h-10 text-base',
+                        isNavCollapsed && 'justify-center h-11 w-11 p-0'
+                      )}
+                    >
+                      <link.icon className="w-5 w-5" />
+                      <span className={cn(isNavCollapsed && "hidden")}>{link.name}</span>
+                      {link.count && !isNavCollapsed && <span className="ml-auto bg-primary/20 text-primary text-xs font-bold px-2 py-0.5 rounded-full">{link.count}</span>}
+                    </Button>
+                  </TooltipTrigger>
+                  {isNavCollapsed && (
+                    <TooltipContent side="right">
+                      <p>{link.name}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
               ))}
             </nav>
-            <Separator className="bg-border/50"/>
-            <div className="px-3 text-sm font-semibold uppercase text-muted-foreground">Categories</div>
-            <nav className="flex flex-col gap-1">
+            <Separator className={cn("bg-border/50", isNavCollapsed && "w-3/4")}/>
+            <div className={cn("px-3 text-sm font-semibold uppercase text-muted-foreground", isNavCollapsed && "hidden")}>Categories</div>
+            <nav className="flex flex-col gap-1 w-full">
               {categories.map((cat) => (
-                <Button key={cat.name} variant="ghost" className="w-full justify-start gap-3 px-3 h-10 text-base">
-                  <cat.icon className={cn('w-5 h-5', cat.color)} />
-                  {cat.name}
-                </Button>
+                <Tooltip key={cat.name}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      key={cat.name}
+                      variant="ghost"
+                      className={cn(
+                        "w-full justify-start gap-3 px-3 h-10 text-base",
+                        isNavCollapsed && 'justify-center h-11 w-11 p-0'
+                      )}
+                    >
+                      <cat.icon className={cn('w-5 h-5', cat.color)} />
+                      <span className={cn(isNavCollapsed && "hidden")}>{cat.name}</span>
+                    </Button>
+                  </TooltipTrigger>
+                  {isNavCollapsed && (
+                    <TooltipContent side="right">
+                      <p>{cat.name}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
               ))}
             </nav>
           </div>
 
           <div className={cn("flex flex-col border-r border-border/50 w-full md:w-auto", selectedEmail && "hidden md:flex")}>
-            <div className="p-4 border-b border-border/50">
-              <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input placeholder="Search" className="pl-10 bg-muted/50 border-border/50 h-11" />
-                </div>
-            </div>
             <ScrollArea className="flex-1">
               <div className="flex flex-col">
                 {mockEmails.map((email) => (
