@@ -1,9 +1,16 @@
+"use client"
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BrainCircuit, LogIn } from "lucide-react";
+import { BrainCircuit, LogIn, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { signInWithGoogle, signInWithFacebook } from '@/lib/firebase/auth';
+import { useToast } from '@/hooks/use-toast';
+
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg role="img" viewBox="0 0 24 24" {...props}>
@@ -25,6 +32,33 @@ const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 export default function SignInPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState<null | 'google' | 'facebook'>(null);
+
+  const handleSocialSignIn = async (provider: 'google' | 'facebook') => {
+    setIsLoading(provider);
+    try {
+      const signInMethod = provider === 'google' ? signInWithGoogle : signInWithFacebook;
+      const result = await signInMethod();
+      if (result) {
+        toast({ title: "Success!", description: `Signed in as ${result.user.displayName}` });
+        router.push('/dashboard');
+      } else {
+        throw new Error('Sign in failed');
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'Sign In Failed',
+        description: 'Could not sign in. Please try again.',
+      });
+    } finally {
+      setIsLoading(null);
+    }
+  };
+
   return (
     <div className="flex min-h-svh items-center justify-center bg-background p-4">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10 -z-1"></div>
@@ -66,12 +100,12 @@ export default function SignInPage() {
           </div>
 
           <div className="grid w-full grid-cols-2 gap-4">
-            <Button variant="outline" className="w-full">
-              <GoogleIcon className="mr-2 h-4 w-4"/>
+            <Button variant="outline" className="w-full" onClick={() => handleSocialSignIn('google')} disabled={!!isLoading}>
+              {isLoading === 'google' ? <Loader2 className="mr-2 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4"/>}
               Google
             </Button>
-            <Button variant="outline" className="w-full">
-              <FacebookIcon className="mr-2 h-4 w-4"/>
+            <Button variant="outline" className="w-full" onClick={() => handleSocialSignIn('facebook')} disabled={!!isLoading}>
+              {isLoading === 'facebook' ? <Loader2 className="mr-2 animate-spin" /> : <FacebookIcon className="mr-2 h-4 w-4"/>}
               Facebook
             </Button>
           </div>
