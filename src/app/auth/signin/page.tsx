@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react';
@@ -45,14 +46,19 @@ export default function SignInPage() {
         toast({ title: "Success!", description: `Signed in as ${result.user.displayName}` });
         router.push('/dashboard');
       } else {
+        // This case will be hit if the auth method returns null, e.g. from a caught error
         throw new Error('Sign in failed');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      let description = 'Could not sign in. Please try again.';
+      if (error.code === 'auth/unauthorized-domain') {
+        description = 'This domain is not authorized. Go to your Firebase console -> Authentication -> Settings -> Authorized domains and add it.';
+      }
       toast({
         variant: 'destructive',
         title: 'Sign In Failed',
-        description: 'Could not sign in. Please try again.',
+        description: description,
       });
     } finally {
       setIsLoading(null);
