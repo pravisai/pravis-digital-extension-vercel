@@ -1,66 +1,102 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Zap, Droplet, Wind, Coffee, BrainCircuit } from "lucide-react";
+"use client"
 
-const nudgeItems = [
+import { Card, CardContent } from "@/components/ui/card";
+import { BrainCircuit, Calendar, Mail, Share2, Wand2 } from "lucide-react";
+import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import React, { useState, useEffect } from "react"
+import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth"
+import { auth } from "@/lib/firebase/config"
+
+const featureItems = [
     {
-        icon: Droplet,
-        title: "Stay Hydrated",
-        description: "Time for a glass of water to keep your mind sharp.",
-        color: "text-blue-400",
-        shadow: "shadow-blue-400/20"
+        href: "/dashboard/email-assistant",
+        icon: Mail,
+        title: "Email Draft",
+        color: "text-primary",
+        borderColor: "border-primary shadow-primary/20",
     },
     {
-        icon: Wind,
-        title: "Mindful Moment",
-        description: "Take a few deep breaths. Inhale calm, exhale stress.",
-        color: "text-purple-400",
-        shadow: "shadow-purple-400/20"
+        href: "#",
+        icon: Calendar,
+        title: "Calendar",
+        color: "text-primary",
+        borderColor: "border-primary shadow-primary/20",
     },
     {
-        icon: Coffee,
-        title: "Short Break",
-        description: "Step away from your screen for a few minutes. Stretch your legs.",
-        color: "text-yellow-400",
-        shadow: "shadow-yellow-400/20"
+        href: "#",
+        icon: Share2,
+        title: "Social Media",
+        color: "text-destructive",
+        borderColor: "border-destructive shadow-destructive/20",
     },
     {
+        href: "/dashboard/clarity-chat",
         icon: BrainCircuit,
-        title: "Refocus",
-        description: "Check in with your main goal for today. Are you on track?",
-        color: "text-green-400",
-        shadow: "shadow-green-400/20"
+        title: "Loud Think",
+        color: "text-destructive",
+        borderColor: "border-destructive shadow-destructive/20",
+    },
+    {
+        href: "#",
+        icon: Wand2,
+        title: "Test AI Key",
+        color: "text-primary",
+        borderColor: "border-primary shadow-primary/20",
     }
-]
+];
 
 export function DailyRhythms() {
+    const [user, setUser] = useState<FirebaseUser | null>(null);
+    const [greeting, setGreeting] = useState("Good Afternoon");
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+        });
+
+        const hour = new Date().getHours();
+        if (hour < 12) {
+            setGreeting("Good Morning");
+        } else if (hour < 18) {
+            setGreeting("Good Afternoon");
+        } else {
+            setGreeting("Good Evening");
+        }
+
+        return () => unsubscribe();
+    }, []);
+
+    const displayName = user?.displayName?.split(' ')[0] || 'Dreamer';
+
     return (
-        <Card className="w-full shadow-lg border-primary/40 shadow-primary/10">
-            <CardHeader>
-                <div className="flex items-center gap-4">
-                    <Zap className="w-8 h-8 text-primary" />
-                    <div>
-                        <CardTitle className="font-headline text-2xl">Daily Rhythms</CardTitle>
-                        <CardDescription>Gentle nudges to support your well-being and focus throughout the day.</CardDescription>
-                    </div>
+        <div className="space-y-8">
+            <header className="flex justify-between items-start">
+                <div>
+                    <h1 className="text-4xl font-bold font-headline text-primary-foreground/90">{greeting}, {displayName}</h1>
+                    <p className="text-muted-foreground mt-2">Ready to be present and authentic?</p>
                 </div>
-            </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {nudgeItems.map((nudge, index) => (
-                        <Card key={index} className={`bg-card/50 hover:bg-card/80 transition-all transform hover:-translate-y-1 shadow-lg ${nudge.shadow}`}>
-                            <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                                <div className={`p-2 bg-background rounded-full ${nudge.color}`}>
-                                    <nudge.icon className="w-6 h-6" />
-                                </div>
-                                <CardTitle className="font-headline text-lg">{nudge.title}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-sm text-muted-foreground">{nudge.description}</p>
-                            </CardContent>
-                        </Card>
+                <Avatar className="h-24 w-24 border-2 border-primary/50">
+                  <AvatarImage src={user?.photoURL || undefined} alt={user?.displayName || "User"} />
+                  <AvatarFallback className="text-4xl">{user?.displayName?.charAt(0) || 'D'}</AvatarFallback>
+                </Avatar>
+            </header>
+
+            <section>
+                <h2 className="text-2xl font-bold font-headline mb-4">For You</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                    {featureItems.map((feature, index) => (
+                        <Link href={feature.href} key={index} className="transform hover:-translate-y-1 transition-transform duration-300">
+                            <Card className={`bg-card/80 hover:bg-card/100 border-2 ${feature.borderColor} flex flex-col items-center justify-center text-center p-6 aspect-square rounded-2xl shadow-lg`}>
+                                <CardContent className="flex flex-col items-center justify-center gap-4 p-0">
+                                    <feature.icon className={`w-1/2 h-1/2 ${feature.color}`} strokeWidth={1.5} />
+                                    <p className="font-semibold text-lg">{feature.title}</p>
+                                </CardContent>
+                            </Card>
+                        </Link>
                     ))}
                 </div>
-            </CardContent>
-        </Card>
+            </section>
+        </div>
     )
 }
