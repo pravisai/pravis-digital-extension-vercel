@@ -1,4 +1,6 @@
-import { BrainCircuit } from "lucide-react";
+import { BrainCircuit, LogIn } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -29,6 +31,15 @@ export default function Home() {
             <p className="font-headline text-lg md:text-xl mt-2 text-accent tracking-[0.3em] uppercase drop-shadow-[0_0_10px_hsl(var(--accent)/0.6)]">
               Your Digital Extension
             </p>
+          </div>
+
+          <div className="mt-16">
+            <Button asChild size="lg" className="font-headline text-lg tracking-wider shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow duration-300">
+              <Link href="/auth/signin">
+                <LogIn className="mr-3" />
+                Sign In
+              </Link>
+            </Button>
           </div>
         </div>
       </main>
