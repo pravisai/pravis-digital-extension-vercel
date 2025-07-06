@@ -21,6 +21,7 @@ import {
   Home,
   User,
   Volume2,
+  ArrowLeft,
 } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -102,8 +103,8 @@ export function EmailAssistant() {
 
   return (
     <div className="h-full w-full flex flex-col text-foreground bg-background">
-      <div className="flex-1 grid grid-cols-[240px_350px_1fr] overflow-hidden">
-        <div className="bg-card/30 border-r border-border/20 p-3 flex flex-col gap-4">
+      <div className="flex-1 flex md:grid md:grid-cols-[240px_350px_1fr] overflow-hidden">
+        <div className="bg-card/30 border-r border-border/20 p-3 hidden md:flex flex-col gap-4">
           <div className="px-2">
             <Button className="w-full h-12 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-500 hover:to-blue-600 text-white shadow-lg shadow-cyan-500/20">
               <PenSquare className="mr-2" />
@@ -138,7 +139,7 @@ export function EmailAssistant() {
           </nav>
         </div>
 
-        <div className="flex flex-col border-r border-border/20">
+        <div className={cn("flex flex-col border-r border-border/20 w-full md:w-auto", selectedEmail && "hidden md:flex")}>
           <div className="p-3 border-b border-border/20">
             <div className="flex items-center gap-2">
               <Button variant="ghost" className="bg-accent/50">All</Button>
@@ -163,7 +164,7 @@ export function EmailAssistant() {
                 >
                   <h3 className="text-sm">{email.sender}</h3>
                   <h4 className="text-sm">{email.subject}</h4>
-                  <p className={cn('text-xs truncate', selectedEmail?.id === email.id ? 'text-teal-300' : 'text-muted-foreground')}>
+                  <p className={cn('text-xs truncate text-muted-foreground', selectedEmail?.id === email.id && 'text-teal-300' )}>
                     {email.body}
                   </p>
                 </button>
@@ -172,11 +173,14 @@ export function EmailAssistant() {
           </ScrollArea>
         </div>
 
-        <div className="flex flex-col bg-card/10">
+        <div className={cn("flex flex-col bg-card/10 flex-1", !selectedEmail && "hidden md:flex")}>
           {selectedEmail ? (
             <>
               <div className="p-4 flex justify-between items-center border-b border-border/20">
                 <div className="flex items-center gap-3">
+                   <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSelectedEmail(null)}>
+                     <ArrowLeft className="h-4 w-4" />
+                   </Button>
                    <Avatar>
                     <AvatarFallback>{selectedEmail.sender.slice(0,2).toUpperCase()}</AvatarFallback>
                   </Avatar>
@@ -217,7 +221,7 @@ export function EmailAssistant() {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-muted-foreground">
+            <div className="flex-1 flex-col items-center justify-center text-muted-foreground hidden md:flex">
               <p>Select an email to read</p>
             </div>
           )}
