@@ -28,6 +28,7 @@ import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 
 
 const mockEmails = [
@@ -117,7 +118,7 @@ export function EmailAssistant() {
                 <Button
                   key={link.name}
                   variant={link.name === 'Inbox' ? "secondary" : "ghost"}
-                  className='w-full justify-start gap-3 px-3 h-10 text-sm'
+                  className='w-full justify-start gap-3 px-3 h-10 text-base'
                 >
                   <link.icon className="w-5 h-5" />
                   {link.name}
@@ -126,10 +127,10 @@ export function EmailAssistant() {
               ))}
             </nav>
             <Separator className="bg-border/50"/>
-            <div className="px-3 text-xs font-semibold uppercase text-muted-foreground">Categories</div>
+            <div className="px-3 text-sm font-semibold uppercase text-muted-foreground">Categories</div>
             <nav className="flex flex-col gap-1">
               {categories.map((cat) => (
-                <Button key={cat.name} variant="ghost" className="w-full justify-start gap-3 px-3 h-10 text-sm">
+                <Button key={cat.name} variant="ghost" className="w-full justify-start gap-3 px-3 h-10 text-base">
                   <cat.icon className={cn('w-5 h-5', cat.color)} />
                   {cat.name}
                 </Button>
@@ -140,8 +141,8 @@ export function EmailAssistant() {
           <div className={cn("flex flex-col border-r border-border/50 w-full md:w-auto", selectedEmail && "hidden md:flex")}>
             <div className="p-4 border-b border-border/50">
               <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search" className="pl-9 bg-muted/50 border-border/50" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input placeholder="Search" className="pl-10 bg-muted/50 border-border/50 h-11" />
                 </div>
             </div>
             <ScrollArea className="flex-1">
@@ -152,13 +153,13 @@ export function EmailAssistant() {
                     onClick={() => setSelectedEmail(email)}
                     className={cn(
                       'flex flex-col gap-1.5 p-4 border-b border-border/20 text-left hover:bg-accent focus:bg-accent outline-none transition-colors',
+                      selectedEmail?.id === email.id && 'bg-accent',
                       !email.read && 'bg-primary/5',
                     )}
-                    data-selected={selectedEmail?.id === email.id}
                   >
-                    <h3 className={cn("text-sm font-semibold", !email.read && "text-primary-foreground/90")}>{email.sender}</h3>
-                    <h4 className={cn("text-sm", !email.read && "text-primary-foreground/80")}>{email.subject}</h4>
-                    <p className='text-xs text-muted-foreground truncate'>
+                    <h3 className={cn("text-base font-semibold", !email.read && "text-primary-foreground/90")}>{email.sender}</h3>
+                    <h4 className={cn("text-sm font-medium", !email.read && "text-primary-foreground/80")}>{email.subject}</h4>
+                    <p className='text-sm text-muted-foreground truncate'>
                       {email.body}
                     </p>
                   </button>
@@ -171,35 +172,35 @@ export function EmailAssistant() {
             {selectedEmail ? (
               <>
                 <div className="p-4 flex justify-between items-center border-b border-border/50">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSelectedEmail(null)}>
-                      <ArrowLeft className="h-4 w-4" />
+                      <ArrowLeft className="h-5 w-5" />
                     </Button>
-                    <Avatar>
-                      <AvatarFallback>{selectedEmail.sender.slice(0,2).toUpperCase()}</AvatarFallback>
+                    <Avatar className="h-11 w-11">
+                      <AvatarFallback className="text-lg">{selectedEmail.sender.slice(0,2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <h2 className="font-semibold">{selectedEmail.sender}</h2>
-                      <p className="text-xs text-muted-foreground">{selectedEmail.email}</p>
+                      <h2 className="font-semibold text-lg">{selectedEmail.sender}</h2>
+                      <p className="text-sm text-muted-foreground">{selectedEmail.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 text-muted-foreground">
-                    <p className="text-xs mr-2">{selectedEmail.date}</p>
+                    <p className="text-sm mr-2">{selectedEmail.date}</p>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                         <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
+                         <Button variant="ghost" size="icon"><Trash2 className="h-5 w-5" /></Button>
                       </TooltipTrigger>
                       <TooltipContent>Delete</TooltipContent>
                     </Tooltip>
                      <Tooltip>
                       <TooltipTrigger asChild>
-                         <Button variant="ghost" size="icon"><Clock className="h-4 w-4" /></Button>
+                         <Button variant="ghost" size="icon"><Clock className="h-5 w-5" /></Button>
                       </TooltipTrigger>
                       <TooltipContent>Snooze</TooltipContent>
                     </Tooltip>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon"><MoreVertical className="h-5 w-5" /></Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>Mark as unread</DropdownMenuItem>
@@ -211,26 +212,28 @@ export function EmailAssistant() {
                 </div>
                 <ScrollArea className="flex-1 p-6">
                   <h1 className="text-2xl font-bold mb-6">{selectedEmail.subject}</h1>
-                  <p className="text-base whitespace-pre-wrap leading-relaxed">
+                  <p className="text-base whitespace-pre-wrap leading-7">
                     {selectedEmail.body}
                   </p>
                 </ScrollArea>
-                <div className="p-4 border-t border-border/50 bg-background">
-                  <div className="flex items-center gap-2 mb-4">
+                <div className="p-6 border-t border-border/50 bg-background space-y-4">
+                  <div className="flex items-center gap-2">
                     <Button variant="outline"><Reply className="mr-2 h-4 w-4" /> Reply</Button>
                     <Button variant="outline"><ReplyAll className="mr-2 h-4 w-4" /> Reply All</Button>
                     <Button variant="outline"><Forward className="mr-2 h-4 w-4" /> Forward</Button>
                   </div>
-                  <div className="rounded-lg p-4 bg-muted/50">
-                      <div className="flex items-center gap-2 font-semibold mb-2">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary">
-                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"></path>
-                              <path d="M12 17.5c-3.03 0-5.5-2.47-5.5-5.5S8.97 6.5 12 6.5s5.5 2.47 5.5 5.5-2.47 5.5-5.5 5.5zm0-9c-1.93 0-3.5 1.57-3.5 3.5s1.57 3.5 3.5 3.5 3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5z" fill="currentColor"></path>
-                          </svg>
-                          Pravis Summary
-                      </div>
+                  <Card className="border-primary/20 bg-primary/5">
+                    <CardHeader className="flex-row items-center gap-3 space-y-0 pb-2">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"></path>
+                          <path d="M12 17.5c-3.03 0-5.5-2.47-5.5-5.5S8.97 6.5 12 6.5s5.5 2.47 5.5 5.5-2.47 5.5-5.5 5.5zm0-9c-1.93 0-3.5 1.57-3.5 3.5s1.57 3.5 3.5 3.5 3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5z" fill="currentColor"></path>
+                      </svg>
+                      <CardTitle className="text-base font-semibold">Pravis Summary</CardTitle>
+                    </CardHeader>
+                    <CardContent>
                       <p className="text-sm text-muted-foreground">Could not generate summary for this email.</p>
-                  </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </>
             ) : (
