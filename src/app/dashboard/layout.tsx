@@ -53,7 +53,6 @@ function PravisSidebar() {
   };
   
   const menuItems = [
-    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard" },
     { href: "/dashboard/clarity-chat", icon: MessageSquare, label: "Clarity Chat", tooltip: "Clarity Chat" },
     { href: "/dashboard/email-assistant", icon: Mail, label: "Email Assistant", tooltip: "Email Assistant" },
     { href: "/dashboard/creative-partner", icon: Lightbulb, label: "Creative Partner", tooltip: "Creative Partner" },
