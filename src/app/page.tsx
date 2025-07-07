@@ -51,24 +51,17 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center p-4 font-body animated-background">
-      <div className="w-full max-w-md space-y-8 rounded-2xl p-8 glass-card">
+    <div className="flex min-h-svh items-center justify-center bg-background p-4 font-body">
+      <div className="w-full max-w-sm space-y-8 rounded-lg border border-border bg-card p-8 shadow-2xl">
         <div className="text-center space-y-2">
-          <h1 
-            className="font-headline text-6xl font-light tracking-[0.2em] text-primary"
-            style={{ animation: 'text-glow 3s ease-in-out infinite' }}
-          >
-            PRAVIS
-          </h1>
-          <p className="text-base font-light text-muted-foreground tracking-wider uppercase">
-            Your digital extension
-          </p>
+            <h1 className="font-headline text-5xl font-bold tracking-tight text-primary">PRAVIS</h1>
+            <p className="text-muted-foreground">Your digital extension</p>
         </div>
-
-        <div className="space-y-4 text-center pt-4">
+        
+        <div className="space-y-4 text-center">
             <p className="text-muted-foreground">Sign in to begin your session.</p>
         </div>
-      
+        
         <Button 
           className={cn(
             "w-full h-12 text-base font-semibold",
