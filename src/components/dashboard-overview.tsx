@@ -180,22 +180,16 @@ export function DashboardOverview() {
         </Card>
 
         <Card>
-           <CardHeader>
-             <CardTitle>Quick Actions</CardTitle>
-           </CardHeader>
-           <CardContent className="pt-2">
-             <div className="grid grid-cols-2 gap-4">
-               {quickActions.map((action) => (
-                 <Link
-                   key={action.label}
-                   href={action.href}
-                   className="flex flex-col items-center justify-center gap-2 rounded-xl border bg-background p-4 text-center transition-colors hover:bg-accent hover:text-accent-foreground"
-                 >
-                   <action.icon className="h-8 w-8" />
-                   <span className="font-medium text-sm">{action.label}</span>
-                 </Link>
-               ))}
-             </div>
+           <CardContent className="flex justify-around items-center h-full p-6">
+             {quickActions.map((action) => (
+               <Link
+                 key={action.label}
+                 href={action.href}
+                 className="flex h-16 w-16 items-center justify-center rounded-full border bg-background text-center transition-colors hover:bg-accent hover:text-accent-foreground"
+               >
+                 <action.icon className="h-8 w-8" />
+               </Link>
+             ))}
            </CardContent>
         </Card>
       </div>
