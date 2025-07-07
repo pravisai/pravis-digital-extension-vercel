@@ -106,7 +106,7 @@ export default function SignInPage() {
                 <Label htmlFor="password"  className="text-sm font-semibold text-muted-foreground">Password</Label>
                 <Input id="password" type="password" placeholder="••••••••" className="bg-input h-12 border-border/80"/>
             </div>
-            <Button asChild className="w-full font-semibold tracking-wider h-12 text-base bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-500 hover:to-blue-600 text-white shadow-lg shadow-cyan-500/20">
+            <Button asChild className="w-full font-semibold tracking-wider h-12 text-base">
                 <Link href="/dashboard">
                     Log In
                 </Link>
