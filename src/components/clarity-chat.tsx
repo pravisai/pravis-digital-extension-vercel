@@ -31,13 +31,15 @@ export function ClarityChat() {
   }, []);
   
   useEffect(() => {
-    setMessages([
-      {
-        role: "pravis",
-        content: "Hello! I'm Pravis, your personal AI assistant. How can I help you find clarity today?",
-      }
-    ])
-  }, [])
+    if (messages.length === 0) {
+      setMessages([
+        {
+          role: "pravis",
+          content: "Hello! I'm Pravis, your personal AI assistant. How can I help you find clarity today?",
+        }
+      ])
+    }
+  }, [messages.length])
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,7 +70,7 @@ export function ClarityChat() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-card border rounded-lg shadow-sm">
+    <div className="flex flex-col h-full bg-card shadow-sm">
         <header className="p-4 border-b flex items-center justify-between">
             <div className="flex items-center gap-3">
                 <Avatar>
