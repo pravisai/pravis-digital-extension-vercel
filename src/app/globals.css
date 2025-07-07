@@ -15,7 +15,7 @@
     --secondary: 210 100% 50%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 4% 16%;
-    --muted-foreground: 240 4% 65%;
+    --muted-foreground: 240 5% 80%;
     --accent: 180 100% 50%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 50.6%;
@@ -42,7 +42,7 @@
     --secondary: 210 100% 50%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 4% 16%;
-    --muted-foreground: 240 4% 65%;
+    --muted-foreground: 240 5% 80%;
     --accent: 180 100% 50%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 50.6%;
@@ -83,6 +83,7 @@
         height: 100%;
         position: relative;
         transform-style: preserve-3d;
+        transition: transform 0.5s ease-out;
     }
 
     .cube__face {

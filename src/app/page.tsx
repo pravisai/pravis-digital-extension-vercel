@@ -54,7 +54,7 @@ export default function SignInPage() {
     <div className="flex min-h-svh items-center justify-center bg-background p-4 font-body">
       <div className="w-full max-w-sm space-y-8 rounded-lg border border-border bg-card p-8 shadow-2xl">
         <div className="text-center space-y-2">
-            <h1 className="font-headline text-5xl font-bold tracking-tight text-primary">PRAVIS</h1>
+            <h1 className="font-headline text-5xl font-bold tracking-tight text-primary [text-shadow:0_0_8px_hsl(var(--primary)/0.5)]">PRAVIS</h1>
             <p className="text-muted-foreground">Your digital extension</p>
         </div>
         
