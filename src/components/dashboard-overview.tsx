@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from "react"
@@ -182,7 +183,7 @@ export function DashboardOverview() {
                 {quickActions.map(action => (
                     <Tooltip key={action.href}>
                         <TooltipTrigger asChild>
-                            <Button asChild variant="outline" size="icon" className="h-16 w-16 rounded-2xl">
+                            <Button asChild variant="outline" size="icon" className="h-14 w-14 rounded-full">
                                 <Link href={action.href}>
                                     <action.icon className="h-8 w-8" />
                                 </Link>
