@@ -1,10 +1,10 @@
 
-import { ProductivitySuite } from "@/components/creative-partner";
+import { CreativePartner } from "@/components/creative-partner";
 
-export default function ProductivitySuitePage() {
+export default function CreativePartnerPage() {
     return (
         <div className="w-full">
-            <ProductivitySuite />
+            <CreativePartner />
         </div>
     )
 }

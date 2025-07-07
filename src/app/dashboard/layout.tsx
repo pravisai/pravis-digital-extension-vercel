@@ -1,7 +1,7 @@
 
 "use client"
 
-import { BrainCircuit, Lightbulb, Mail, MessageSquare, Settings, User, LogOut, Menu, ClipboardList } from "lucide-react"
+import { BrainCircuit, Lightbulb, Mail, MessageSquare, Settings, User, LogOut, Menu } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { signOutUser } from "@/lib/firebase/auth"
@@ -52,9 +52,9 @@ function Topbar() {
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: BrainCircuit },
-    { href: "/dashboard/clarity-chat", icon: MessageSquare, label: "Pravis Assistant" },
+    { href: "/dashboard/clarity-chat", icon: MessageSquare, label: "Clarity Chat" },
     { href: "/dashboard/email-assistant", icon: Mail, label: "Email Assistant" },
-    { href: "/dashboard/creative-partner", icon: ClipboardList, label: "Productivity Suite" },
+    { href: "/dashboard/creative-partner", icon: Lightbulb, label: "Creative Partner" },
   ];
 
   const MobileNav = () => (
