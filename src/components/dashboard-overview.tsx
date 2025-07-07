@@ -76,7 +76,7 @@ const recentActivity = [
 const quickActions = [
     {
         href: "/dashboard/clarity-chat",
-        label: "Start AI Conversation",
+        label: "Ask Pravis Assistant",
         icon: Bot
     },
     {

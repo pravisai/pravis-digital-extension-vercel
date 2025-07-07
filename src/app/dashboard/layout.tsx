@@ -52,7 +52,7 @@ function Topbar() {
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: BrainCircuit },
-    { href: "/dashboard/clarity-chat", icon: MessageSquare, label: "Clarity Chat" },
+    { href: "/dashboard/clarity-chat", icon: MessageSquare, label: "Pravis Assistant" },
     { href: "/dashboard/email-assistant", icon: Mail, label: "Email Assistant" },
     { href: "/dashboard/creative-partner", icon: Lightbulb, label: "Creative Partner" },
   ];
