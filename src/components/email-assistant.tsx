@@ -106,6 +106,7 @@ export function EmailAssistant() {
     setIsFetchingEmails(true);
     setFetchError(null);
     setEmails([]);
+    setSelectedEmail(null);
 
     const token = sessionStorage.getItem('gmail_access_token');
     if (!token) {
