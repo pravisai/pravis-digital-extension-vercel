@@ -39,82 +39,91 @@ const cubeFaces = [
 export function DailyRhythms() {
     const router = useRouter();
     const [rotation, setRotation] = useState({ x: 20, y: 30 });
-    const [isInteracting, setIsInteracting] = useState(false);
     
-    const lastRotation = useRef({x: 20, y: 30});
+    // Refs for managing interaction state without causing re-renders
+    const isPointerDown = useRef(false);
+    const isDragging = useRef(false);
     const pointerStart = useRef({ x: 0, y: 0 });
-    const didMove = useRef(false);
-    const animationFrameId = useRef<number>();
+    const rotationOnDragStart = useRef({ x: 20, y: 30 });
+    const autoRotateFrameId = useRef<number>();
 
-    const animate = useCallback(() => {
-        if (!isInteracting) {
-            setRotation(prev => {
-                const newRotation = {
-                    x: 20, // Lock vertical rotation
-                    y: (prev.y + 0.1) % 360,
-                };
-                lastRotation.current = newRotation;
-                return newRotation;
-            });
+    // Auto-rotation logic
+    const stopAutoRotation = useCallback(() => {
+        if (autoRotateFrameId.current) {
+            cancelAnimationFrame(autoRotateFrameId.current);
+            autoRotateFrameId.current = undefined;
         }
-        animationFrameId.current = requestAnimationFrame(animate);
-    }, [isInteracting]);
-
-    useEffect(() => {
-        animationFrameId.current = requestAnimationFrame(animate);
-        return () => {
-            if (animationFrameId.current) {
-                cancelAnimationFrame(animationFrameId.current);
-            }
-        };
-    }, [animate]);
-
-    const onPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-        didMove.current = false;
-        setIsInteracting(true);
-        pointerStart.current = { x: e.clientX, y: e.clientY };
-        e.currentTarget.setPointerCapture(e.pointerId);
     }, []);
 
+    const startAutoRotation = useCallback(() => {
+        stopAutoRotation();
+        if (isPointerDown.current) return;
+        
+        const animate = () => {
+            setRotation(prev => ({
+                x: 20,
+                y: (prev.y + 0.1) % 360,
+            }));
+            autoRotateFrameId.current = requestAnimationFrame(animate);
+        };
+        autoRotateFrameId.current = requestAnimationFrame(animate);
+    }, [stopAutoRotation]);
+    
+    useEffect(() => {
+        startAutoRotation();
+        return stopAutoRotation;
+    }, [startAutoRotation, stopAutoRotation]);
+
+    const onPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+        stopAutoRotation();
+        isPointerDown.current = true;
+        isDragging.current = false;
+        pointerStart.current = { x: e.clientX, y: e.clientY };
+        rotationOnDragStart.current = rotation;
+        e.currentTarget.setPointerCapture(e.pointerId);
+    }, [rotation, stopAutoRotation]);
+
     const onPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-        if (!isInteracting) return;
+        if (!isPointerDown.current) return;
 
         const dx = e.clientX - pointerStart.current.x;
-        
-        // Use a threshold to distinguish between a click and a drag
-        if (!didMove.current && Math.abs(dx) > 10) {
-            didMove.current = true;
+        const dy = e.clientY - pointerStart.current.y;
+
+        // If pointer moves more than a 5px threshold, it's a drag
+        if (!isDragging.current && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+            isDragging.current = true;
         }
 
-        if (didMove.current) {
-            const newY = lastRotation.current.y + dx;
+        if (isDragging.current) {
+            // Horizontal rotation only
+            const newY = rotationOnDragStart.current.y + dx * 0.5; // Drag sensitivity
             setRotation({ x: 20, y: newY });
         }
-    }, [isInteracting]);
-    
+    }, []);
+
     const onPointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
         e.currentTarget.releasePointerCapture(e.pointerId);
-        setIsInteracting(false);
+        isPointerDown.current = false;
 
-        if (didMove.current) {
-            // If the user dragged, update the last rotation value
-            lastRotation.current = { ...rotation };
-        } else {
-            // If the user did not drag (i.e., a click/tap), handle navigation
+        // If it wasn't a drag, it was a click
+        if (!isDragging.current) {
             const targetElement = e.target as HTMLElement;
             const faceElement = targetElement.closest<HTMLElement>('[data-href]');
-            
             if (faceElement?.dataset.href) {
                 router.push(faceElement.dataset.href);
             }
         }
-    }, [router, rotation]);
+        
+        // Resume auto-rotation after a delay
+        setTimeout(startAutoRotation, 3000);
+    }, [router, startAutoRotation]);
     
-    const onSceneLeave = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-        if (isInteracting) {
+    // Handle cases where the pointer leaves the component while dragging
+    const onPointerLeave = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+        if (isPointerDown.current) {
             onPointerUp(e);
         }
-    }, [isInteracting, onPointerUp]);
+    }, [onPointerUp]);
     
     return (
         <div className="space-y-8">
@@ -126,15 +135,15 @@ export function DailyRhythms() {
                         onPointerDown={onPointerDown}
                         onPointerMove={onPointerMove}
                         onPointerUp={onPointerUp}
-                        onPointerLeave={onSceneLeave}
-                        style={{ cursor: 'grab' }}
-                        onMouseDown={(e) => (e.currentTarget.style.cursor = 'grabbing')}
-                        onMouseUp={(e) => (e.currentTarget.style.cursor = 'grab')}
+                        onPointerLeave={onPointerLeave}
+                        style={{ cursor: 'grab', touchAction: 'none' }}
                     >
                         <div 
                             className="cube" 
                             style={{ 
                                 transform: `translateZ(-125px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+                                // Disable CSS transition during drag for better performance
+                                transition: isDragging.current ? 'none' : 'transform 0.5s ease-out'
                             }}
                         >
                             {cubeFaces.map((face, i) => (
