@@ -176,19 +176,15 @@ export function DashboardOverview() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <p className="text-sm text-muted-foreground">Common tasks with Pravis</p>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 flex items-center justify-center">
             <TooltipProvider>
-              <div className="flex justify-around items-center pt-2">
+              <div className="flex justify-around items-center w-full">
                 {quickActions.map(action => (
                     <Tooltip key={action.href}>
                         <TooltipTrigger asChild>
-                            <Button asChild variant="outline" size="icon" className="h-14 w-14 rounded-2xl">
+                            <Button asChild variant="outline" size="icon" className="h-16 w-16 rounded-2xl">
                                 <Link href={action.href}>
-                                    <action.icon className="h-6 w-6" />
+                                    <action.icon className="h-8 w-8" />
                                 </Link>
                             </Button>
                         </TooltipTrigger>
