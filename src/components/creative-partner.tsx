@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
+import { format, isSameDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -56,6 +56,7 @@ export function CreativePartner() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<{ category: TaskCategory | 'All', status: 'All' | 'Completed' | 'Incomplete' }>({ category: 'All', status: 'All' });
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
   useEffect(() => {
     try {
@@ -114,12 +115,23 @@ export function CreativePartner() {
         if (filter.status === 'Completed') return task.completed;
         if (filter.status === 'Incomplete') return !task.completed;
         return true;
+      })
+      .filter(task => {
+        if (!selectedDate) return true;
+        // Only show tasks for the selected date. isSameDay is from date-fns
+        return task.dueDate && isSameDay(task.dueDate, selectedDate);
       });
-  }, [tasks, searchTerm, filter]);
+  }, [tasks, searchTerm, filter, selectedDate]);
 
   const completionProgress = useMemo(() => {
     const completed = tasks.filter(t => t.completed).length;
     return tasks.length > 0 ? (completed / tasks.length) * 100 : 0;
+  }, [tasks]);
+  
+  const dueDates = useMemo(() => {
+    return tasks
+        .filter(task => task.dueDate)
+        .map(task => task.dueDate as Date);
   }, [tasks]);
 
   const TaskItem = ({ task }: { task: Task }) => (
@@ -192,7 +204,9 @@ export function CreativePartner() {
         <Card className="flex-1 flex flex-col min-h-0">
             <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                    <CardTitle>Today's Tasks</CardTitle>
+                    <CardTitle>
+                        {selectedDate ? `Tasks for ${format(selectedDate, 'MMM d')}` : "Today's Tasks"}
+                    </CardTitle>
                     <CardDescription>{filteredTasks.length} tasks</CardDescription>
                 </div>
                  <div className="flex items-center gap-2">
@@ -221,7 +235,9 @@ export function CreativePartner() {
                 {filteredTasks.length > 0 ? (
                     filteredTasks.map(task => <TaskItem key={task.id} task={task} />)
                 ) : (
-                    <div className="text-center text-muted-foreground py-10">No tasks found.</div>
+                    <div className="text-center text-muted-foreground py-10">
+                        {selectedDate ? "No tasks for this day." : "No tasks found."}
+                    </div>
                 )}
             </CardContent>
         </Card>
@@ -235,6 +251,26 @@ export function CreativePartner() {
             </CardHeader>
             <CardContent>
                 <Progress value={completionProgress} className="h-3" />
+            </CardContent>
+        </Card>
+        <Card>
+            <CardHeader>
+                <CardTitle>Calendar</CardTitle>
+                <CardDescription>
+                    {selectedDate ? `Filtered to ${format(selectedDate, 'PPP')}` : 'Select a day to filter tasks.'}
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-center">
+                <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    className="p-0"
+                    modifiers={{ hasDueDate: dueDates }}
+                    modifiersClassNames={{
+                        hasDueDate: 'relative bg-primary/10 rounded-md',
+                    }}
+                />
             </CardContent>
         </Card>
         <Card>
