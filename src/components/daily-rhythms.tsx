@@ -1,8 +1,9 @@
+
 "use client"
 
 import { BrainCircuit, Calendar, Mail, Share2 } from "lucide-react";
 import Link from "next/link";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 
 const cubeFaces = [
     {
@@ -36,42 +37,76 @@ const cubeFaces = [
 ];
 
 export function DailyRhythms() {
-    const [rotationY, setRotationY] = useState(0);
-    const pointerStartX = useRef(0);
+    const [rotation, setRotation] = useState({ x: 20, y: 30 });
+    const [isInteracting, setIsInteracting] = useState(false);
+    
+    const pointerStart = useRef({ x: 0 });
     const didMove = useRef(false);
+    const lastRotation = useRef({x: 20, y: 30});
+    const animationFrameId = useRef<number>();
+
+    const animate = useCallback(() => {
+        setRotation(prev => {
+            const newRotation = {
+                x: (prev.x + 0.05) % 360,
+                y: (prev.y + 0.1) % 360,
+            }
+            lastRotation.current = newRotation;
+            return newRotation;
+        });
+        animationFrameId.current = requestAnimationFrame(animate);
+    }, []);
+
+    useEffect(() => {
+        if (!isInteracting) {
+            animationFrameId.current = requestAnimationFrame(animate);
+        } else {
+            if (animationFrameId.current) {
+                cancelAnimationFrame(animationFrameId.current);
+            }
+        }
+        return () => {
+            if (animationFrameId.current) {
+                cancelAnimationFrame(animationFrameId.current);
+            }
+        };
+    }, [isInteracting, animate]);
 
     const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-        pointerStartX.current = e.clientX;
+        pointerStart.current = { x: e.clientX };
         didMove.current = false;
-        // Capture the pointer to ensure we get subsequent events
+        setIsInteracting(true);
         e.currentTarget.setPointerCapture(e.pointerId);
     };
 
     const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-        // Check if primary button is held down (for mouse)
-        if (e.buttons !== 1) return;
+        if (!isInteracting || e.buttons !== 1) return;
         
-        // A movement of 10px or more is considered a swipe/drag
-        if (!didMove.current && Math.abs(e.clientX - pointerStartX.current) > 10) {
+        const dx = e.clientX - pointerStart.current.x;
+
+        if (!didMove.current && Math.abs(dx) > 10) {
             didMove.current = true;
         }
-    };
 
-    const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-        // Release pointer capture
-        e.currentTarget.releasePointerCapture(e.pointerId);
-
-        if (didMove.current) { // It was a swipe/drag
-            const deltaX = e.clientX - pointerStartX.current;
-            // A swipe of 50px or more triggers rotation
-            if (deltaX > 50) { // Swipe Right
-                setRotationY(r => r + 90);
-            } else if (deltaX < -50) { // Swipe Left
-                setRotationY(r => r - 90);
-            }
+        if(didMove.current) {
+            const newY = lastRotation.current.y + dx;
+            setRotation({ x: lastRotation.current.x, y: newY });
         }
-        // If not a swipe, the click will be handled by the Link component
     };
+    
+    const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (didMove.current) {
+            lastRotation.current = { ...rotation };
+        }
+        e.currentTarget.releasePointerCapture(e.pointerId);
+        setIsInteracting(false);
+    };
+
+    const onSceneLeave = () => {
+        if (isInteracting) {
+             setIsInteracting(false);
+        }
+    }
     
     return (
         <div className="space-y-8">
@@ -83,24 +118,27 @@ export function DailyRhythms() {
                         onPointerDown={onPointerDown}
                         onPointerMove={onPointerMove}
                         onPointerUp={onPointerUp}
-                        style={{ touchAction: 'none', cursor: 'grab' }}
+                        onPointerLeave={onSceneLeave}
+                        style={{ touchAction: 'pan-y', cursor: 'grab' }}
                     >
                         <div 
                             className="cube" 
-                            style={{ transform: `translateZ(-125px) rotateY(${rotationY}deg)` }}
+                            style={{ 
+                                transform: `translateZ(-125px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`
+                            }}
                         >
-                            {cubeFaces.map((face) => (
+                            {cubeFaces.map((face, i) => (
                                 <Link
                                     href={face.href}
                                     key={face.title}
                                     className={`cube__face ${face.className}`}
+                                    style={{ '--i': i } as React.CSSProperties}
                                     onClick={(e) => {
-                                        // Prevent navigation if the user was dragging/swiping
                                         if (didMove.current) {
                                             e.preventDefault();
                                         }
                                     }}
-                                    draggable={false} // Prevent default browser drag behavior
+                                    draggable={false}
                                 >
                                     <face.icon className={`w-24 h-24 ${face.color}`} strokeWidth={1} />
                                     <p className="font-semibold text-xl">{face.title}</p>
