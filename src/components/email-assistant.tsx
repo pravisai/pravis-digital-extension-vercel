@@ -26,6 +26,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { format } from 'date-fns'
 
 import { draftEmailReplies } from '@/ai/flows/draft-email-replies'
 import { useToast } from '@/hooks/use-toast'
@@ -120,7 +121,7 @@ export function EmailAssistant() {
         setEmails(fetchedEmails as Email[]);
     } catch (error) {
         console.error("Failed to fetch emails:", error);
-        setFetchError("Failed to fetch emails. Your session might have expired. Please try signing in again.");
+        setFetchError("Failed to fetch emails. This can happen if your session has expired or if Gmail permissions are not correctly set up. Please try signing in again.");
     } finally {
         setIsFetchingEmails(false);
     }
@@ -290,7 +291,10 @@ export function EmailAssistant() {
                       !email.read && 'bg-primary/5',
                     )}
                   >
-                    <h3 className={cn("text-base font-semibold", !email.read && "text-primary-foreground/90")}>{email.sender}</h3>
+                    <div className="flex justify-between items-center">
+                      <h3 className={cn("text-base font-semibold", !email.read && "text-primary-foreground/90")}>{email.sender}</h3>
+                      {email.date && <p className="text-xs text-muted-foreground">{format(new Date(email.date), 'MMM d')}</p>}
+                    </div>
                     <h4 className={cn("text-sm font-medium", !email.read && "text-primary-foreground/80")}>{email.subject}</h4>
                     <p className='text-sm text-muted-foreground truncate'>
                       {email.body}
@@ -317,7 +321,7 @@ export function EmailAssistant() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 text-muted-foreground">
-                    <p className="text-sm mr-2">{new Date(selectedEmail.date).toLocaleString()}</p>
+                    {selectedEmail.date && <p className="text-sm mr-2">{format(new Date(selectedEmail.date), 'PPpp')}</p>}
                     <Tooltip>
                       <TooltipTrigger asChild>
                          <Button variant="ghost" size="icon"><Trash2 className="h-5 w-5" /></Button>
