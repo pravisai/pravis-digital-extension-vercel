@@ -85,22 +85,22 @@ const recentActivity = [
 const quickActions = [
     {
         href: "/dashboard/clarity-chat",
-        label: "Ask Pravis Assistant",
+        label: "Ask Pravis",
         icon: Bot
     },
     {
         href: "/dashboard/email-assistant",
-        label: "Draft Email Reply",
+        label: "Draft Email",
         icon: Mail
     },
     {
         href: "#",
-        label: "Set Daily Intention",
+        label: "Daily Intention",
         icon: Sunrise
     },
     {
         href: "/dashboard/creative-partner",
-        label: "Generate Creative Content",
+        label: "Creative Content",
         icon: Sparkles
     }
 ]
@@ -121,12 +121,15 @@ export function DashboardOverview() {
 
   return (
     <div className="space-y-6">
+      {/* This header was removed to clean up the UI, but can be added back if needed */}
+      {/* 
       <header>
         <h1 className="text-3xl font-bold">Welcome back, {displayName}!</h1>
         <p className="text-muted-foreground">
           Here's what's happening with your AI assistant today.
         </p>
       </header>
+      */}
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
@@ -177,26 +180,23 @@ export function DashboardOverview() {
         </Card>
 
         <Card>
-          <CardContent className="p-4 flex items-center justify-center">
-            <TooltipProvider>
-              <div className="flex justify-around items-center w-full">
-                {quickActions.map(action => (
-                    <Tooltip key={action.href}>
-                        <TooltipTrigger asChild>
-                            <Button asChild variant="outline" size="icon" className="h-14 w-14 rounded-full">
-                                <Link href={action.href}>
-                                    <action.icon className="h-8 w-8" />
-                                </Link>
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>{action.label}</p>
-                        </TooltipContent>
-                    </Tooltip>
-                ))}
-              </div>
-            </TooltipProvider>
-          </CardContent>
+           <CardHeader>
+             <CardTitle>Quick Actions</CardTitle>
+           </CardHeader>
+           <CardContent className="pt-2">
+             <div className="grid grid-cols-2 gap-4">
+               {quickActions.map((action) => (
+                 <Link
+                   key={action.label}
+                   href={action.href}
+                   className="flex flex-col items-center justify-center gap-2 rounded-xl border bg-background p-4 text-center transition-colors hover:bg-accent hover:text-accent-foreground"
+                 >
+                   <action.icon className="h-8 w-8" />
+                   <span className="font-medium text-sm">{action.label}</span>
+                 </Link>
+               ))}
+             </div>
+           </CardContent>
         </Card>
       </div>
     </div>
