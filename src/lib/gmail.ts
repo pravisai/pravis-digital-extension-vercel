@@ -1,11 +1,13 @@
 
 'use server';
 
+import type { Email } from '@/types/email';
+
 /**
  * Fetches the user's recent emails using Gmail API.
  * @param accessToken OAuth 2.0 access token from Firebase login
  */
-export const fetchEmails = async (accessToken: string) => {
+export const fetchEmails = async (accessToken: string): Promise<{ emails: Email[], error: string | null }> => {
   const response = await fetch(
     'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=15',
     {
@@ -25,13 +27,13 @@ export const fetchEmails = async (accessToken: string) => {
         errorMessage = await response.text();
         console.error('Gmail API Error (non-JSON response):', errorMessage);
     }
-    throw new Error(errorMessage);
+    return { emails: [], error: errorMessage };
   }
 
   const data = await response.json();
 
   if (!data.messages || data.messages.length === 0) {
-    return []; // Return empty array if no messages
+    return { emails: [], error: null }; // Return empty array if no messages
   }
   
   // Recursively search for the text/plain part of a multipart email
@@ -122,7 +124,8 @@ export const fetchEmails = async (accessToken: string) => {
   const messages = await Promise.all(messagesPromises);
 
   // Filter out any nulls that resulted from errors
-  return messages.filter((msg): msg is NonNullable<typeof msg> => msg !== null);
+  const validMessages = messages.filter((msg): msg is NonNullable<typeof msg> => msg !== null);
+  return { emails: validMessages, error: null };
 };
 
 /**

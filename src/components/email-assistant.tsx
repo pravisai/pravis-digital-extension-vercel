@@ -45,16 +45,8 @@ import { Skeleton } from './ui/skeleton'
 import { Label } from './ui/label'
 import { fetchEmails } from '@/lib/gmail'
 import { Alert, AlertDescription, AlertTitle } from './ui/alert'
+import type { Email } from '@/types/email'
 
-type Email = {
-    id: string;
-    subject: string;
-    body: string;
-    date: string;
-    read: boolean;
-    sender: string;
-    email: string;
-}
 
 const navLinks = [
   { name: 'Inbox', icon: Inbox, count: 3 },
@@ -116,20 +108,19 @@ export function EmailAssistant() {
         return;
     }
 
-    try {
-        const fetchedEmails = await fetchEmails(token);
-        setEmails(fetchedEmails as Email[]);
-    } catch (error: any) {
-        console.error("Failed to fetch emails:", error);
-        const apiErrorMessage = error.message || 'An unknown error occurred.';
-        
-        if (apiErrorMessage.toLowerCase().includes('invalid authentication credentials')) {
+    const result = await fetchEmails(token);
+    setIsFetchingEmails(false);
+
+    if (result.error) {
+        console.error("Failed to fetch emails:", result.error);
+        const errorMessage = result.error.toLowerCase();
+        if (errorMessage.includes('invalid credentials') || errorMessage.includes('invalid authentication')) {
             setFetchError('Your session has expired. Please sign out and sign back in to refresh your connection to Gmail.');
         } else {
-            setFetchError(`Could not fetch emails. Reason: ${apiErrorMessage}. Please ensure the Gmail API is enabled in your Google Cloud project and try signing in again.`);
+            setFetchError(`Could not fetch emails. Reason: ${result.error}. Please ensure the Gmail API is enabled in your Google Cloud project and try signing in again.`);
         }
-    } finally {
-        setIsFetchingEmails(false);
+    } else {
+        setEmails(result.emails);
     }
   };
 
