@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from "react"
@@ -162,7 +163,7 @@ export function DashboardOverview() {
           <CardContent>
             <div className="flex flex-col space-y-2">
                 {quickActions.map(action => (
-                    <Button asChild variant="ghost" className="justify-start">
+                    <Button asChild variant="ghost" className="justify-start" key={action.href}>
                         <Link href={action.href}>
                             <action.icon className="mr-2 h-4 w-4" />
                             {action.label}
