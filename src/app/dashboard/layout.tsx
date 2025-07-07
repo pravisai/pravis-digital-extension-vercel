@@ -28,11 +28,22 @@ function DashboardHeader() {
   const router = useRouter();
   const { toast } = useToast();
   const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [greeting, setGreeting] = useState("Good Afternoon");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
+
+    const hour = new Date().getHours();
+    if (hour < 12) {
+        setGreeting("Good Morning");
+    } else if (hour < 18) {
+        setGreeting("Good Afternoon");
+    } else {
+        setGreeting("Good Evening");
+    }
+
     return () => unsubscribe();
   }, []);
 
@@ -56,6 +67,8 @@ function DashboardHeader() {
     { href: "/dashboard/email-assistant", label: "Email Assistant" },
     { href: "/dashboard/creative-partner", label: "Productivity Suite" },
   ];
+  
+  const displayName = user?.displayName?.split(' ')[0] || 'Dreamer';
 
   return (
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
@@ -69,7 +82,7 @@ function DashboardHeader() {
           ))}
         </nav>
         <div className="md:hidden">
-            <h1 className="text-lg font-bold">Dashboard</h1>
+            <h1 className="text-lg font-semibold">{greeting}, {displayName}</h1>
         </div>
   
         <div className="flex items-center gap-4">

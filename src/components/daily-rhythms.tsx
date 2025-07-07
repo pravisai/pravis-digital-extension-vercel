@@ -3,10 +3,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { BrainCircuit, Calendar, Mail, Share2 } from "lucide-react";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import React, { useState, useEffect } from "react"
-import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth"
-import { auth } from "@/lib/firebase/config"
 
 const featureItems = [
     {
@@ -40,41 +36,8 @@ const featureItems = [
 ];
 
 export function DailyRhythms() {
-    const [user, setUser] = useState<FirebaseUser | null>(null);
-    const [greeting, setGreeting] = useState("Good Afternoon");
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser);
-        });
-
-        const hour = new Date().getHours();
-        if (hour < 12) {
-            setGreeting("Good Morning");
-        } else if (hour < 18) {
-            setGreeting("Good Afternoon");
-        } else {
-            setGreeting("Good Evening");
-        }
-
-        return () => unsubscribe();
-    }, []);
-
-    const displayName = user?.displayName?.split(' ')[0] || 'Dreamer';
-
     return (
         <div className="space-y-8">
-            <header className="flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
-                <div className="flex-1">
-                    <h1 className="text-3xl md:text-4xl font-bold font-headline text-primary-foreground/90">{greeting}, {displayName}</h1>
-                    <p className="text-muted-foreground mt-2">Ready to be present and authentic?</p>
-                </div>
-                <Avatar className="h-20 w-20 md:h-24 md:w-24 border-2 border-primary/50">
-                  <AvatarImage src={user?.photoURL || undefined} alt={user?.displayName || "User"} />
-                  <AvatarFallback className="text-3xl md:text-4xl">{user?.displayName?.charAt(0) || 'D'}</AvatarFallback>
-                </Avatar>
-            </header>
-
             <section>
                 <h2 className="text-2xl font-bold font-headline mb-4">For You</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
