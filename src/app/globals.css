@@ -71,73 +71,113 @@
 }
 
 @layer components {
-    .scene {
-        width: 250px;
-        height: 250px;
-        perspective: 900px;
-        animation: float 6s ease-in-out infinite;
+    .hud-container {
+        position: relative;
+        background-color: #0a0a0a;
+        background-image: 
+            linear-gradient(hsl(var(--primary) / 0.08) 1px, transparent 1px), 
+            linear-gradient(to right, hsl(var(--primary) / 0.08) 1px, transparent 1px);
+        background-size: 30px 30px;
+        animation: hud-flicker 10s infinite linear;
     }
 
-    .cube {
+    .hud-button-wrapper {
+        position: relative;
+        width: 140px;
+        height: 160px;
+        margin: 0 auto;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+    
+    .hud-button-wrapper:hover {
+        transform: scale(1.1);
+    }
+    .hud-button-wrapper:active {
+        transform: scale(1.05);
+    }
+
+    .hud-button {
+        position: relative;
         width: 100%;
         height: 100%;
-        position: relative;
-        transform-style: preserve-3d;
-        transition: transform 0.5s ease-out;
-    }
-
-    .cube__face {
-        position: absolute;
-        width: 250px;
-        height: 250px;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 1rem;
-        overflow: hidden;
-        backface-visibility: hidden;
-        box-shadow: 0 0 10px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--primary) / 0.3), inset 0 0 5px hsl(var(--primary) / 0.2);
-        animation: cube-glow 4s ease-in-out infinite;
-        @apply bg-card/80 hover:bg-card/100 border-2 rounded-2xl p-6 border-primary/50;
+        clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        background-color: hsl(var(--primary) / 0.05);
+        backdrop-filter: blur(2px);
+        transition: background-color 0.3s ease;
+        padding: 0.5rem;
+    }
+    
+    .hud-button-wrapper:hover .hud-button {
+        background-color: hsl(var(--primary) / 0.1);
     }
 
-    .cube__face:active {
-        animation-name: none;
-        box-shadow: 0 0 25px hsl(var(--primary) / 0.8), 0 0 50px hsl(var(--primary) / 0.6), inset 0 0 12px hsl(var(--primary) / 0.5);
-        transition: box-shadow 0.1s ease-in-out;
-    }
-
-    .cube__face::after {
+    .hud-button::before, .hud-button::after {
         content: '';
         position: absolute;
-        top: -100%;
-        left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(0deg, transparent, hsl(var(--primary) / 0.1), transparent);
-        animation: scanline 5s linear infinite;
-        animation-delay: calc(var(--i, 0) * 0.7s);
+        top: 0;
+        left: 0;
+        clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        pointer-events: none;
     }
 
-    .cube__face--front  { transform: rotateY(  0deg) translateZ(125px); }
-    .cube__face--right  { transform: rotateY( 90deg) translateZ(125px); }
-    .cube__face--back   { transform: rotateY(180deg) translateZ(125px); }
-    .cube__face--left   { transform: rotateY(-90deg) translateZ(125px); }
+    .hud-button::before {
+        box-shadow: 0 0 5px hsl(var(--primary)), 0 0 10px hsl(var(--primary)), inset 0 0 5px hsl(var(--primary) / 0.5);
+        animation: hud-pulse 4s infinite ease-in-out;
+        transition: box-shadow 0.3s ease;
+        opacity: 0.7;
+    }
+
+    .hud-button-wrapper:hover .hud-button::before {
+       box-shadow: 0 0 10px hsl(var(--primary)), 0 0 20px hsl(var(--primary)), inset 0 0 10px hsl(var(--primary) / 0.8);
+       opacity: 1;
+    }
+
+    .hud-button-wrapper:active .hud-button::before {
+        box-shadow: 0 0 15px hsl(var(--primary)), 0 0 30px hsl(var(--primary)), inset 0 0 15px hsl(var(--primary) / 1);
+        opacity: 1;
+    }
+
+    .hud-button::after {
+        background: linear-gradient(to top, transparent, hsl(var(--primary) / 0.2), transparent);
+        animation: hud-scanline 3.5s linear infinite;
+        animation-delay: var(--animation-delay, 0s);
+    }
+
+    @media (max-width: 768px) {
+      .hud-button-wrapper {
+        width: 120px;
+        height: 140px;
+      }
+    }
 }
 
 
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-15px); }
+@keyframes hud-pulse {
+    0%, 100% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
 }
 
-@keyframes cube-glow {
-    0%, 100% { box-shadow: 0 0 10px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--primary) / 0.3), inset 0 0 5px hsl(var(--primary) / 0.2); }
-    50% { box-shadow: 0 0 20px hsl(var(--primary) / 0.7), 0 0 40px hsl(var(--primary) / 0.5), inset 0 0 10px hsl(var(--primary) / 0.4); }
+@keyframes hud-scanline {
+    0% {
+        transform: translateY(-100%);
+    }
+    100% {
+        transform: translateY(100%);
+    }
 }
 
-@keyframes scanline {
-    0% { top: -100%; }
-    100% { top: 100%; }
+@keyframes hud-flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.98; }
 }
