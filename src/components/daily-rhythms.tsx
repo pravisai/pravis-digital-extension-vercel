@@ -1,6 +1,6 @@
+
 "use client"
 
-import { Card, CardContent } from "@/components/ui/card";
 import { BrainCircuit, Calendar, Mail, Share2 } from "lucide-react";
 import Link from "next/link";
 
@@ -42,13 +42,17 @@ export function DailyRhythms() {
                 <h2 className="text-2xl font-bold font-headline mb-4">For You</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {featureItems.map((feature, index) => (
-                        <Link href={feature.href} key={index} className="transform hover:-translate-y-1 transition-transform duration-300">
-                            <Card className={`bg-card/80 hover:bg-card/100 border-2 ${feature.borderColor} flex flex-col items-center justify-center text-center p-6 aspect-square rounded-2xl shadow-lg`}>
-                                <CardContent className="flex flex-col items-center justify-center gap-4 p-0">
+                        <Link href={feature.href} key={index} className="flip-card">
+                            <div className="flip-card-inner">
+                                <div className={`flip-card-front ${feature.borderColor}`}>
                                     <feature.icon className={`w-1/2 h-1/2 ${feature.color}`} strokeWidth={1.5} />
                                     <p className="font-semibold text-lg">{feature.title}</p>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                <div className={`flip-card-back ${feature.borderColor}`}>
+                                     <feature.icon className={`w-1/2 h-1/2 ${feature.color}`} strokeWidth={1.5} />
+                                    <p className="font-semibold text-lg">{feature.title}</p>
+                                </div>
+                            </div>
                         </Link>
                     ))}
                 </div>
