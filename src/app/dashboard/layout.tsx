@@ -138,7 +138,6 @@ function MobileNav({ onChatOpen }: { onChatOpen: () => void }) {
   };
 
   const navItemsLeft = [
-    { href: "/dashboard", label: "Dashboard", icon: BrainCircuit },
     { href: "/dashboard/email-assistant", icon: Mail, label: "Email" },
   ];
   const navItemsRight = [
@@ -147,7 +146,7 @@ function MobileNav({ onChatOpen }: { onChatOpen: () => void }) {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 z-40 w-full h-20 bg-background border-t border-border/50">
-      <div className="grid h-full grid-cols-5 mx-auto font-medium">
+      <div className="grid h-full grid-cols-4 mx-auto font-medium">
         {navItemsLeft.map(item => (
           <Link key={item.href} href={item.href} className="inline-flex flex-col items-center justify-center px-2 text-center hover:bg-accent group">
             <item.icon className={cn("w-6 h-6 mb-1 text-muted-foreground group-hover:text-primary", { "text-primary": pathname.startsWith(item.href) })} />
