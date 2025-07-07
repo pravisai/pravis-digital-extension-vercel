@@ -1,7 +1,7 @@
 
 "use client"
 
-import { BrainCircuit, Lightbulb, Mail, MessageSquare, Settings, User, LogOut, Menu } from "lucide-react"
+import { BrainCircuit, Lightbulb, Mail, MessageSquare, Settings, User, LogOut, Menu, ListChecks } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { signOutUser } from "@/lib/firebase/auth"
@@ -52,9 +52,9 @@ function Topbar() {
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: BrainCircuit },
-    { href: "/dashboard/clarity-chat", icon: MessageSquare, label: "Clarity Chat" },
+    { href: "/dashboard/clarity-chat", icon: MessageSquare, label: "Pravis Assistant" },
     { href: "/dashboard/email-assistant", icon: Mail, label: "Email Assistant" },
-    { href: "/dashboard/creative-partner", icon: Lightbulb, label: "Creative Partner" },
+    { href: "/dashboard/creative-partner", icon: ListChecks, label: "Productivity Suite" },
   ];
 
   const MobileNav = () => (
@@ -157,10 +157,19 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const isEmailPage = pathname === '/dashboard/email-assistant';
 
+  // The productivity suite is on the "creative-partner" route
+  const isFullHeightPage = pathname === '/dashboard/creative-partner' || pathname === '/dashboard/clarity-chat';
+
   return (
     <div className="flex min-h-screen w-full flex-col">
       <Topbar />
-      <main className={cn("flex-1", !isEmailPage && "p-4 md:p-6")}>
+      <main className={cn(
+        "flex-1",
+        {
+          "p-4 md:p-6": !isEmailPage,
+          "h-[calc(100vh-4rem)]": isFullHeightPage,
+        }
+      )}>
         {children}
       </main>
     </div>

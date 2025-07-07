@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { BrainCircuit, Send, User } from "lucide-react"
+import { BrainCircuit, Send, User, Paperclip, Mic } from "lucide-react"
 import React, { useRef, useState, useEffect } from "react"
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
@@ -34,7 +34,7 @@ export function ClarityChat() {
     setMessages([
       {
         role: "pravis",
-        content: "Hello! I'm Pravis. How can I help you find clarity today?",
+        content: "Hello! I'm Pravis, your personal AI assistant. How can I help you find clarity today?",
       }
     ])
   }, [])
@@ -69,66 +69,82 @@ export function ClarityChat() {
 
   return (
     <div className="flex flex-col h-full bg-card border rounded-lg shadow-sm">
-      <header className="p-4 border-b">
-        <h1 className="font-semibold text-lg">Clarity Chat</h1>
-      </header>
-      <ScrollArea className="flex-1 w-full" ref={scrollAreaRef}>
-        <div className="space-y-6 p-6">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex items-start gap-4 ${
-                message.role === "user" ? "justify-end" : ""
-              }`}
-            >
-              {message.role === "pravis" && (
+        <header className="p-4 border-b flex items-center justify-between">
+            <div className="flex items-center gap-3">
                 <Avatar>
-                  <AvatarFallback><BrainCircuit /></AvatarFallback>
+                    <AvatarFallback><BrainCircuit /></AvatarFallback>
                 </Avatar>
-              )}
-              <div
-                className={`rounded-lg p-3 max-w-md ${
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary"
+                <div>
+                    <h1 className="font-semibold text-lg">Pravis AI</h1>
+                    <p className="text-xs text-green-500 flex items-center gap-1">
+                        <span className="h-2 w-2 rounded-full bg-green-500 inline-block"></span>
+                        Online
+                    </p>
+                </div>
+            </div>
+        </header>
+        <ScrollArea className="flex-1 w-full" ref={scrollAreaRef}>
+            <div className="space-y-6 p-6">
+            {messages.map((message, index) => (
+                <div
+                key={index}
+                className={`flex items-start gap-4 ${
+                    message.role === "user" ? "justify-end" : ""
                 }`}
-              >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-              </div>
-              {message.role === "user" && (
+                >
+                {message.role === "pravis" && (
+                    <Avatar>
+                        <AvatarFallback><BrainCircuit /></AvatarFallback>
+                    </Avatar>
+                )}
+                <div
+                    className={`rounded-lg p-3 max-w-md ${
+                    message.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary"
+                    }`}
+                >
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                </div>
+                {message.role === "user" && (
+                    <Avatar>
+                    {user?.photoURL ? (
+                        <AvatarImage src={user.photoURL} alt={user.displayName || "User"} />
+                    ) : (
+                        <AvatarFallback><User /></AvatarFallback>
+                    )}
+                    </Avatar>
+                )}
+                </div>
+            ))}
+            {isLoading && (
+                <div className="flex items-center gap-4">
                 <Avatar>
-                  {user?.photoURL ? (
-                    <AvatarImage src={user.photoURL} alt={user.displayName || "User"} />
-                  ) : (
-                    <AvatarFallback><User /></AvatarFallback>
-                  )}
+                    <AvatarFallback><BrainCircuit className="animate-pulse" /></AvatarFallback>
                 </Avatar>
-              )}
+                <div className="rounded-lg p-3 bg-secondary animate-pulse">
+                    <div className="h-4 w-24 rounded-md bg-muted"></div>
+                </div>
+                </div>
+            )}
             </div>
-          ))}
-          {isLoading && (
-            <div className="flex items-center gap-4">
-              <Avatar>
-                <AvatarFallback><BrainCircuit className="animate-pulse" /></AvatarFallback>
-              </Avatar>
-              <div className="rounded-lg p-3 bg-secondary animate-pulse">
-                <div className="h-4 w-24 rounded-md bg-muted"></div>
-              </div>
-            </div>
-          )}
-        </div>
       </ScrollArea>
       <footer className="p-4 border-t">
-        <form onSubmit={handleSendMessage} className="flex gap-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask Pravis for clarity..."
-            disabled={isLoading}
-          />
-          <Button type="submit" disabled={isLoading || !input.trim()}>
-            <Send className="h-4 w-4" />
-          </Button>
+        <form onSubmit={handleSendMessage} className="relative">
+            <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask Pravis anything..."
+                className="pr-28 pl-10 h-12"
+                disabled={isLoading}
+            />
+            <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                <Button variant="ghost" size="icon" disabled={isLoading} type="button"><Paperclip className="h-5 w-5 text-muted-foreground" /></Button>
+            </div>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                <Button variant="ghost" size="icon" disabled={isLoading} type="button"><Mic className="h-5 w-5 text-muted-foreground"/></Button>
+                <Button type="submit" disabled={isLoading || !input.trim()}><Send className="h-5 w-5" /></Button>
+            </div>
         </form>
       </footer>
     </div>
