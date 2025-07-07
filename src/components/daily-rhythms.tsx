@@ -1,8 +1,9 @@
+
 "use client"
 
 import { BrainCircuit, Calendar, Mail, Share2 } from "lucide-react";
-import Link from "next/link";
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 
 const cubeFaces = [
     {
@@ -36,6 +37,7 @@ const cubeFaces = [
 ];
 
 export function DailyRhythms() {
+    const router = useRouter();
     const [rotation, setRotation] = useState({ x: 20, y: 30 });
     const [isInteracting, setIsInteracting] = useState(false);
     
@@ -96,6 +98,16 @@ export function DailyRhythms() {
     const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
         if (didMove.current) {
             lastRotation.current = { ...rotation };
+        } else {
+            // This was a click, not a drag.
+            const target = e.target as HTMLElement;
+            const cubeFace = target.closest<HTMLDivElement>('.cube__face');
+            if (cubeFace) {
+                const href = cubeFace.dataset.href;
+                if (href) {
+                    router.push(href);
+                }
+            }
         }
         e.currentTarget.releasePointerCapture(e.pointerId);
         setIsInteracting(false);
@@ -127,16 +139,15 @@ export function DailyRhythms() {
                             }}
                         >
                             {cubeFaces.map((face, i) => (
-                                <Link
-                                    href={face.href}
+                                <div
+                                    data-href={face.href}
                                     key={face.title}
                                     className={`cube__face ${face.className}`}
                                     style={{ '--i': i } as React.CSSProperties}
-                                    draggable={false}
                                 >
                                     <face.icon className={`w-24 h-24 ${face.color}`} strokeWidth={1} />
                                     <p className="font-semibold text-xl">{face.title}</p>
-                                </Link>
+                                </div>
                             ))}
                         </div>
                     </div>
