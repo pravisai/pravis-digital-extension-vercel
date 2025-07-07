@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { signInWithGoogle } from '@/lib/firebase/auth';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg role="img" viewBox="0 0 24 24" {...props}>
@@ -67,7 +68,7 @@ export default function SignInPage() {
     <div className="flex min-h-svh flex-col items-center justify-center bg-background text-foreground p-4 font-body">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="font-headline text-5xl font-light tracking-[0.2em] text-primary-foreground/90">
+          <h1 className="font-headline text-5xl font-light tracking-[0.2em] text-primary">
             PRAVIS
           </h1>
           <p className="text-sm font-light text-muted-foreground tracking-wider uppercase">
@@ -81,7 +82,14 @@ export default function SignInPage() {
             <p className="text-muted-foreground mt-2">Log in to continue your journey with Pravis.</p>
         </div>
       
-        <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary/10 hover:text-primary h-12 text-base font-semibold" onClick={handleGoogleSignIn} disabled={isLoading}>
+        <Button 
+          className={cn(
+            "w-full h-12 text-base font-semibold text-white",
+            "bg-gradient-to-br from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+          )} 
+          onClick={handleGoogleSignIn} 
+          disabled={isLoading}
+        >
             {isLoading ? <Loader2 className="mr-2 animate-spin" /> : <GoogleIcon className="mr-2 h-5 w-5"/>}
             Continue with Google
         </Button>
