@@ -8,7 +8,7 @@ const cubeFaces = [
     {
         href: "/dashboard/email-assistant",
         icon: Mail,
-        title: "Email Draft",
+        title: "Email Assistant",
         color: "text-primary",
         className: "cube__face--front",
     },
