@@ -1,4 +1,5 @@
-// src/lib/gmail.ts
+
+'use server';
 
 /**
  * Fetches the user's recent emails using Gmail API.
@@ -25,27 +26,50 @@ export const fetchEmails = async (accessToken: string) => {
     return []; // Return empty array if no messages
   }
   
-  const getBody = (payload: any) => {
-    let body = '';
-    if (payload.body && payload.body.size > 0) {
-      body = payload.body.data;
-    } else if (payload.parts) {
-      // Find the plain text part of the email
-      const part = payload.parts.find(
-        (p: any) => p.mimeType === 'text/plain'
-      );
-      if (part && part.body && part.body.data) {
-        body = part.body.data;
-      }
+  // Recursively search for the text/plain part of a multipart email
+  const findTextPlainPart = (parts: any[]): any | undefined => {
+    for (const part of parts) {
+        if (part.mimeType === 'text/plain') {
+            return part;
+        }
+        if (part.parts) {
+            const found = findTextPlainPart(part.parts);
+            if (found) {
+                return found;
+            }
+        }
     }
-    // Decode from base64, replacing URL-safe characters with standard base64 characters
-    return body ? atob(body.replace(/-/g, '+').replace(/_/g, '/')) : '';
+    return undefined;
+  };
+
+  const getBody = (payload: any) => {
+      let bodyData = '';
+      if (payload.body?.size > 0 && !payload.parts) {
+          bodyData = payload.body.data;
+      } 
+      else if (payload.parts) {
+          const plainTextPart = findTextPlainPart(payload.parts);
+          if (plainTextPart?.body?.data) {
+              bodyData = plainTextPart.body.data;
+          }
+      }
+      
+      if (bodyData) {
+          try {
+              // Decode from base64, replacing URL-safe characters
+              return atob(bodyData.replace(/-/g, '+').replace(/_/g, '/'));
+          } catch (e) {
+              console.error("Error decoding base64 email body:", e);
+              return ''; // Return empty string on decoding failure
+          }
+      }
+      return ''; // Return empty if no body found
   };
 
 
   // Fetch each message's full content
-  const messages = await Promise.all(
-    data.messages.map(async (msg: { id: string }) => {
+  const messagesPromises = data.messages.map(async (msg: { id: string }) => {
+    try {
       const res = await fetch(
         `https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}?format=full`,
         {
@@ -54,6 +78,12 @@ export const fetchEmails = async (accessToken: string) => {
           },
         }
       );
+
+      if (!res.ok) {
+        console.error(`Failed to fetch email ${msg.id}:`, await res.json());
+        return null; // Return null for failed emails instead of throwing
+      }
+      
       const fullMsg = await res.json();
       
       const fromHeader = fullMsg.payload?.headers?.find((h: any) => h.name === 'From')?.value || '';
@@ -67,17 +97,23 @@ export const fetchEmails = async (accessToken: string) => {
         subject:
           fullMsg.payload?.headers?.find((h: any) => h.name === 'Subject')
             ?.value || 'No Subject',
-        sender,
-        email,
+        sender: sender || 'Unknown Sender',
+        email: email || 'No email address',
         date:
           fullMsg.payload?.headers?.find((h: any) => h.name === 'Date')
-            ?.value || '',
+            ?.value || new Date().toISOString(),
         read: !fullMsg.labelIds.includes('UNREAD'),
       };
-    })
-  );
+    } catch(error) {
+      console.error(`Error processing email ${msg.id}:`, error);
+      return null;
+    }
+  });
 
-  return messages;
+  const messages = await Promise.all(messagesPromises);
+
+  // Filter out any nulls that resulted from errors
+  return messages.filter((msg): msg is NonNullable<typeof msg> => msg !== null);
 };
 
 /**
@@ -130,3 +166,4 @@ export const sendEmail = async (
 
   return await response.json();
 };
+
