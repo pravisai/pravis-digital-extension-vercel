@@ -18,8 +18,9 @@ export const fetchEmails = async (accessToken: string) => {
   const data = await response.json();
 
   if (!response.ok) {
+    const errorMessage = data?.error?.message || 'An unknown error occurred while fetching the email list.';
     console.error('Gmail API Error:', data);
-    throw new Error('Failed to fetch emails from Gmail.');
+    throw new Error(errorMessage);
   }
 
   if (!data.messages || data.messages.length === 0) {
@@ -166,4 +167,3 @@ export const sendEmail = async (
 
   return await response.json();
 };
-

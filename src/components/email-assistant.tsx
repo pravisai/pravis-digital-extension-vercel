@@ -119,9 +119,10 @@ export function EmailAssistant() {
     try {
         const fetchedEmails = await fetchEmails(token);
         setEmails(fetchedEmails as Email[]);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Failed to fetch emails:", error);
-        setFetchError("Failed to fetch emails. This can happen if your session has expired or if Gmail permissions are not correctly set up. Please try signing in again.");
+        const apiErrorMessage = error.message || 'An unknown error occurred.';
+        setFetchError(`Could not fetch emails. Reason: ${apiErrorMessage}. Please ensure the Gmail API is enabled in your Google Cloud project and try signing in again.`);
     } finally {
         setIsFetchingEmails(false);
     }
