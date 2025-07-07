@@ -28,9 +28,9 @@ export default function SignInPage() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      const result = await signInWithGoogle();
-      if (result) {
-        toast({ title: "Success!", description: `Signed in as ${result.user.displayName}` });
+      const { userCredential } = await signInWithGoogle();
+      if (userCredential?.user) {
+        toast({ title: "Success!", description: `Signed in as ${userCredential.user.displayName}` });
         router.push('/dashboard');
       } else {
         throw new Error('Sign in failed');
