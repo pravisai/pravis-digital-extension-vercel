@@ -15,13 +15,20 @@ export const fetchEmails = async (accessToken: string) => {
     }
   );
 
-  const data = await response.json();
-
   if (!response.ok) {
-    const errorMessage = data?.error?.message || 'An unknown error occurred while fetching the email list.';
-    console.error('Gmail API Error:', data);
+    let errorMessage = 'An unknown error occurred while fetching the email list.';
+    try {
+        const data = await response.json();
+        errorMessage = data?.error?.message || `An error occurred: ${response.statusText}`;
+        console.error('Gmail API Error:', data);
+    } catch (e) {
+        errorMessage = await response.text();
+        console.error('Gmail API Error (non-JSON response):', errorMessage);
+    }
     throw new Error(errorMessage);
   }
+
+  const data = await response.json();
 
   if (!data.messages || data.messages.length === 0) {
     return []; // Return empty array if no messages
@@ -64,7 +71,8 @@ export const fetchEmails = async (accessToken: string) => {
               return ''; // Return empty string on decoding failure
           }
       }
-      return ''; // Return empty if no body found
+      // Fallback to snippet if no body is found
+      return payload.snippet || '';
   };
 
 
@@ -81,7 +89,7 @@ export const fetchEmails = async (accessToken: string) => {
       );
 
       if (!res.ok) {
-        console.error(`Failed to fetch email ${msg.id}:`, await res.json());
+        console.error(`Failed to fetch email ${msg.id}:`, await res.clone().json().catch(() => res.text()));
         return null; // Return null for failed emails instead of throwing
       }
       

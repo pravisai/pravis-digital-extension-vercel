@@ -122,7 +122,12 @@ export function EmailAssistant() {
     } catch (error: any) {
         console.error("Failed to fetch emails:", error);
         const apiErrorMessage = error.message || 'An unknown error occurred.';
-        setFetchError(`Could not fetch emails. Reason: ${apiErrorMessage}. Please ensure the Gmail API is enabled in your Google Cloud project and try signing in again.`);
+        
+        if (apiErrorMessage.toLowerCase().includes('invalid authentication credentials')) {
+            setFetchError('Your session has expired. Please sign out and sign back in to refresh your connection to Gmail.');
+        } else {
+            setFetchError(`Could not fetch emails. Reason: ${apiErrorMessage}. Please ensure the Gmail API is enabled in your Google Cloud project and try signing in again.`);
+        }
     } finally {
         setIsFetchingEmails(false);
     }
