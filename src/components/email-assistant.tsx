@@ -20,6 +20,8 @@ import {
   ArrowLeft,
   Menu,
   Loader2,
+  RefreshCw,
+  AlertCircle,
 } from 'lucide-react'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -40,61 +42,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from './ui/skeleton'
 import { Label } from './ui/label'
+import { fetchEmails } from '@/lib/gmail'
+import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 
-
-const mockEmails = [
-  {
-    id: 1,
-    sender: 'Olivia Martin',
-    email: 'olivia.martin@example.com',
-    subject: 'Dinner Invitation',
-    body: 'Hey, are you free for dinner this Friday? I was thinking we could try that new Italian place downtown. Let me know what you think!',
-    date: '7/6/2025, 4:07:37 PM',
-    read: false,
-  },
-  {
-    id: 2,
-    sender: 'John Doe',
-    subject: 'Project Update: Q3 Report',
-    body: "Hi team, please find the attached Q3 report. We've made great progress and I'd like to share the highlights with you all.",
-    date: '7/6/2025, 2:15:11 PM',
-    read: true,
-  },
-  {
-    id: 3,
-    sender: 'Acme Inc.',
-    subject: 'Your Weekly Digest is here!',
-    body: 'Catch up on the latest news, articles, and updates from our blog. This week, we cover the future of AI in business.',
-    date: '7/6/2025, 11:30:45 AM',
-    read: true,
-  },
-  {
-    id: 4,
-    sender: 'Sophia Davis',
-    subject: 'Re: Quick question',
-    body: 'Thanks for getting back to me so quickly! That answers everything. I appreciate your help.',
-    date: '7/5/2025, 5:55:02 PM',
-    read: false,
-  },
-  {
-    id: 5,
-    sender: 'Design Weekly',
-    subject: 'Inspiration for your next project',
-    body: 'Discover the latest trends in UI/UX, amazing color palettes, and get inspired for your next design project.',
-    date: '7/5/2025, 9:00:00 AM',
-    read: true,
-  },
-  {
-    id: 6,
-    sender: 'Liam Harris',
-    subject: 'Brainstorming session for new feature',
-    body: "Let's schedule a meeting for next week to brainstorm ideas for the new feature. Please let me know your availability.",
-    date: '7/4/2025, 3:20:00 PM',
-    read: false,
-  },
-]
-
-type Email = (typeof mockEmails)[0]
+type Email = {
+    id: string;
+    subject: string;
+    body: string;
+    date: string;
+    read: boolean;
+    sender: string;
+    email: string;
+}
 
 const navLinks = [
   { name: 'Inbox', icon: Inbox, count: 3 },
@@ -117,6 +76,10 @@ const replyFormSchema = z.object({
 
 
 export function EmailAssistant() {
+  const [emails, setEmails] = useState<Email[]>([]);
+  const [isFetchingEmails, setIsFetchingEmails] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null)
   const [isNavCollapsed, setIsNavCollapsed] = useState(false)
   const { toast } = useToast()
@@ -138,6 +101,29 @@ export function EmailAssistant() {
       setDraftedReply('');
     }
   }, [selectedEmail, form]);
+
+  const handleFetchEmails = async () => {
+    setIsFetchingEmails(true);
+    setFetchError(null);
+    setEmails([]);
+
+    const token = sessionStorage.getItem('gmail_access_token');
+    if (!token) {
+        setFetchError("You are not authenticated with Google. Please sign in again.");
+        setIsFetchingEmails(false);
+        return;
+    }
+
+    try {
+        const fetchedEmails = await fetchEmails(token);
+        setEmails(fetchedEmails as Email[]);
+    } catch (error) {
+        console.error("Failed to fetch emails:", error);
+        setFetchError("Failed to fetch emails. Your session might have expired. Please try signing in again.");
+    } finally {
+        setIsFetchingEmails(false);
+    }
+  };
 
   async function onDraftReply(values: z.infer<typeof replyFormSchema>) {
     if (!selectedEmail) return;
@@ -260,14 +246,40 @@ export function EmailAssistant() {
 
           <div className={cn(
             "flex flex-col border-r border-border/50 w-full",
-            selectedEmail && "hidden"
+            selectedEmail && "hidden md:flex"
           )}>
-            <div className="p-4 border-b border-border/50 text-xl font-bold">
-              Inbox
+            <div className="p-4 border-b border-border/50 flex items-center justify-between">
+              <h2 className="text-xl font-bold">
+                Inbox
+              </h2>
+              <Button onClick={handleFetchEmails} disabled={isFetchingEmails} variant="outline" size="sm">
+                {isFetchingEmails ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4"/>}
+                Fetch Inbox
+              </Button>
             </div>
             <ScrollArea className="flex-1">
               <div className="flex flex-col">
-                {mockEmails.map((email) => (
+                {isFetchingEmails && Array.from({ length: 10 }).map((_, i) => (
+                   <div key={i} className="flex flex-col gap-2 p-4 border-b border-border/20">
+                     <Skeleton className="h-5 w-1/3" />
+                     <Skeleton className="h-4 w-2/3" />
+                     <Skeleton className="h-4 w-full" />
+                   </div>
+                ))}
+                {!isFetchingEmails && fetchError && (
+                  <Alert variant="destructive" className="m-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error Fetching Emails</AlertTitle>
+                    <AlertDescription>{fetchError}</AlertDescription>
+                  </Alert>
+                )}
+                {!isFetchingEmails && !fetchError && emails.length === 0 && (
+                  <div className="text-center p-10 text-muted-foreground">
+                    <Inbox className="mx-auto h-12 w-12" />
+                    <p className="mt-4">Your inbox is empty or you haven't fetched it yet.</p>
+                  </div>
+                )}
+                {!isFetchingEmails && emails.map((email) => (
                   <button
                     key={email.id}
                     onClick={() => setSelectedEmail(email)}
@@ -292,7 +304,7 @@ export function EmailAssistant() {
             <div className="flex flex-col bg-background flex-1">
                 <div className="p-4 flex justify-between items-center border-b border-border/50">
                   <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => setSelectedEmail(null)}>
+                    <Button variant="ghost" size="icon" onClick={() => setSelectedEmail(null)} className="md:hidden">
                       <ArrowLeft className="h-5 w-5" />
                     </Button>
                     <Avatar className="h-11 w-11">
@@ -304,7 +316,7 @@ export function EmailAssistant() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 text-muted-foreground">
-                    <p className="text-sm mr-2">{selectedEmail.date}</p>
+                    <p className="text-sm mr-2">{new Date(selectedEmail.date).toLocaleString()}</p>
                     <Tooltip>
                       <TooltipTrigger asChild>
                          <Button variant="ghost" size="icon"><Trash2 className="h-5 w-5" /></Button>

@@ -28,8 +28,11 @@ export default function SignInPage() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      const { userCredential } = await signInWithGoogle();
+      const { userCredential, accessToken } = await signInWithGoogle();
       if (userCredential?.user) {
+        if (accessToken) {
+          sessionStorage.setItem('gmail_access_token', accessToken);
+        }
         toast({ title: "Success!", description: `Signed in as ${userCredential.user.displayName}` });
         router.push('/dashboard');
       } else {
@@ -38,6 +41,11 @@ export default function SignInPage() {
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') {
         console.log('Sign-in popup closed by user.');
+        toast({
+          variant: 'destructive',
+          title: 'Sign In Cancelled',
+          description: 'You cancelled the Google Sign-in process.',
+        });
       } else {
         console.error(error);
         let description = 'Could not sign in. Please try again.';

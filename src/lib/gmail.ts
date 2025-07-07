@@ -1,4 +1,3 @@
-
 // src/lib/gmail.ts
 
 /**
@@ -7,7 +6,7 @@
  */
 export const fetchEmails = async (accessToken: string) => {
   const response = await fetch(
-    'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=10&q=in:inbox',
+    'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=15&q=in:inbox',
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -26,7 +25,7 @@ export const fetchEmails = async (accessToken: string) => {
     return []; // Return empty array if no messages
   }
 
-  // Fetch each message's full content (snippet)
+  // Fetch each message's full content
   const messages = await Promise.all(
     data.messages.map(async (msg: { id: string }) => {
       const res = await fetch(
@@ -38,18 +37,24 @@ export const fetchEmails = async (accessToken: string) => {
         }
       );
       const fullMsg = await res.json();
+      
+      const fromHeader = fullMsg.payload?.headers?.find((h: any) => h.name === 'From')?.value || '';
+      const emailMatch = fromHeader.match(/<(.+)>/);
+      const sender = fromHeader.split('<')[0].replace(/"/g, '').trim();
+      const email = emailMatch ? emailMatch[1] : '';
+
       return {
         id: fullMsg.id,
-        snippet: fullMsg.snippet,
+        body: fullMsg.snippet, // Using snippet as body for now
         subject:
           fullMsg.payload?.headers?.find((h: any) => h.name === 'Subject')
             ?.value || 'No Subject',
-        from:
-          fullMsg.payload?.headers?.find((h: any) => h.name === 'From')
-            ?.value || '',
+        sender,
+        email,
         date:
           fullMsg.payload?.headers?.find((h: any) => h.name === 'Date')
             ?.value || '',
+        read: !fullMsg.labelIds.includes('UNREAD'),
       };
     })
   );
