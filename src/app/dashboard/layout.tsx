@@ -166,7 +166,7 @@ function MobileNav({ onChatOpen }: { onChatOpen: () => void }) {
           <Button
             onClick={onChatOpen}
             size="icon"
-            className="w-16 h-16 bg-primary rounded-full hover:bg-primary/90 shadow-lg shadow-primary/30 -translate-y-4"
+            className="w-16 h-16 bg-primary rounded-full hover:bg-primary/90 shadow-lg shadow-primary/30 -translate-y-4 animate-pulse"
           >
             <Bot className="w-8 h-8 text-primary-foreground" />
             <span className="sr-only">Open Pravis Assistant</span>
