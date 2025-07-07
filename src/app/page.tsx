@@ -4,6 +4,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { signInWithGoogle } from '@/lib/firebase/auth';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +24,9 @@ export default function SignInPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isEmailLoading, setIsEmailLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -42,24 +47,39 @@ export default function SignInPage() {
         toast({
           variant: 'destructive',
           title: 'Sign In Failed',
-          description: error.message || 'Could not sign in. Please try again.',
+          description: error.message || 'Could not sign in with Google. Please try again.',
         });
       }
     } finally {
       setIsLoading(false);
     }
   };
+  
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsEmailLoading(true);
+    // This is a placeholder for actual email/password authentication
+    setTimeout(() => {
+      toast({
+        variant: 'destructive',
+        title: 'Feature Not Available',
+        description: 'Email/password login is not yet implemented.',
+      });
+      setIsEmailLoading(false);
+    }, 1000);
+  };
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-background p-4 font-body">
-      <div className="w-full max-w-sm space-y-8 rounded-lg border border-border bg-card p-8 shadow-2xl">
+      <div className="w-full max-w-sm space-y-6 rounded-lg border border-border bg-card p-8 shadow-2xl">
         <div className="text-center space-y-2">
             <h1 className="font-headline text-5xl font-bold tracking-tight text-primary [text-shadow:0_0_8px_hsl(var(--primary)/0.5)]">PRAVIS</h1>
             <p className="text-muted-foreground">Your digital extension</p>
         </div>
         
         <div className="space-y-4 text-center">
-            <p className="text-muted-foreground">Sign in to begin your session.</p>
+             <h2 className="text-2xl font-semibold tracking-tight text-foreground">Welcome Back</h2>
+             <p className="text-muted-foreground">Log in to continue your journey with Pravis.</p>
         </div>
         
         <Button 
@@ -69,11 +89,61 @@ export default function SignInPage() {
             "shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow duration-300"
           )} 
           onClick={handleGoogleSignIn} 
-          disabled={isLoading}
+          disabled={isLoading || isEmailLoading}
         >
             {isLoading ? <Loader2 className="mr-2 animate-spin" /> : <GoogleIcon className="mr-2 h-5 w-5"/>}
             Continue with Google
         </Button>
+
+        <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                    Or log in with email
+                </span>
+            </div>
+        </div>
+
+        <form onSubmit={handleEmailLogin} className="space-y-4">
+            <div className="grid w-full items-center gap-1.5">
+                <Label htmlFor="email" className="text-muted-foreground">Email</Label>
+                <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="dreamer@example.com" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isEmailLoading || isLoading}
+                    required
+                />
+            </div>
+            <div className="grid w-full items-center gap-1.5">
+                <Label htmlFor="password" className="text-muted-foreground">Password</Label>
+                <Input 
+                    id="password" 
+                    type="password"
+                    placeholder="••••••••" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isEmailLoading || isLoading}
+                    required
+                />
+            </div>
+            <Button type="submit" className="w-full h-12 text-base" disabled={isEmailLoading || isLoading}>
+                {isEmailLoading && <Loader2 className="mr-2 animate-spin" />}
+                Log In
+            </Button>
+        </form>
+
+        <p className="px-8 text-center text-sm text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <a href="#" className="underline underline-offset-4 hover:text-primary">
+                Sign Up
+            </a>
+        </p>
+
       </div>
     </div>
   );
