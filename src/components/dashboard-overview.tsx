@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from "react"
@@ -21,6 +20,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const statCards = [
   {
@@ -176,16 +181,24 @@ export function DashboardOverview() {
             <p className="text-sm text-muted-foreground">Common tasks with Pravis</p>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col space-y-2">
+            <TooltipProvider>
+              <div className="flex justify-around items-center pt-2">
                 {quickActions.map(action => (
-                    <Button asChild variant="ghost" className="justify-start" key={action.href}>
-                        <Link href={action.href}>
-                            <action.icon className="mr-2 h-4 w-4" />
-                            {action.label}
-                        </Link>
-                    </Button>
+                    <Tooltip key={action.href}>
+                        <TooltipTrigger asChild>
+                            <Button asChild variant="outline" size="icon" className="h-14 w-14 rounded-2xl">
+                                <Link href={action.href}>
+                                    <action.icon className="h-6 w-6" />
+                                </Link>
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{action.label}</p>
+                        </TooltipContent>
+                    </Tooltip>
                 ))}
-            </div>
+              </div>
+            </TooltipProvider>
           </CardContent>
         </Card>
       </div>
