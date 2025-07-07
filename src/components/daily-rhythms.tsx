@@ -1,4 +1,3 @@
-
 "use client"
 
 import { BrainCircuit, Calendar, Mail, Share2 } from "lucide-react";
@@ -14,24 +13,24 @@ const cubeFaces = [
         className: "cube__face--front",
     },
     {
-        href: "#",
+        href: "/dashboard/calendar",
         icon: Calendar,
         title: "Calendar",
         color: "text-primary",
         className: "cube__face--right",
     },
     {
-        href: "#",
+        href: "/dashboard/social-media",
         icon: Share2,
         title: "Social Media",
-        color: "text-destructive",
+        color: "text-primary",
         className: "cube__face--back",
     },
     {
         href: "/dashboard/clarity-chat",
         icon: BrainCircuit,
         title: "Loud Think",
-        color: "text-destructive",
+        color: "text-primary",
         className: "cube__face--left",
     },
 ];
