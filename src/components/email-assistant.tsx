@@ -46,6 +46,7 @@ import { Label } from './ui/label'
 import { fetchEmails } from '@/lib/gmail'
 import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import type { Email } from '@/types/email'
+import { signInWithGoogle, getStoredAccessToken } from '@/lib/firebase/auth'
 
 
 const navLinks = [
@@ -101,26 +102,47 @@ export function EmailAssistant() {
     setEmails([]);
     setSelectedEmail(null);
 
-    const token = sessionStorage.getItem('gmail_access_token');
-    if (!token) {
-        setFetchError("You are not authenticated with Google. Please sign in again.");
-        setIsFetchingEmails(false);
-        return;
-    }
+    try {
+      let accessToken = getStoredAccessToken();
 
-    const result = await fetchEmails(token);
-    setIsFetchingEmails(false);
-
-    if (result.error) {
-        console.error("Failed to fetch emails:", result.error);
-        const errorMessage = result.error.toLowerCase();
-        if (errorMessage.includes('invalid credentials') || errorMessage.includes('invalid authentication')) {
-            setFetchError('Your session has expired. Please sign out and sign back in to refresh your connection to Gmail.');
-        } else {
-            setFetchError(`Could not fetch emails. Reason: ${result.error}. Please ensure the Gmail API is enabled in your Google Cloud project and try signing in again.`);
+      // If no token, trigger sign-in first
+      if (!accessToken) {
+        const { accessToken: newAccessToken } = await signInWithGoogle();
+        if (!newAccessToken) {
+          throw new Error('Failed to obtain Gmail access token during login.');
         }
-    } else {
+        accessToken = newAccessToken;
+      }
+
+      const result = await fetchEmails(accessToken);
+
+      // If there's an error, it might be an expired token. Try to re-authenticate.
+      if (result.error) {
+        console.warn('Gmail token error, attempting to re-authenticate:', result.error);
+        const { accessToken: refreshedToken } = await signInWithGoogle();
+        if (!refreshedToken) {
+          throw new Error('Unable to re-authenticate with Google.');
+        }
+        
+        // Retry fetching with the new token
+        const retryResult = await fetchEmails(refreshedToken);
+        if (retryResult.error) {
+          // If it still fails, throw the error
+          throw new Error(retryResult.error);
+        }
+        setEmails(retryResult.emails);
+      } else {
         setEmails(result.emails);
+      }
+    } catch (err: any) {
+      console.error('Error in email fetching process:', err);
+      let message = err.message || 'An unknown error occurred.';
+      if (err.code === 'auth/popup-closed-by-user') {
+          message = 'The sign-in popup was closed. Please try again.';
+      }
+      setFetchError(message);
+    } finally {
+      setIsFetchingEmails(false);
     }
   };
 

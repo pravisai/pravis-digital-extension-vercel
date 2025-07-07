@@ -25,6 +25,11 @@ export const signInWithGoogle = async (): Promise<{
     const credential = GoogleAuthProvider.credentialFromResult(result);
     const accessToken = credential?.accessToken ?? null;
 
+    // ✅ Store in sessionStorage for the current session
+    if (accessToken) {
+      sessionStorage.setItem('gmail_access_token', accessToken);
+    }
+
     return { userCredential: result, accessToken };
   } catch (error) {
     console.error('Error signing in with Google:', error);
@@ -35,8 +40,15 @@ export const signInWithGoogle = async (): Promise<{
 export const signOutUser = async (): Promise<void> => {
   try {
     await signOut(auth);
+    sessionStorage.removeItem('gmail_access_token'); // ✅ Clear token on sign-out
   } catch (error) {
     console.error('Error signing out: ', error);
     throw error;
   }
+};
+
+// ✅ Utility function to get stored Gmail access token
+export const getStoredAccessToken = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  return sessionStorage.getItem('gmail_access_token');
 };
