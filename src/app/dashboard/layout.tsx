@@ -23,7 +23,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ClarityChat } from "@/components/clarity-chat"
 
 
-function DesktopNav() {
+function DashboardHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const { toast } = useToast();
@@ -58,8 +58,8 @@ function DesktopNav() {
   ];
 
   return (
-      <header className="sticky top-0 z-30 hidden h-16 items-center justify-between gap-4 border-b bg-background px-4 md:flex md:px-6">
-        <nav className="flex items-center gap-1">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
+        <nav className="hidden items-center gap-1 md:flex">
           {menuItems.map(item => (
             <Button asChild variant={pathname === item.href ? "secondary" : "ghost"} size="sm" key={item.href}>
               <Link href={item.href}>
@@ -68,6 +68,9 @@ function DesktopNav() {
             </Button>
           ))}
         </nav>
+        <div className="md:hidden">
+            <h1 className="text-lg font-bold">Dashboard</h1>
+        </div>
   
         <div className="flex items-center gap-4">
           {user ? (
@@ -111,31 +114,6 @@ function DesktopNav() {
 
 function MobileNav({ onChatOpen }: { onChatOpen: () => void }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { toast } = useToast();
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const handleSignOut = async () => {
-    try {
-      await signOutUser();
-      toast({ title: "Signed Out", description: "You have been successfully signed out." });
-      router.push('/');
-    } catch (error) {
-      console.error(error);
-      toast({
-        variant: 'destructive',
-        title: 'Sign Out Failed',
-        description: 'Could not sign out. Please try again.',
-      });
-    }
-  };
 
   const navItemsLeft = [
     { href: "/dashboard/email-assistant", icon: Mail, label: "Email" },
@@ -146,7 +124,7 @@ function MobileNav({ onChatOpen }: { onChatOpen: () => void }) {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 z-40 w-full h-20 bg-background border-t border-border/50">
-      <div className="grid h-full grid-cols-4 mx-auto font-medium">
+      <div className="grid h-full grid-cols-3 mx-auto font-medium">
         {navItemsLeft.map(item => (
           <Link key={item.href} href={item.href} className="inline-flex flex-col items-center justify-center px-2 text-center hover:bg-accent group">
             <item.icon className={cn("w-6 h-6 mb-1 text-muted-foreground group-hover:text-primary", { "text-primary": pathname.startsWith(item.href) })} />
@@ -171,42 +149,6 @@ function MobileNav({ onChatOpen }: { onChatOpen: () => void }) {
             <span className={cn("text-xs text-muted-foreground group-hover:text-primary", { "text-primary": pathname.startsWith(item.href) })}>{item.label}</span>
           </Link>
         ))}
-        
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="inline-flex flex-col items-center justify-center px-2 hover:bg-accent group">
-              {user ? (
-                 <Avatar className="w-6 h-6 mb-1">
-                    <AvatarImage src={user.photoURL || undefined} alt={user.displayName || "User"} />
-                    <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
-                  </Avatar>
-              ) : (
-                 <User className="w-6 h-6 mb-1 text-muted-foreground group-hover:text-primary" />
-              )}
-              <span className="text-xs text-muted-foreground group-hover:text-primary">Profile</span>
-            </button>
-          </DropdownMenuTrigger>
-          {user && (
-            <DropdownMenuContent className="w-56 mb-2" align="center" side="top" forceMount>
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user.displayName}</p>
-                  <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Sign out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          )}
-        </DropdownMenu>
       </div>
     </div>
   );
@@ -225,7 +167,7 @@ export default function DashboardLayout({
 
   return (
     <div className="flex min-h-screen w-full flex-col">
-      <DesktopNav />
+      <DashboardHeader />
       <main className={cn(
         "flex-1 pb-24 md:pb-0",
         {
