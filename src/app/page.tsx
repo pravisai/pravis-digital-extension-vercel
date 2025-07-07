@@ -36,16 +36,20 @@ export default function SignInPage() {
         throw new Error('Sign in failed');
       }
     } catch (error: any) {
-      console.error(error);
-      let description = 'Could not sign in. Please try again.';
-      if (error.code === 'auth/unauthorized-domain') {
-        description = `This domain (${window.location.host}) is not authorized. Please add it to your Firebase project's authorized domains.`;
+      if (error.code === 'auth/popup-closed-by-user') {
+        console.log('Sign-in popup closed by user.');
+      } else {
+        console.error(error);
+        let description = 'Could not sign in. Please try again.';
+        if (error.code === 'auth/unauthorized-domain') {
+          description = `This domain (${window.location.host}) is not authorized. Please add it to your Firebase project's authorized domains.`;
+        }
+        toast({
+          variant: 'destructive',
+          title: 'Sign In Failed',
+          description: description,
+        });
       }
-      toast({
-        variant: 'destructive',
-        title: 'Sign In Failed',
-        description: description,
-      });
     } finally {
       setIsLoading(false);
     }
