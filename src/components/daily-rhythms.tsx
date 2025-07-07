@@ -10,28 +10,28 @@ const cubeFaces = [
         href: "/dashboard/email-assistant",
         icon: Mail,
         title: "Email Assistant",
-        color: "text-primary",
+        color: "text-cyan-400",
         className: "cube__face--front",
     },
     {
         href: "/dashboard/calendar",
         icon: Calendar,
         title: "Calendar",
-        color: "text-primary",
+        color: "text-cyan-400",
         className: "cube__face--right",
     },
     {
         href: "/dashboard/social-media",
         icon: Share2,
         title: "Social Media",
-        color: "text-primary",
+        color: "text-blue-400",
         className: "cube__face--back",
     },
     {
         href: "/dashboard/clarity-chat",
         icon: BrainCircuit,
         title: "Loud Think",
-        color: "text-primary",
+        color: "text-blue-400",
         className: "cube__face--left",
     },
 ];
@@ -41,50 +41,48 @@ export function DailyRhythms() {
     const [rotation, setRotation] = useState({ x: 20, y: 30 });
     const [isInteracting, setIsInteracting] = useState(false);
     
+    const lastRotation = useRef({x: 20, y: 30});
     const pointerStart = useRef({ x: 0, y: 0 });
     const didMove = useRef(false);
-    const lastRotation = useRef({x: 20, y: 30});
     const animationFrameId = useRef<number>();
 
     const animate = useCallback(() => {
-        setRotation(prev => {
-            const newRotation = {
-                x: 20, // Lock vertical rotation
-                y: (prev.y + 0.1) % 360,
-            }
-            lastRotation.current = newRotation;
-            return newRotation;
-        });
+        if (!isInteracting) {
+            setRotation(prev => {
+                const newRotation = {
+                    x: 20, // Lock vertical rotation
+                    y: (prev.y + 0.1) % 360,
+                };
+                lastRotation.current = newRotation;
+                return newRotation;
+            });
+        }
         animationFrameId.current = requestAnimationFrame(animate);
-    }, []);
+    }, [isInteracting]);
 
     useEffect(() => {
-        if (!isInteracting) {
-            animationFrameId.current = requestAnimationFrame(animate);
-        }
+        animationFrameId.current = requestAnimationFrame(animate);
         return () => {
             if (animationFrameId.current) {
                 cancelAnimationFrame(animationFrameId.current);
             }
         };
-    }, [isInteracting, animate]);
+    }, [animate]);
 
-    const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-        if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
-        e.currentTarget.setPointerCapture(e.pointerId);
-        setIsInteracting(true);
-        
+    const onPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
         didMove.current = false;
+        setIsInteracting(true);
         pointerStart.current = { x: e.clientX, y: e.clientY };
-    };
+        e.currentTarget.setPointerCapture(e.pointerId);
+    }, []);
 
-    const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const onPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
         if (!isInteracting) return;
 
         const dx = e.clientX - pointerStart.current.x;
-        const dy = e.clientY - pointerStart.current.y;
-
-        if (!didMove.current && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+        
+        // Use a threshold to distinguish between a click and a drag
+        if (!didMove.current && Math.abs(dx) > 10) {
             didMove.current = true;
         }
 
@@ -92,31 +90,31 @@ export function DailyRhythms() {
             const newY = lastRotation.current.y + dx;
             setRotation({ x: 20, y: newY });
         }
-    };
+    }, [isInteracting]);
     
-    const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const onPointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
         e.currentTarget.releasePointerCapture(e.pointerId);
         setIsInteracting(false);
 
         if (didMove.current) {
+            // If the user dragged, update the last rotation value
             lastRotation.current = { ...rotation };
         } else {
+            // If the user did not drag (i.e., a click/tap), handle navigation
             const targetElement = e.target as HTMLElement;
-            const faceElement = targetElement.closest('[data-href]');
+            const faceElement = targetElement.closest<HTMLElement>('[data-href]');
             
-            if (faceElement instanceof HTMLElement && faceElement.dataset.href) {
+            if (faceElement?.dataset.href) {
                 router.push(faceElement.dataset.href);
             }
         }
-        
-        didMove.current = false;
-    };
+    }, [router, rotation]);
     
-    const onSceneLeave = (e: React.PointerEvent<HTMLDivElement>) => {
+    const onSceneLeave = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
         if (isInteracting) {
             onPointerUp(e);
         }
-    }
+    }, [isInteracting, onPointerUp]);
     
     return (
         <div className="space-y-8">
