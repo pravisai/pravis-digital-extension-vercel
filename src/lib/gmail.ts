@@ -24,12 +24,30 @@ export const fetchEmails = async (accessToken: string) => {
   if (!data.messages || data.messages.length === 0) {
     return []; // Return empty array if no messages
   }
+  
+  const getBody = (payload: any) => {
+    let body = '';
+    if (payload.body && payload.body.size > 0) {
+      body = payload.body.data;
+    } else if (payload.parts) {
+      // Find the plain text part of the email
+      const part = payload.parts.find(
+        (p: any) => p.mimeType === 'text/plain'
+      );
+      if (part && part.body && part.body.data) {
+        body = part.body.data;
+      }
+    }
+    // Decode from base64, replacing URL-safe characters with standard base64 characters
+    return body ? atob(body.replace(/-/g, '+').replace(/_/g, '/')) : '';
+  };
+
 
   // Fetch each message's full content
   const messages = await Promise.all(
     data.messages.map(async (msg: { id: string }) => {
       const res = await fetch(
-        `https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=Date`,
+        `https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}?format=full`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -45,7 +63,7 @@ export const fetchEmails = async (accessToken: string) => {
 
       return {
         id: fullMsg.id,
-        body: fullMsg.snippet, // Using snippet as body for now
+        body: getBody(fullMsg.payload) || fullMsg.snippet,
         subject:
           fullMsg.payload?.headers?.find((h: any) => h.name === 'Subject')
             ?.value || 'No Subject',
