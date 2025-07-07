@@ -1,4 +1,3 @@
-
 "use client"
 
 import { BrainCircuit, Mail, ListChecks, Bot, User, Settings, LogOut } from "lucide-react"
@@ -60,21 +59,15 @@ function DesktopNav() {
 
   return (
       <header className="sticky top-0 z-30 hidden h-16 items-center justify-between gap-4 border-b bg-background px-4 md:flex md:px-6">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <BrainCircuit className="h-6 w-6 text-primary" />
-            <span className="text-lg font-headline tracking-widest text-primary-foreground">PRAVIS</span>
-          </Link>
-          <nav className="flex items-center gap-1">
-            {menuItems.map(item => (
-              <Button asChild variant={pathname === item.href ? "secondary" : "ghost"} size="sm" key={item.href}>
-                <Link href={item.href}>
-                  {item.label}
-                </Link>
-              </Button>
-            ))}
-          </nav>
-        </div>
+        <nav className="flex items-center gap-1">
+          {menuItems.map(item => (
+            <Button asChild variant={pathname === item.href ? "secondary" : "ghost"} size="sm" key={item.href}>
+              <Link href={item.href}>
+                {item.label}
+              </Link>
+            </Button>
+          ))}
+        </nav>
   
         <div className="flex items-center gap-4">
           {user ? (
@@ -234,17 +227,11 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen w-full flex-col">
       <DesktopNav />
-      <header className="sticky top-0 z-30 flex md:hidden h-16 items-center justify-between gap-4 border-b bg-background px-4">
-        <Link href="/dashboard" className="flex items-center gap-2">
-            <BrainCircuit className="h-6 w-6 text-primary" />
-            <span className="text-lg font-headline tracking-widest text-primary-foreground">PRAVIS</span>
-        </Link>
-      </header>
       <main className={cn(
         "flex-1 pb-24 md:pb-0",
         {
           "p-4 md:p-6": !isEmailPage,
-          "h-[calc(100vh-4rem)]": isFullHeightPage,
+          "md:h-[calc(100vh-4rem)]": isFullHeightPage,
         }
       )}>
         {children}
