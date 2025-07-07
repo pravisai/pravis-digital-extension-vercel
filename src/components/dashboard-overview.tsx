@@ -1,51 +1,12 @@
 
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth"
-import { auth } from "@/lib/firebase/config"
-import {
-  CheckCircle2,
-  Mail,
-  MessageSquare,
-  Timer,
-  ChevronDown,
-} from "lucide-react"
+import React, { useState } from "react"
+import { ChevronDown } from "lucide-react"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
-
-const statCards = [
-  {
-    title: "Tasks Completed",
-    value: "24",
-    change: "+12%",
-    changeColor: "text-green-500",
-    icon: CheckCircle2,
-  },
-  {
-    title: "Emails Processed",
-    value: "156",
-    change: "+8%",
-    changeColor: "text-green-500",
-    icon: Mail,
-  },
-  {
-    title: "AI Conversations",
-    value: "42",
-    change: "+23%",
-    changeColor: "text-green-500",
-    icon: MessageSquare,
-  },
-  {
-    title: "Time Saved",
-    value: "3.2h",
-    change: "+15%",
-    changeColor: "text-green-500",
-    icon: Timer,
-  },
-]
 
 const recentActivity = [
     {
@@ -71,46 +32,10 @@ const recentActivity = [
 ]
 
 export function DashboardOverview() {
-  const [user, setUser] = useState<FirebaseUser | null>(null)
   const [isActivityOpen, setIsActivityOpen] = useState(true);
-
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser)
-    })
-    return () => unsubscribe()
-  }, [])
-
-  const displayName = user?.displayName?.split(" ")[0] || "User"
 
   return (
     <div className="space-y-6">
-      {/* This header was removed to clean up the UI, but can be added back if needed */}
-      {/* 
-      <header>
-        <h1 className="text-3xl font-bold">Welcome back, {displayName}!</h1>
-        <p className="text-muted-foreground">
-          Here's what's happening with your AI assistant today.
-        </p>
-      </header>
-      */}
-
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {statCards.map((card) => (
-          <Card key={card.title}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-              <card.icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{card.value}</div>
-              <p className={`text-xs ${card.changeColor}`}>{card.change}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
       <Card>
           <Collapsible
             open={isActivityOpen}

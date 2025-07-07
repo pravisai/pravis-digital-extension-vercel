@@ -1,7 +1,7 @@
 
 "use client"
 
-import { BrainCircuit, Mail, ListChecks, Bot, User, Settings, LogOut, ArrowLeft } from "lucide-react"
+import { BrainCircuit, Mail, ListChecks, Bot, User, Settings, LogOut, ArrowLeft, LineChart, CheckCircle2, MessageSquare, Timer } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { signOutUser } from "@/lib/firebase/auth"
@@ -19,10 +19,48 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ClarityChat } from "@/components/clarity-chat"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
+
+const statCards = [
+  {
+    title: "Tasks Completed",
+    value: "24",
+    change: "+12%",
+    changeColor: "text-green-500",
+    icon: CheckCircle2,
+  },
+  {
+    title: "Emails Processed",
+    value: "156",
+    change: "+8%",
+    changeColor: "text-green-500",
+    icon: Mail,
+  },
+  {
+    title: "AI Conversations",
+    value: "42",
+    change: "+23%",
+    changeColor: "text-green-500",
+    icon: MessageSquare,
+  },
+  {
+    title: "Time Saved",
+    value: "3.2h",
+    change: "+15%",
+    changeColor: "text-green-500",
+    icon: Timer,
+  },
+]
 
 function DashboardHeader() {
   const pathname = usePathname();
@@ -94,7 +132,35 @@ function DashboardHeader() {
           </div>
         </div>
   
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="icon" className="shrink-0">
+                <LineChart className="h-5 w-5" />
+                <span className="sr-only">View Analytics</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Your Analytics</SheetTitle>
+              </SheetHeader>
+              <div className="grid gap-4 py-4">
+                {statCards.map((card) => (
+                  <Card key={card.title}>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+                      <card.icon className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{card.value}</div>
+                      <p className={`text-xs ${card.changeColor}`}>{card.change}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
+
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
