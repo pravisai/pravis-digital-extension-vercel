@@ -6,7 +6,7 @@
  */
 export const fetchEmails = async (accessToken: string) => {
   const response = await fetch(
-    'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=15&q=in:inbox',
+    'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=15',
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
