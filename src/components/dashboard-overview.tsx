@@ -2,7 +2,6 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import Link from "next/link"
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
 import {
@@ -10,23 +9,12 @@ import {
   Mail,
   MessageSquare,
   Timer,
-  Bot,
-  Sunrise,
-  Sparkles,
-  ArrowUpRight,
   ChevronDown,
 } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 
 const statCards = [
   {
@@ -82,29 +70,6 @@ const recentActivity = [
     }
 ]
 
-const quickActions = [
-    {
-        href: "/dashboard/clarity-chat",
-        label: "Ask Pravis",
-        icon: Bot
-    },
-    {
-        href: "/dashboard/email-assistant",
-        label: "Draft Email",
-        icon: Mail
-    },
-    {
-        href: "#",
-        label: "Daily Intention",
-        icon: Sunrise
-    },
-    {
-        href: "/dashboard/creative-partner",
-        label: "Creative Content",
-        icon: Sparkles
-    }
-]
-
 export function DashboardOverview() {
   const [user, setUser] = useState<FirebaseUser | null>(null)
   const [isActivityOpen, setIsActivityOpen] = useState(true);
@@ -146,53 +111,37 @@ export function DashboardOverview() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-            <Collapsible
-              open={isActivityOpen}
-              onOpenChange={setIsActivityOpen}
-            >
-              <CollapsibleTrigger className="flex w-full cursor-pointer items-center justify-between p-6 text-left">
-                <div className="space-y-1.5">
-                  <h3 className="text-2xl font-semibold leading-none tracking-tight">Recent Activity</h3>
-                  <p className="text-sm text-muted-foreground">Your latest AI-assisted tasks</p>
-                </div>
-                <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-300", isActivityOpen && "rotate-180")} />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent className="pt-0">
-                  <ul className="space-y-6">
-                      {recentActivity.map((activity, index) => (
-                          <li key={index} className="flex items-center gap-4">
-                              <div className="relative">
-                                 <div className={`h-3 w-3 rounded-full ${activity.color}`} />
-                              </div>
-                              <div className="flex-1">
-                                 <p className="font-medium">{activity.text}</p>
-                              </div>
-                              <p className="text-sm text-muted-foreground">{activity.time}</p>
-                          </li>
-                      ))}
-                  </ul>
-                </CardContent>
-              </CollapsibleContent>
-            </Collapsible>
-        </Card>
-
-        <Card>
-           <CardContent className="flex justify-around items-center h-full p-6">
-             {quickActions.map((action) => (
-               <Link
-                 key={action.label}
-                 href={action.href}
-                 className="flex h-16 w-16 items-center justify-center rounded-full border bg-background text-center transition-colors hover:bg-accent hover:text-accent-foreground"
-               >
-                 <action.icon className="h-8 w-8" />
-               </Link>
-             ))}
-           </CardContent>
-        </Card>
-      </div>
+      <Card>
+          <Collapsible
+            open={isActivityOpen}
+            onOpenChange={setIsActivityOpen}
+          >
+            <CollapsibleTrigger className="flex w-full cursor-pointer items-center justify-between p-6 text-left">
+              <div className="space-y-1.5">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">Recent Activity</h3>
+                <p className="text-sm text-muted-foreground">Your latest AI-assisted tasks</p>
+              </div>
+              <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-300", isActivityOpen && "rotate-180")} />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="pt-0">
+                <ul className="space-y-6">
+                    {recentActivity.map((activity, index) => (
+                        <li key={index} className="flex items-center gap-4">
+                            <div className="relative">
+                                <div className={`h-3 w-3 rounded-full ${activity.color}`} />
+                            </div>
+                            <div className="flex-1">
+                                <p className="font-medium">{activity.text}</p>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{activity.time}</p>
+                        </li>
+                    ))}
+                </ul>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+      </Card>
     </div>
   )
 }
