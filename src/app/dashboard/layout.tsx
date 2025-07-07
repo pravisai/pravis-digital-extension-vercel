@@ -1,6 +1,7 @@
+
 "use client"
 
-import { BrainCircuit, Mail, ListChecks, Bot, User, Settings, LogOut } from "lucide-react"
+import { BrainCircuit, Mail, ListChecks, Bot, User, Settings, LogOut, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { signOutUser } from "@/lib/firebase/auth"
@@ -72,17 +73,25 @@ function DashboardHeader() {
 
   return (
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
-        <nav className="hidden items-center gap-1 md:flex">
-          {menuItems.map(item => (
-            <Button asChild variant={pathname === item.href ? "secondary" : "ghost"} size="sm" key={item.href}>
-              <Link href={item.href}>
-                {item.label}
-              </Link>
+        <div className="flex items-center gap-2">
+          {pathname !== '/dashboard' && (
+            <Button variant="ghost" size="icon" onClick={() => router.back()} className="shrink-0">
+              <ArrowLeft className="h-5 w-5" />
+              <span className="sr-only">Back</span>
             </Button>
-          ))}
-        </nav>
-        <div className="md:hidden">
-            <h1 className="text-lg font-semibold">{greeting}, {displayName}</h1>
+          )}
+          <nav className="hidden items-center gap-1 md:flex">
+            {menuItems.map(item => (
+              <Button asChild variant={pathname === item.href ? "secondary" : "ghost"} size="sm" key={item.href}>
+                <Link href={item.href}>
+                  {item.label}
+                </Link>
+              </Button>
+            ))}
+          </nav>
+          <div className="md:hidden">
+              <h1 className="text-lg font-semibold">{greeting}, {displayName}</h1>
+          </div>
         </div>
   
         <div className="flex items-center gap-4">
