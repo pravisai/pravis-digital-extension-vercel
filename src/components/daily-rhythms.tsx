@@ -48,7 +48,7 @@ export function DailyRhythms() {
     const animate = useCallback(() => {
         setRotation(prev => {
             const newRotation = {
-                x: (prev.x + 0.05) % 360,
+                x: 20, // Lock vertical rotation
                 y: (prev.y + 0.1) % 360,
             }
             lastRotation.current = newRotation;
@@ -90,7 +90,7 @@ export function DailyRhythms() {
 
         if(didMove.current) {
             const newY = lastRotation.current.y + dx;
-            setRotation({ x: lastRotation.current.x, y: newY });
+            setRotation({ x: 20, y: newY }); // Only update Y rotation
         }
     };
     
