@@ -54,9 +54,13 @@ export function ClarityChat() {
       const result = await provideClarityThroughChat({ userMessage: input })
       const pravisMessage: Message = { role: "pravis", content: result.pravisResponse }
       setMessages((prev) => [...prev, pravisMessage])
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching response from Pravis:", error)
-      const errorMessage: Message = { role: "pravis", content: "I'm having trouble connecting right now. Please try again later." }
+      let messageContent = "I'm having trouble connecting right now. Please try again later."
+      if (error?.message && /503|overloaded/i.test(error.message)) {
+        messageContent = "The AI is currently experiencing high demand. Please try your request again in a moment."
+      }
+      const errorMessage: Message = { role: "pravis", content: messageContent }
       setMessages((prev) => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
