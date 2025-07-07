@@ -132,11 +132,6 @@ export function DailyRhythms() {
                                     key={face.title}
                                     className={`cube__face ${face.className}`}
                                     style={{ '--i': i } as React.CSSProperties}
-                                    onClick={(e) => {
-                                        if (didMove.current) {
-                                            e.preventDefault();
-                                        }
-                                    }}
                                     draggable={false}
                                 >
                                     <face.icon className={`w-24 h-24 ${face.color}`} strokeWidth={1} />
