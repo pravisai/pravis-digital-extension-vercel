@@ -4,10 +4,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
-import Link from "next/link";
 import { signInWithGoogle } from '@/lib/firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -34,29 +31,18 @@ export default function SignInPage() {
         if (accessToken) {
           sessionStorage.setItem('gmail_access_token', accessToken);
         }
-        toast({ title: "Success!", description: `Signed in as ${userCredential.user.displayName}` });
+        toast({ title: "Success!", description: `Authenticated as ${userCredential.user.displayName}` });
         router.push('/dashboard');
       } else {
         throw new Error('Sign in failed');
       }
     } catch (error: any) {
-      if (error.code === 'auth/popup-closed-by-user') {
-        console.log('Sign-in popup closed by user.');
-        toast({
-          variant: 'destructive',
-          title: 'Sign In Cancelled',
-          description: 'You cancelled the Google Sign-in process.',
-        });
-      } else {
+      if (error.code !== 'auth/popup-closed-by-user') {
         console.error(error);
-        let description = 'Could not sign in. Please try again.';
-        if (error.code === 'auth/unauthorized-domain') {
-          description = `This domain (${window.location.host}) is not authorized. Please add it to your Firebase project's authorized domains.`;
-        }
         toast({
           variant: 'destructive',
           title: 'Sign In Failed',
-          description: description,
+          description: error.message || 'Could not sign in. Please try again.',
         });
       }
     } finally {
@@ -65,27 +51,29 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center bg-background text-foreground p-4 font-body">
-      <div className="w-full max-w-sm space-y-6">
+    <div className="flex min-h-svh flex-col items-center justify-center p-4 font-body animated-background">
+      <div className="w-full max-w-md space-y-8 rounded-2xl p-8 glass-card">
         <div className="text-center space-y-2">
-          <h1 className="font-headline text-5xl font-light tracking-[0.2em] text-primary">
+          <h1 
+            className="font-headline text-6xl font-light tracking-[0.2em] text-primary"
+            style={{ animation: 'text-glow 3s ease-in-out infinite' }}
+          >
             PRAVIS
           </h1>
-          <p className="text-sm font-light text-muted-foreground tracking-wider uppercase">
+          <p className="text-base font-light text-muted-foreground tracking-wider uppercase">
             Your digital extension
           </p>
         </div>
 
-        <div className="space-y-4 text-center">
-            <div className="w-12 h-[2px] bg-primary mx-auto rounded-full"></div>
-            <h2 className="text-3xl font-bold font-headline">Welcome Back</h2>
-            <p className="text-muted-foreground mt-2">Log in to continue your journey with Pravis.</p>
+        <div className="space-y-4 text-center pt-4">
+            <p className="text-muted-foreground">Sign in to begin your session.</p>
         </div>
       
         <Button 
           className={cn(
-            "w-full h-12 text-base font-semibold text-white",
-            "bg-gradient-to-br from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+            "w-full h-12 text-base font-semibold",
+            "bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-primary-foreground",
+            "shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow duration-300"
           )} 
           onClick={handleGoogleSignIn} 
           disabled={isLoading}
@@ -93,40 +81,6 @@ export default function SignInPage() {
             {isLoading ? <Loader2 className="mr-2 animate-spin" /> : <GoogleIcon className="mr-2 h-5 w-5"/>}
             Continue with Google
         </Button>
-
-        <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-border/50" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-                OR LOG IN WITH EMAIL
-            </span>
-            </div>
-        </div>
-
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-            <div className="space-y-2 text-left">
-                <Label htmlFor="email" className="text-sm font-semibold text-muted-foreground">Email</Label>
-                <Input id="email" type="email" placeholder="dreamer@example.com" className="bg-input h-12 border-border/80"/>
-            </div>
-            <div className="space-y-2 text-left">
-                <Label htmlFor="password"  className="text-sm font-semibold text-muted-foreground">Password</Label>
-                <Input id="password" type="password" placeholder="••••••••" className="bg-input h-12 border-border/80"/>
-            </div>
-            <Button asChild className="w-full font-semibold tracking-wider h-12 text-base">
-                <Link href="/dashboard">
-                    Log In
-                </Link>
-            </Button>
-        </form>
-
-        <p className="text-sm text-center text-muted-foreground">
-            Don't have an account?{" "}
-            <Link href="#" className="font-semibold text-primary hover:underline">
-            Sign Up
-            </Link>
-        </p>
       </div>
     </div>
   );

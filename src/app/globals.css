@@ -117,6 +117,24 @@
     .cube__face--right  { transform: rotateY( 90deg) translateZ(125px); }
     .cube__face--back   { transform: rotateY(180deg) translateZ(125px); }
     .cube__face--left   { transform: rotateY(-90deg) translateZ(125px); }
+    
+    .animated-background {
+      background:
+        linear-gradient(rgba(0,0,0,0.95), rgba(0,0,0,0.95)),
+        radial-gradient(ellipse at center, hsl(var(--primary) / 0.1), transparent 70%),
+        linear-gradient(90deg, transparent 49.5%, hsl(var(--primary) / 0.2) 50%, hsl(var(--primary) / 0.2) 50.5%, transparent 51%),
+        linear-gradient(0deg, transparent 49.5%, hsl(var(--primary) / 0.2) 50%, hsl(var(--primary) / 0.2) 50.5%, transparent 51%);
+      background-size: 100% 100%, 200% 200%, 50px 50px, 50px 50px;
+      animation: background-pan 30s linear infinite;
+    }
+
+    .glass-card {
+      background: hsl(var(--card) / 0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid hsl(var(--primary) / 0.2);
+      box-shadow: 0 8px 32px 0 hsl(var(--primary) / 0.1);
+    }
 }
 
 
@@ -133,4 +151,22 @@
 @keyframes scanline {
     0% { top: -100%; }
     100% { top: 100%; }
+}
+
+@keyframes background-pan {
+    0% {
+      background-position: 0% 0%;
+    }
+    100% {
+      background-position: 100% 100%;
+    }
+}
+
+@keyframes text-glow {
+    0%, 100% {
+        text-shadow: 0 0 5px hsl(var(--primary)), 0 0 10px hsl(var(--primary)), 0 0 15px hsl(var(--accent));
+    }
+    50% {
+        text-shadow: 0 0 10px hsl(var(--primary)), 0 0 20px hsl(var(--primary)), 0 0 30px hsl(var(--accent));
+    }
 }
