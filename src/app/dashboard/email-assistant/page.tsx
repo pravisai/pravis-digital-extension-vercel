@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -61,60 +62,73 @@ export default function EmailPage() {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Email Assistant</h1>
 
-      <button
-        onClick={handleLoginAndFetchEmails}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-      >
-        Login with Gmail & Fetch Emails
-      </button>
+      {!accessToken && (
+        <button
+          onClick={handleLoginAndFetchEmails}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          disabled={loading}
+        >
+          {loading ? 'Loading...' : 'Login with Gmail & Fetch Emails'}
+        </button>
+      )}
 
-      {loading && <p className="text-gray-600">Loading...</p>}
+      {loading && emails.length === 0 && <p className="text-gray-600">Loading emails...</p>}
       {error && <p className="text-red-500">{error}</p>}
       {success && <p className="text-green-600">{success}</p>}
 
-      <div>
-        <h2 className="text-xl font-semibold mt-4">Recent Emails</h2>
-        <ul className="mt-4 space-y-4">
-          {emails.map((email, index) => (
-            <li key={index} className="p-4 border rounded shadow">
-              <p><strong>Subject:</strong> {email.subject}</p>
-              <p><strong>From:</strong> {email.from}</p>
-              <p><strong>Date:</strong> {email.date}</p>
-              <p><strong>Snippet:</strong> {email.snippet}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {accessToken && !loading && emails.length === 0 && (
+         <p className="text-gray-500 mt-4">No recent emails found in your inbox.</p>
+      )}
 
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold">Send a New Email</h2>
-        <input
-          type="email"
-          placeholder="To"
-          value={to}
-          onChange={(e) => setTo(e.target.value)}
-          className="block w-full p-2 mt-2 border rounded"
-        />
-        <input
-          type="text"
-          placeholder="Subject"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          className="block w-full p-2 mt-2 border rounded"
-        />
-        <textarea
-          placeholder="Body"
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          className="block w-full p-2 mt-2 border rounded h-32"
-        />
-        <button
-          onClick={handleSendEmail}
-          className="mt-3 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-        >
-          Send Email
-        </button>
-      </div>
+      {emails.length > 0 && (
+        <div>
+          <h2 className="text-xl font-semibold mt-4">Recent Emails</h2>
+          <ul className="mt-4 space-y-4">
+            {emails.map((email) => (
+              <li key={email.id} className="p-4 border rounded shadow">
+                <p><strong>Subject:</strong> {email.subject}</p>
+                <p><strong>From:</strong> {email.from}</p>
+                <p><strong>Date:</strong> {email.date}</p>
+                <p><strong>Snippet:</strong> {email.snippet}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+
+      {accessToken && (
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold">Send a New Email</h2>
+          <input
+            type="email"
+            placeholder="To"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            className="block w-full p-2 mt-2 border rounded"
+          />
+          <input
+            type="text"
+            placeholder="Subject"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            className="block w-full p-2 mt-2 border rounded"
+          />
+          <textarea
+            placeholder="Body"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            className="block w-full p-2 mt-2 border rounded h-32"
+          />
+          <button
+            onClick={handleSendEmail}
+            disabled={loading}
+            className="mt-3 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
+            {loading ? 'Sending...' : 'Send Email'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
