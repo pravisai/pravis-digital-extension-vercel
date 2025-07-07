@@ -1,9 +1,10 @@
-import { CreativePartner } from "@/components/creative-partner";
 
-export default function CreativePartnerPage() {
+import { ProductivitySuite } from "@/components/creative-partner";
+
+export default function ProductivitySuitePage() {
     return (
-        <div className="flex justify-center">
-            <CreativePartner />
+        <div className="w-full">
+            <ProductivitySuite />
         </div>
     )
 }
