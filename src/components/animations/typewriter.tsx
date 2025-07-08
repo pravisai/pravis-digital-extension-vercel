@@ -10,7 +10,7 @@ interface TypewriterProps {
   speed?: number;
 }
 
-export function Typewriter({ text, className, delay = 0, speed = 0.04 }: TypewriterProps) {
+export function Typewriter({ text, className, delay = 0, speed = 0.06 }: TypewriterProps) {
   const letters = Array.from(text);
 
   const container = {

@@ -23,7 +23,7 @@ export function FadeIn({ children, delay = 0, className, stagger = false }: Fade
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-10%" }}
-        transition={{ staggerChildren: 0.1, delayChildren: delay }}
+        transition={{ staggerChildren: 0.2, delayChildren: delay }}
       >
         {children}
       </motion.div>
@@ -37,7 +37,7 @@ export function FadeIn({ children, delay = 0, className, stagger = false }: Fade
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-10%" }}
-      transition={{ duration: 0.5, delay }}
+      transition={{ duration: 0.8, delay }}
     >
       {children}
     </motion.div>
@@ -47,7 +47,7 @@ export function FadeIn({ children, delay = 0, className, stagger = false }: Fade
 export const StaggeredListItem = ({ children, className }: { children: React.ReactNode, className?: string }) => {
     const variants = {
       hidden: { opacity: 0, y: 20 },
-      visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+      visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
     }
     return <motion.div className={className} variants={variants}>{children}</motion.div>
 }
