@@ -15,13 +15,13 @@
     --popover-foreground: 210 40% 98%;
 
     --primary: 262 82% 50%;
-    --primary-foreground: 0 0% 98%;
+    --primary-foreground: 271 91% 10%;
 
     --secondary: 263 70% 25%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 215 28% 17%;
-    --muted-foreground: 215 20% 75%;
+    --muted-foreground: 215 20% 65%;
 
     --accent: 263 70% 25%;
     --accent-foreground: 210 40% 98%;
@@ -57,7 +57,7 @@
     --secondary-foreground: 210 40% 98%;
 
     --muted: 215 28% 17%;
-    --muted-foreground: 215 20% 75%;
+    --muted-foreground: 215 20% 65%;
 
     --accent: 263 70% 25%;
     --accent-foreground: 210 40% 98%;
@@ -82,7 +82,7 @@
     --secondary: 240 5% 90%;
     --secondary-foreground: 240 6% 10%;
     --muted: 240 5% 90%;
-    --muted-foreground: 240 5% 30%;
+    --muted-foreground: 240 4% 46%;
     --accent: 240 5% 90%;
     --accent-foreground: 240 6% 10%;
     --destructive: 0 84% 60%;
@@ -146,7 +146,7 @@
     margin-top: 2rem;
     background: radial-gradient(
       circle at 50% 50%,
-      rgba(255, 255, 255, 0.1),
+      rgba(157, 0, 255, 0.1),
       transparent 70%
     );
     background-size: 150% 150%;
@@ -177,7 +177,7 @@
     position: absolute;
     width: 250px;
     height: 250px;
-    background: rgba(255, 255, 255, 0.05);
+    background: linear-gradient(135deg, rgba(46, 46, 46, 0.6), rgba(26, 26, 26, 0.6));
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -195,9 +195,17 @@
   }
 
   .cube-face:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, rgba(46, 46, 46, 0.7), rgba(26, 26, 26, 0.7));
     border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 20px 5px var(--glow-color, rgba(255, 255, 255, 0.1));
   }
+  
+  .front:hover { transform: rotateY(0deg) translateZ(135px); --glow-color: #9D00FF4D; }
+  .right:hover { transform: rotateY(90deg) translateZ(135px); --glow-color: #00FFFF4D;}
+  .back:hover { transform: rotateY(180deg) translateZ(135px); --glow-color: #FF007F4D;}
+  .left:hover { transform: rotateY(-90deg) translateZ(135px); --glow-color: #39FF144D;}
+  .top:hover { transform: rotateX(90deg) translateZ(135px); --glow-color: #9D00FF4D;}
+  .bottom:hover { transform: rotateX(-90deg) translateZ(135px); --glow-color: #00FFFF4D;}
 
   .front { transform: rotateY(0deg) translateZ(125px); }
   .right { transform: rotateY(90deg) translateZ(125px); }
@@ -205,14 +213,6 @@
   .left { transform: rotateY(-90deg) translateZ(125px); }
   .top { transform: rotateX(90deg) translateZ(125px); }
   .bottom { transform: rotateX(-90deg) translateZ(125px); }
-  
-  .front:hover { transform: rotateY(0deg) translateZ(135px); }
-  .right:hover { transform: rotateY(90deg) translateZ(135px); }
-  .back:hover { transform: rotateY(180deg) translateZ(135px); }
-  .left:hover { transform: rotateY(-90deg) translateZ(135px); }
-  .top:hover { transform: rotateX(90deg) translateZ(135px); }
-  .bottom:hover { transform: rotateX(-90deg) translateZ(135px); }
-
 
   .module-icon {
     width: 60px;
@@ -222,8 +222,17 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 1rem;
-    color: #ffffff;
+    transition: filter 0.3s ease;
   }
+  
+  .cube-face:hover .module-icon {
+    filter: drop-shadow(0 0 8px var(--glow-color, #fff));
+  }
+
+  .module-icon.neon-purple { color: #9D00FF; --glow-color: #9D00FF; }
+  .module-icon.electric-blue { color: #00FFFF; --glow-color: #00FFFF; }
+  .module-icon.bright-pink { color: #FF007F; --glow-color: #FF007F; }
+  .module-icon.acid-green { color: #39FF14; --glow-color: #39FF14; }
   
   .cube-face h3 {
     color: #ffffff;

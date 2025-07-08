@@ -12,42 +12,48 @@ const modules = [
       icon: BrainCircuit,
       label: "Loud Think",
       description: "AI-powered brainstorming and productivity suite.",
-      face: "front"
+      face: "front",
+      colorClass: "neon-purple"
     },
     {
       href: "/dashboard/calendar",
       icon: Calendar,
       label: "Calendar",
       description: "Manage your schedule and events seamlessly.",
-      face: "right"
+      face: "right",
+      colorClass: "electric-blue"
     },
     {
       href: "/dashboard/social-media",
       icon: Share2,
       label: "Socials",
       description: "Connect and manage your social media presence.",
-      face: "back"
+      face: "back",
+      colorClass: "bright-pink"
     },
     {
       href: "/dashboard/email-assistant",
       icon: Mail,
       label: "Email Assistant",
       description: "Draft replies and manage your inbox with AI.",
-      face: "left"
+      face: "left",
+      colorClass: "acid-green"
     },
     {
       href: "/dashboard",
       icon: Cpu,
       label: "Pravis Core",
       description: "System Hub",
-      face: "top"
+      face: "top",
+      colorClass: "neon-purple"
     },
     {
       href: "/dashboard",
       icon: Settings,
       label: "Settings",
       description: "Configure your experience",
-      face: "bottom"
+      face: "bottom",
+      colorClass: "electric-blue"
     },
 ];
 
@@ -209,7 +215,7 @@ export function Modules() {
                                 className={cn("cube-face", item.face)}
                                 onClick={() => handleFaceClick(item.href)}
                             >
-                                <div className="module-icon">
+                                <div className={cn("module-icon", item.colorClass)}>
                                     <item.icon className={cn("w-7 h-7")} />
                                 </div>
                                 <div>
