@@ -47,6 +47,8 @@ import { fetchEmails } from '@/lib/gmail'
 import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import type { Email } from '@/types/email'
 import { signInWithGoogle, getStoredAccessToken } from '@/lib/firebase/auth'
+import { Typewriter } from './animations/typewriter'
+import { FadeIn, StaggeredListItem } from './animations/fade-in'
 
 
 const navLinks = [
@@ -270,13 +272,13 @@ export function EmailAssistant() {
             selectedEmail && "hidden md:flex"
           )}>
             <div className="p-4 border-b border-border/50 flex items-center justify-between">
-              <h2 className="text-xl font-bold">
-                Inbox
-              </h2>
-              <Button onClick={handleFetchEmails} disabled={isFetchingEmails} variant="outline" size="sm">
-                {isFetchingEmails ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4"/>}
-                Fetch Inbox
-              </Button>
+              <Typewriter text="Inbox" className="text-xl font-bold tracking-tight" />
+              <FadeIn delay={0.5}>
+                <Button onClick={handleFetchEmails} disabled={isFetchingEmails} variant="outline" size="sm">
+                  {isFetchingEmails ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4"/>}
+                  Fetch Inbox
+                </Button>
+              </FadeIn>
             </div>
             <ScrollArea className="flex-1">
               <div className="flex flex-col">
@@ -366,96 +368,106 @@ export function EmailAssistant() {
                   </div>
                 </div>
                 <ScrollArea className="flex-1 p-6">
-                  <h1 className="text-2xl font-bold mb-6">{selectedEmail.subject}</h1>
-                  <p className="text-base whitespace-pre-wrap leading-7">
-                    {selectedEmail.body}
-                  </p>
+                  <Typewriter text={selectedEmail.subject} className="text-2xl font-bold mb-6 tracking-tight" />
+                  <FadeIn delay={0.5}>
+                    <p className="text-base whitespace-pre-wrap leading-7">
+                      {selectedEmail.body}
+                    </p>
+                  </FadeIn>
                 </ScrollArea>
                  <div className="p-6 border-t border-border/50 bg-background space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline"><Reply className="mr-2 h-4 w-4" /> Reply</Button>
-                    <Button variant="outline"><ReplyAll className="mr-2 h-4 w-4" /> Reply All</Button>
-                    <Button variant="outline"><Forward className="mr-2 h-4 w-4" /> Forward</Button>
-                  </div>
-                  <Card className="border-primary/20 bg-primary/5">
-                    <CardHeader>
-                      <CardTitle className="text-base font-semibold">Draft a reply with Pravis</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onDraftReply)} className="space-y-4">
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <FormField
-                              control={form.control}
-                              name="tone"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Tone of Reply</FormLabel>
-                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FadeIn stagger className="flex items-center gap-2">
+                    <StaggeredListItem>
+                      <Button variant="outline"><Reply className="mr-2 h-4 w-4" /> Reply</Button>
+                    </StaggeredListItem>
+                    <StaggeredListItem>
+                      <Button variant="outline"><ReplyAll className="mr-2 h-4 w-4" /> Reply All</Button>
+                    </StaggeredListItem>
+                    <StaggeredListItem>
+                      <Button variant="outline"><Forward className="mr-2 h-4 w-4" /> Forward</Button>
+                    </StaggeredListItem>
+                  </FadeIn>
+                  <FadeIn delay={0.4}>
+                    <Card className="border-primary/20 bg-primary/5">
+                      <CardHeader>
+                        <CardTitle className="text-base font-semibold">Draft a reply with Pravis</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <Form {...form}>
+                          <form onSubmit={form.handleSubmit(onDraftReply)} className="space-y-4">
+                            <div className="grid md:grid-cols-2 gap-4">
+                              <FormField
+                                control={form.control}
+                                name="tone"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Tone of Reply</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select a tone" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="Friendly">Friendly</SelectItem>
+                                        <SelectItem value="Formal">Formal</SelectItem>
+                                        <SelectItem value="Casual">Casual</SelectItem>
+                                        <SelectItem value="Professional">Professional</SelectItem>
+                                        <SelectItem value="Direct">Direct</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name="parameters"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Specific Instructions</FormLabel>
                                     <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select a tone" />
-                                      </SelectTrigger>
+                                      <Textarea placeholder="e.g., Acknowledge receipt and say you'll reply in full tomorrow." {...field} />
                                     </FormControl>
-                                    <SelectContent>
-                                      <SelectItem value="Friendly">Friendly</SelectItem>
-                                      <SelectItem value="Formal">Formal</SelectItem>
-                                      <SelectItem value="Casual">Casual</SelectItem>
-                                      <SelectItem value="Professional">Professional</SelectItem>
-                                      <SelectItem value="Direct">Direct</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name="parameters"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Specific Instructions</FormLabel>
-                                  <FormControl>
-                                    <Textarea placeholder="e.g., Acknowledge receipt and say you'll reply in full tomorrow." {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            <Button type="submit" disabled={isDrafting} className="w-full">
+                              {isDrafting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PenSquare className="mr-2 h-4 w-4" />}
+                              Draft Reply
+                            </Button>
+                          </form>
+                        </Form>
+                        {(isDrafting || draftedReply) && (
+                          <div className="space-y-2 pt-4">
+                            <Label>Generated Reply</Label>
+                            {isDrafting && !draftedReply ? (
+                              <div className="space-y-2 rounded-md border border-input p-4">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-3/4" />
+                              </div>
+                            ) : (
+                              <Textarea
+                                value={draftedReply}
+                                readOnly
+                                rows={5}
+                                className="bg-background"
+                              />
+                            )}
+                            {draftedReply && !isDrafting && (
+                              <div className="flex justify-end gap-2 pt-2">
+                                <Button variant="ghost" onClick={() => setDraftedReply('')}>Discard</Button>
+                                <Button><Send className="mr-2 h-4 w-4" /> Send</Button>
+                              </div>
+                            )}
                           </div>
-                          <Button type="submit" disabled={isDrafting} className="w-full">
-                            {isDrafting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PenSquare className="mr-2 h-4 w-4" />}
-                            Draft Reply
-                          </Button>
-                        </form>
-                      </Form>
-                      {(isDrafting || draftedReply) && (
-                        <div className="space-y-2 pt-4">
-                          <Label>Generated Reply</Label>
-                          {isDrafting && !draftedReply ? (
-                            <div className="space-y-2 rounded-md border border-input p-4">
-                              <Skeleton className="h-4 w-full" />
-                              <Skeleton className="h-4 w-full" />
-                              <Skeleton className="h-4 w-3/4" />
-                            </div>
-                          ) : (
-                            <Textarea
-                              value={draftedReply}
-                              readOnly
-                              rows={5}
-                              className="bg-background"
-                            />
-                          )}
-                          {draftedReply && !isDrafting && (
-                            <div className="flex justify-end gap-2 pt-2">
-                              <Button variant="ghost" onClick={() => setDraftedReply('')}>Discard</Button>
-                              <Button><Send className="mr-2 h-4 w-4" /> Send</Button>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </FadeIn>
                 </div>
             </div>
           )}
