@@ -1,7 +1,7 @@
 
 "use client"
 
-import { BrainCircuit, Mail, ListChecks, Bot, User, Settings, LogOut, ArrowLeft, LineChart, CheckCircle2, MessageSquare, Timer } from "lucide-react"
+import { BrainCircuit, Mail, ListChecks, Bot, User, Settings, LogOut, ArrowLeft, LineChart, CheckCircle2, MessageSquare, Timer, Sun, Moon } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { signOutUser } from "@/lib/firebase/auth"
@@ -92,7 +92,6 @@ function DashboardHeader() {
   };
 
   const menuItems = [
-    { href: "/dashboard", label: "Dashboard" },
     { href: "/dashboard/email-assistant", label: "Email Assistant" },
     { href: "/dashboard/creative-partner", label: "Productivity Suite" },
   ];
@@ -106,10 +105,10 @@ function DashboardHeader() {
               <span className="sr-only">Back</span>
             </Button>
           )}
-           <Link href="/dashboard" className="font-bold text-lg hidden md:block animate-glitch-hover">PRAVIS</Link>
+           <Link href="/dashboard" className="font-bold text-lg hidden md:block">Dashboard</Link>
           <nav className="hidden items-center gap-1 md:flex">
             {menuItems.map(item => (
-              <Button asChild variant={pathname === item.href ? "secondary" : "ghost"} size="sm" key={item.href}>
+              <Button asChild variant={pathname.startsWith(item.href) ? "secondary" : "ghost"} size="sm" key={item.href}>
                 <Link href={item.href}>
                   {item.label}
                 </Link>
