@@ -12,8 +12,7 @@ const modules = [
       icon: BrainCircuit,
       label: "Loud Think",
       description: "AI-powered brainstorming and productivity suite.",
-      bgClass: "bg-purple-600/10",
-      iconClass: "text-purple-400",
+      colorClass: "icon-neon-purple",
       face: "front"
     },
     {
@@ -21,8 +20,7 @@ const modules = [
       icon: Calendar,
       label: "Calendar",
       description: "Manage your schedule and events seamlessly.",
-      bgClass: "bg-sky-600/10",
-      iconClass: "text-sky-400",
+      colorClass: "icon-electric-blue",
       face: "right"
     },
     {
@@ -30,8 +28,7 @@ const modules = [
       icon: Share2,
       label: "Socials",
       description: "Connect and manage your social media presence.",
-      bgClass: "bg-rose-600/10",
-      iconClass: "text-rose-400",
+      colorClass: "icon-bright-pink",
       face: "back"
     },
     {
@@ -39,8 +36,7 @@ const modules = [
       icon: Mail,
       label: "Email Assistant",
       description: "Draft replies and manage your inbox with AI.",
-      bgClass: "bg-emerald-600/10",
-      iconClass: "text-emerald-400",
+      colorClass: "icon-acid-green",
       face: "left"
     },
     {
@@ -48,8 +44,7 @@ const modules = [
       icon: Cpu,
       label: "Pravis Core",
       description: "System Hub",
-      bgClass: "bg-gray-600/10",
-      iconClass: "text-gray-400",
+      colorClass: "icon-electric-blue",
       face: "top"
     },
     {
@@ -57,8 +52,7 @@ const modules = [
       icon: Settings,
       label: "Settings",
       description: "Configure your experience",
-      bgClass: "bg-gray-600/10",
-      iconClass: "text-gray-400",
+      colorClass: "icon-electric-blue",
       face: "bottom"
     },
 ];
@@ -84,8 +78,8 @@ export function Modules() {
         stopAutoRotation();
         autoRotateIntervalRef.current = setInterval(() => {
             if (!isDraggingRef.current) {
-                currentRotationRef.current.y += 0.5;
-                currentRotationRef.current.x += 0.1;
+                currentRotationRef.current.y += 0.375;
+                currentRotationRef.current.x += 0.125;
                 if (cubeRef.current) {
                     const { x, y } = currentRotationRef.current;
                     cubeRef.current.style.transition = 'none';
@@ -204,8 +198,8 @@ export function Modules() {
                                 className={cn("cube-face", item.face)}
                                 onClick={() => handleFaceClick(item.href)}
                             >
-                                <div className={cn("module-icon", item.bgClass)}>
-                                    <item.icon className={cn("w-7 h-7", item.iconClass)} />
+                                <div className="module-icon">
+                                    <item.icon className={cn("w-7 h-7", item.colorClass)} />
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-lg mb-1">{item.label}</h3>

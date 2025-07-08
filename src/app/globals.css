@@ -33,8 +33,6 @@
     --input: 263 70% 25%;
     --ring: 271 91% 70%;
 
-    --radius: 0.75rem;
-
     --chart-1: 271 91% 70%;
     --chart-2: 263 70% 55%;
     --chart-3: 210 40% 98%;
@@ -106,7 +104,7 @@
 }
 
 @layer utilities {
-  .animate-glitch-hover {
+  .animate-glitch-hover:hover {
     animation: glitch 0.3s linear 2;
   }
   
@@ -172,8 +170,8 @@
     position: absolute;
     width: 250px;
     height: 250px;
-    background: hsl(var(--card));
-    border: 1px solid hsl(var(--border));
+    background: linear-gradient(135deg, #1a1a1a, #2e2e2e);
+    border: 1px solid #444;
     border-radius: var(--radius);
     display: flex;
     flex-direction: column;
@@ -188,7 +186,8 @@
   }
 
   .cube-face:hover {
-    border-color: hsl(var(--primary));
+    border-color: #00FFFF;
+    box-shadow: 0 0 15px #00ffff50, 0 0 5px #00ffff inset;
   }
 
   .front { transform: rotateY(0deg) translateZ(125px); }
@@ -215,16 +214,34 @@
     justify-content: center;
     margin-bottom: 1rem;
   }
+  
+  .icon-electric-blue {
+    color: #00FFFF;
+    filter: drop-shadow(0 0 5px #00FFFF);
+  }
+  .icon-neon-purple {
+    color: #9D00FF;
+    filter: drop-shadow(0 0 5px #9D00FF);
+  }
+  .icon-bright-pink {
+    color: #FF007F;
+    filter: drop-shadow(0 0 5px #FF007F);
+  }
+  .icon-acid-green {
+    color: #39FF14;
+    filter: drop-shadow(0 0 5px #39FF14);
+  }
+
 
   .cube-face h3 {
-    color: hsl(var(--card-foreground));
+    color: #EAEAEA;
     font-size: 1.25rem;
     font-weight: 600;
     margin: 0 0 0.5rem 0;
   }
 
   .cube-face p {
-    color: hsl(var(--muted-foreground));
+    color: #888;
     font-size: 0.875rem;
     margin: 0;
     line-height: 1.4;
