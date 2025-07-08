@@ -84,8 +84,8 @@ export function Modules() {
         stopAutoRotation();
         autoRotateIntervalRef.current = setInterval(() => {
             if (!isDraggingRef.current) {
-                currentRotationRef.current.y += 0.4;
-                currentRotationRef.current.x += 0.08;
+                currentRotationRef.current.y += 0.5;
+                currentRotationRef.current.x += 0.1;
                 if (cubeRef.current) {
                     const { x, y } = currentRotationRef.current;
                     cubeRef.current.style.transition = 'none';
