@@ -68,26 +68,55 @@ export function Modules() {
     const cubeRef = useRef<HTMLDivElement>(null);
     const isDraggingRef = useRef(false);
     const startCoordsRef = useRef({ x: 0, y: 0 });
-    const currentRotationRef = useRef({ x: -20, y: 30 }); // Initial rotation
-    const lastRotationRef = useRef({ x: -20, y: 30 });
+    const currentRotationRef = useRef({ x: -20, y: 30 });
+    const rotationAtDragStart = useRef({ x: 0, y: 0 });
     const didDragRef = useRef(false);
+    const autoRotateIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    useEffect(() => {
-      if (cubeRef.current) {
-        const { x, y } = currentRotationRef.current;
-        cubeRef.current.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
-      }
+    const stopAutoRotation = useCallback(() => {
+        if (autoRotateIntervalRef.current) {
+            clearInterval(autoRotateIntervalRef.current);
+            autoRotateIntervalRef.current = null;
+        }
     }, []);
 
+    const startAutoRotation = useCallback(() => {
+        stopAutoRotation();
+        autoRotateIntervalRef.current = setInterval(() => {
+            if (!isDraggingRef.current) {
+                currentRotationRef.current.y += 0.1;
+                currentRotationRef.current.x += 0.02;
+                if (cubeRef.current) {
+                    const { x, y } = currentRotationRef.current;
+                    cubeRef.current.style.transition = 'none';
+                    cubeRef.current.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
+                }
+            }
+        }, 30);
+    }, [stopAutoRotation]);
+
+    useEffect(() => {
+        if (cubeRef.current) {
+            const { x, y } = currentRotationRef.current;
+            cubeRef.current.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
+        }
+        startAutoRotation();
+        return () => stopAutoRotation();
+    }, [startAutoRotation, stopAutoRotation]);
+
     const handleDragStart = useCallback((clientX: number, clientY: number) => {
+        stopAutoRotation();
         isDraggingRef.current = true;
-        startCoordsRef.current = { x: clientX, y: clientY };
         didDragRef.current = false;
+        
+        rotationAtDragStart.current = { ...currentRotationRef.current };
+        startCoordsRef.current = { x: clientX, y: clientY };
+
         if (cubeRef.current) {
             cubeRef.current.style.transition = 'none';
             cubeRef.current.style.cursor = 'grabbing';
         }
-    }, []);
+    }, [stopAutoRotation]);
 
     const handleDragMove = useCallback((clientX: number, clientY: number) => {
         if (!isDraggingRef.current || !cubeRef.current) return;
@@ -95,33 +124,30 @@ export function Modules() {
         const deltaX = clientX - startCoordsRef.current.x;
         const deltaY = clientY - startCoordsRef.current.y;
 
-        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+        if (!didDragRef.current && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
             didDragRef.current = true;
         }
 
         const rotationSpeed = 0.5;
-        const rotationX = currentRotationRef.current.x - (deltaY * rotationSpeed); 
-        const rotationY = currentRotationRef.current.y + (deltaX * rotationSpeed);
+        const rotationX = rotationAtDragStart.current.x - (deltaY * rotationSpeed);
+        const rotationY = rotationAtDragStart.current.y + (deltaX * rotationSpeed);
         
-        lastRotationRef.current = { x: rotationX, y: rotationY };
+        currentRotationRef.current = { x: rotationX, y: rotationY };
         cubeRef.current.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
     }, []);
 
     const handleDragEnd = useCallback(() => {
-        if (!isDraggingRef.current || !cubeRef.current) return;
+        if (!isDraggingRef.current) return;
         isDraggingRef.current = false;
 
         if (cubeRef.current) {
             cubeRef.current.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
             cubeRef.current.style.cursor = 'grab';
-
-            const snapRotationX = Math.round(lastRotationRef.current.x / 90) * 90;
-            const snapRotationY = Math.round(lastRotationRef.current.y / 90) * 90;
-
-            currentRotationRef.current = { x: snapRotationX, y: snapRotationY };
-            cubeRef.current.style.transform = `rotateX(${snapRotationX}deg) rotateY(${snapRotationY}deg)`;
         }
-    }, []);
+        
+        setTimeout(startAutoRotation, 3000);
+    }, [startAutoRotation]);
+
 
     const handleFaceClick = (href: string) => {
         if (didDragRef.current || href === '#') return;
@@ -138,8 +164,10 @@ export function Modules() {
 
         const onTouchStart = (e: TouchEvent) => handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
         const onTouchMove = (e: TouchEvent) => {
-            if (isDraggingRef.current) e.preventDefault();
-            handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
+            if (isDraggingRef.current) {
+                e.preventDefault();
+                handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
+            }
         };
         const onTouchEnd = () => handleDragEnd();
 
@@ -148,7 +176,7 @@ export function Modules() {
         window.addEventListener('mouseup', onMouseUp);
 
         cubeEl.addEventListener('touchstart', onTouchStart, { passive: true });
-        cubeEl.addEventListener('touchmove', onTouchMove, { passive: false });
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
         window.addEventListener('touchend', onTouchEnd);
         
         cubeEl.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -159,7 +187,7 @@ export function Modules() {
             window.removeEventListener('mouseup', onMouseUp);
 
             cubeEl.removeEventListener('touchstart', onTouchStart);
-            cubeEl.removeEventListener('touchmove', onTouchMove);
+            window.removeEventListener('touchmove', onTouchMove);
             window.removeEventListener('touchend', onTouchEnd);
         };
     }, [handleDragStart, handleDragMove, handleDragEnd]);
