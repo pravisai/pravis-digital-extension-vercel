@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BrainCircuit, Calendar, Share2, Mail } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 import { cn } from "@/lib/utils";
+import { FadeIn, StaggeredListItem } from "@/components/animations/fade-in";
 
 const modules = [
     {
@@ -46,23 +47,25 @@ export function Modules() {
     return (
         <section>
             <h2 className="text-2xl font-bold mb-4 tracking-tight">Modules</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FadeIn stagger className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {modules.map((item) => (
-                    <Link href={item.href} key={item.label} className="group">
-                        <Card className="h-full hover:border-primary/50 transition-colors">
-                            <CardContent className="p-6 flex flex-col items-start gap-4">
-                               <div className={cn("p-3 rounded-lg", item.bgClass)}>
-                                    <item.icon className={cn("w-7 h-7", item.iconClass)} />
-                               </div>
-                               <div>
-                                   <h3 className="font-bold text-lg mb-1">{item.label}</h3>
-                                   <p className="text-muted-foreground text-sm">{item.description}</p>
-                               </div>
-                            </CardContent>
-                        </Card>
-                    </Link>
+                    <StaggeredListItem key={item.label}>
+                      <Link href={item.href} className="group">
+                          <Card className="h-full hover:border-primary/50 transition-colors">
+                              <CardContent className="p-6 flex flex-col items-start gap-4">
+                                <div className={cn("p-3 rounded-lg", item.bgClass)}>
+                                      <item.icon className={cn("w-7 h-7", item.iconClass)} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-lg mb-1">{item.label}</h3>
+                                    <p className="text-muted-foreground text-sm">{item.description}</p>
+                                </div>
+                              </CardContent>
+                          </Card>
+                      </Link>
+                    </StaggeredListItem>
                 ))}
-            </div>
+            </FadeIn>
         </section>
     )
 }

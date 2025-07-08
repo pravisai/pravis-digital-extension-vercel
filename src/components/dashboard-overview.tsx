@@ -4,6 +4,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Mail, Phone, Video } from "lucide-react";
+import { FadeIn, StaggeredListItem } from "./animations/fade-in";
 
 const activities = [
     {
@@ -43,21 +44,23 @@ export function ActivityFeed() {
             <CardTitle>Activity</CardTitle>
         </CardHeader>
         <CardContent>
-            <div className="space-y-4">
+            <FadeIn stagger className="space-y-4">
                 {activities.map((item, index) => (
-                   <div key={index} className="flex items-start gap-4">
-                        <Avatar>
-                            <div className={`w-full h-full rounded-full flex items-center justify-center ${item.accent}`}>
-                               <item.icon className="w-5 h-5 text-white" />
-                            </div>
-                        </Avatar>
-                        <div>
-                            <p className="font-medium">{item.title}</p>
-                            <p className="text-sm text-muted-foreground">{item.subtitle}</p>
-                        </div>
-                   </div>
+                  <StaggeredListItem key={index}>
+                    <div className="flex items-start gap-4">
+                          <Avatar>
+                              <div className={`w-full h-full rounded-full flex items-center justify-center ${item.accent}`}>
+                                <item.icon className="w-5 h-5 text-white" />
+                              </div>
+                          </Avatar>
+                          <div>
+                              <p className="font-medium">{item.title}</p>
+                              <p className="text-sm text-muted-foreground">{item.subtitle}</p>
+                          </div>
+                    </div>
+                   </StaggeredListItem>
                 ))}
-            </div>
+            </FadeIn>
         </CardContent>
     </Card>
   )
