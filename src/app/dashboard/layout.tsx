@@ -68,22 +68,11 @@ function DashboardHeader() {
   const router = useRouter();
   const { toast } = useToast();
   const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [greeting, setGreeting] = useState("Good Afternoon");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
-
-    const hour = new Date().getHours();
-    if (hour < 12) {
-        setGreeting("Good Morning");
-    } else if (hour < 18) {
-        setGreeting("Good Afternoon");
-    } else {
-        setGreeting("Good Evening");
-    }
-
     return () => unsubscribe();
   }, []);
 
@@ -108,10 +97,8 @@ function DashboardHeader() {
     { href: "/dashboard/creative-partner", label: "Productivity Suite" },
   ];
   
-  const displayName = user?.displayName?.split(' ')[0] || 'Dreamer';
-
   return (
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
         <div className="flex items-center gap-2">
           {pathname !== '/dashboard' && (
             <Button variant="ghost" size="icon" onClick={() => router.back()} className="shrink-0">
@@ -119,6 +106,7 @@ function DashboardHeader() {
               <span className="sr-only">Back</span>
             </Button>
           )}
+           <Link href="/dashboard" className="font-bold text-lg hidden md:block">PRAVIS</Link>
           <nav className="hidden items-center gap-1 md:flex">
             {menuItems.map(item => (
               <Button asChild variant={pathname === item.href ? "secondary" : "ghost"} size="sm" key={item.href}>
@@ -128,9 +116,6 @@ function DashboardHeader() {
               </Button>
             ))}
           </nav>
-          <div className="md:hidden">
-              <h1 className="text-lg font-semibold">{greeting}, {displayName}</h1>
-          </div>
         </div>
   
         <div className="flex items-center gap-2">
@@ -213,7 +198,7 @@ function MobileNav({ onChatOpen }: { onChatOpen: () => void }) {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 z-40 w-full h-20 bg-background border-t border-border/50">
+    <div className="md:hidden fixed bottom-0 left-0 z-40 w-full h-20 bg-background/80 backdrop-blur-sm border-t">
       <div className="grid h-full grid-cols-3 mx-auto font-medium">
         {navItemsLeft.map(item => (
           <Link key={item.href} href={item.href} className="inline-flex flex-col items-center justify-center px-2 text-center hover:bg-accent group">
@@ -226,9 +211,9 @@ function MobileNav({ onChatOpen }: { onChatOpen: () => void }) {
           <Button
             onClick={onChatOpen}
             size="icon"
-            className="w-16 h-16 bg-primary rounded-full hover:bg-primary/90 shadow-lg shadow-primary/30 -translate-y-4 animate-pulse"
+            className="w-16 h-16 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 shadow-lg shadow-primary/30 -translate-y-4"
           >
-            <Bot className="w-8 h-8 text-primary-foreground" />
+            <Bot className="w-8 h-8" />
             <span className="sr-only">Open Pravis Assistant</span>
           </Button>
         </div>
@@ -261,7 +246,7 @@ export default function DashboardLayout({
       <main className={cn(
         "flex-1 pb-24 md:pb-0",
         {
-          "p-4 md:p-6": !isEmailPage,
+          "p-4 md:p-8": !isEmailPage,
           "md:h-[calc(100vh-4rem)]": isFullHeightPage,
         }
       )}>

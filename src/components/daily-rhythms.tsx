@@ -3,47 +3,63 @@
 
 import Link from "next/link";
 import { BrainCircuit, Calendar, Share2, Mail } from "lucide-react";
+import { Card, CardContent } from "./ui/card";
+import { cn } from "@/lib/utils";
 
-const hudButtons = [
+const modules = [
     {
       href: "/dashboard/creative-partner",
       icon: BrainCircuit,
       label: "Loud Think",
-      stagger: "stagger-1",
+      description: "AI-powered brainstorming and productivity suite.",
+      bgClass: "bg-purple-600/10",
+      iconClass: "text-purple-400"
     },
     {
       href: "/dashboard/calendar",
       icon: Calendar,
       label: "Calendar",
-      stagger: "stagger-2",
+      description: "Manage your schedule and events seamlessly.",
+      bgClass: "bg-sky-600/10",
+      iconClass: "text-sky-400"
     },
     {
       href: "/dashboard/social-media",
       icon: Share2,
       label: "Socials",
-      stagger: "stagger-3",
+      description: "Connect and manage your social media presence.",
+      bgClass: "bg-rose-600/10",
+      iconClass: "text-rose-400"
     },
     {
       href: "/dashboard/email-assistant",
       icon: Mail,
       label: "Email Assistant",
-      stagger: "stagger-4",
+      description: "Draft replies and manage your inbox with AI.",
+      bgClass: "bg-emerald-600/10",
+      iconClass: "text-emerald-400"
     },
 ];
 
 
-export function DailyRhythms() {
+export function Modules() {
     return (
         <section>
-            <h1 className="text-4xl font-bold text-primary mb-10 drop-shadow-neon-primary font-headline">
-                Pravis Dashboard
-            </h1>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                {hudButtons.map((button) => (
-                    <Link href={button.href} key={button.label} className={`hud-button ${button.stagger}`}>
-                        <div className="scanline"></div>
-                        <button.icon className="hud-icon" />
-                        <span className="hud-text">{button.label}</span>
+            <h2 className="text-2xl font-bold mb-4 tracking-tight">Modules</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {modules.map((item) => (
+                    <Link href={item.href} key={item.label} className="group">
+                        <Card className="h-full hover:border-primary/50 transition-colors">
+                            <CardContent className="p-6 flex flex-col items-start gap-4">
+                               <div className={cn("p-3 rounded-lg", item.bgClass)}>
+                                    <item.icon className={cn("w-7 h-7", item.iconClass)} />
+                               </div>
+                               <div>
+                                   <h3 className="font-bold text-lg mb-1">{item.label}</h3>
+                                   <p className="text-muted-foreground text-sm">{item.description}</p>
+                               </div>
+                            </CardContent>
+                        </Card>
                     </Link>
                 ))}
             </div>

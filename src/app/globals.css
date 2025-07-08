@@ -5,54 +5,54 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
+    --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 260 95% 65%;
+    --primary: 262.1 83.3% 57.8%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: 215.4 16.3% 56.9%;
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 260 95% 65%;
+    --ring: 262.1 83.3% 57.8%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 255 35% 8%;
-    --foreground: 0 0% 95%;
-    --card: 255 35% 8%;
-    --card-foreground: 0 0% 95%;
-    --popover: 255 35% 8%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 258 100% 73%;
-    --primary-foreground: 255 35% 8%;
-    --secondary: 249 100% 20%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 249 100% 15%;
-    --muted-foreground: 253 22% 77%;
-    --accent: 249 100% 69%;
-    --accent-foreground: 255 35% 8%;
-    --destructive: 0 100% 60%;
-    --destructive-foreground: 0 0% 95%;
-    --border: 249 100% 25%;
-    --input: 249 100% 25%;
-    --ring: 258 100% 73%;
-    --chart-1: 258 100% 73%;
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+    --card: 220 40% 7%;
+    --card-foreground: 213 31% 91%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 213 31% 91%;
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 215 28% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 215 28% 17%;
+    --muted-foreground: 218 11% 65%;
+    --accent: 215 28% 17%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+    --ring: 262.1 83.3% 57.8%;
+    --chart-1: 262.1 83.3% 57.8%;
     --chart-2: 249 100% 69%;
     --chart-3: 253 22% 77%;
     --chart-4: 260 100% 80%;
@@ -68,112 +68,4 @@
   body {
     @apply bg-background text-foreground;
   }
-  
-  /* Fix for HUD button text visibility in light mode */
-  .light .hud-button .hud-text {
-    @apply text-primary;
-    text-shadow: 0 0 5px hsl(var(--primary) / 0.5), 0 0 10px hsl(var(--primary) / 0.3);
-  }
 }
-
-.hud-button {
-  @apply relative flex flex-col items-center justify-center p-4 aspect-square;
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  background: radial-gradient(circle at center, hsl(var(--primary) / 0.15), hsl(var(--background)) 70%);
-  transform-style: preserve-3d;
-  will-change: transform;
-  transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
-  animation: fadeIn 0.5s ease-out forwards, idle-pulse 6s ease-in-out infinite;
-  opacity: 0;
-}
-
-/* Borders and shadows for depth */
-.hud-button::before,
-.hud-button::after {
-  content: '';
-  @apply absolute inset-[2px] transition-all duration-300;
-  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  transform: translateZ(-1px);
-}
-.hud-button::before {
-  @apply border-2 border-primary/50;
-  box-shadow: inset 0 0 10px hsl(var(--primary) / 0.2), 0 0 10px hsl(var(--primary) / 0.2);
-}
-.hud-button::after {
-  @apply opacity-0;
-  background: radial-gradient(circle at center, hsl(var(--primary) / 0.3), transparent 70%);
-  box-shadow: 0 0 30px 8px hsl(var(--primary) / 0.5), inset 0 0 20px 2px hsl(var(--primary) / 0.7);
-}
-
-/* Icon and Text styling */
-.hud-button .hud-icon {
-  @apply w-10 h-10 mb-2 text-primary transition-all duration-300 ease-in-out;
-  filter: drop-shadow(0 0 8px hsl(var(--primary)));
-}
-
-.hud-button .hud-text {
-  @apply text-sm font-bold uppercase tracking-wider text-primary-foreground transition-all duration-300 ease-in-out;
-  text-shadow: 0 0 5px hsl(var(--primary)), 0 0 10px hsl(var(--primary) / 0.7);
-}
-
-/* Scanline effect */
-.hud-button .scanline {
-  @apply absolute top-0 left-0 w-full h-[2px] bg-primary/70;
-  box-shadow: 0 0 8px 1px hsl(var(--primary));
-  animation: scanline 5s linear infinite alternate;
-  transform: rotate(-30deg) translateY(-50px) translateX(-50px) scaleX(1.5);
-  opacity: 0;
-  transition: opacity 0.4s ease-in-out;
-}
-
-/* Hover effects */
-.hud-button:hover {
-  transform: translateY(-8px) scale(1.1);
-  box-shadow: 0 20px 30px hsl(var(--primary) / 0.2);
-}
-.hud-button:hover::after {
-  opacity: 1;
-}
-.hud-button:hover .scanline {
-  opacity: 1;
-  animation-duration: 2s;
-}
-.hud-button:hover .hud-icon {
-  transform: scale(1.1);
-  filter: drop-shadow(0 0 15px hsl(var(--primary)));
-}
-.hud-button:hover .hud-text {
-   transform: scale(1.05);
-}
-
-/* Active/click state */
-.hud-button:active {
-  transform: translateY(-4px) scale(1.05);
-  transition-duration: 0.1s;
-}
-
-/* Keyframes */
-@keyframes scanline {
-  0% { transform: rotate(-30deg) translateY(-50px) translateX(-50px) scaleX(1.5); }
-  100% { transform: rotate(-30deg) translateY(120px) translateX(50px) scaleX(1.5); }
-}
-
-@keyframes idle-pulse {
-  0%, 100% {
-    box-shadow: inset 0 0 10px hsl(var(--primary) / 0.2), 0 0 10px hsl(var(--primary) / 0.2);
-  }
-  50% {
-    box-shadow: inset 0 0 15px hsl(var(--primary) / 0.3), 0 0 20px hsl(var(--primary) / 0.4);
-  }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.stagger-1 { animation-delay: 0.1s; }
-.stagger-2 { animation-delay: 0.2s; }
-.stagger-3 { animation-delay: 0.3s; }
-.stagger-4 { animation-delay: 0.4s; }
