@@ -5,69 +5,39 @@
 
 @layer base {
   :root {
-    --background: 222 83% 4%;
+    --background: 0 0% 5%;
     --foreground: 210 40% 98%;
 
-    --card: 222 79% 8%;
+    --card: 0 0% 10%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 83% 4%;
+    --popover: 0 0% 5%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 262 82% 50%;
-    --primary-foreground: 271 91% 10%;
+    --primary: 271 100% 50%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 263 70% 25%;
+    --secondary: 271 100% 25%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 215 28% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 220 10% 20%;
+    --muted-foreground: 220 10% 65%;
 
-    --accent: 263 70% 25%;
+    --accent: 271 100% 35%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 63% 31%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 222 60% 12%;
-    --input: 263 70% 25%;
-    --ring: 271 91% 70%;
+    --border: 271 100% 20%;
+    --input: 271 100% 25%;
+    --ring: 271 100% 50%;
 
-    --chart-1: 271 91% 70%;
-    --chart-2: 263 70% 55%;
-    --chart-3: 210 40% 98%;
-    --chart-4: 222 79% 8%;
-    --chart-5: 215 20% 75%;
-  }
-
-  .dark {
-    --background: 222 83% 4%;
-    --foreground: 210 40% 98%;
-
-    --card: 222 79% 8%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222 83% 4%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 271 91% 70%;
-    --primary-foreground: 271 91% 10%;
-
-    --secondary: 263 70% 25%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 215 28% 17%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 263 70% 25%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 222 60% 12%;
-    --input: 263 70% 25%;
-    --ring: 271 91% 70%;
+    --chart-1: 271 100% 50%; /* neon purple */
+    --chart-2: 180 100% 50%; /* electric blue */
+    --chart-3: 329 100% 50%; /* bright pink */
+    --chart-4: 110 89% 54%; /* acid green */
+    --chart-5: 220 10% 65%; /* muted foreground */
   }
 
   :root.light {
@@ -77,7 +47,7 @@
     --card-foreground: 224 71% 4%;
     --popover: 0 0% 100%;
     --popover-foreground: 224 71% 4%;
-    --primary: 262 70% 45%;
+    --primary: 271 82% 45%;
     --primary-foreground: 0 0% 98%;
     --secondary: 240 5% 90%;
     --secondary-foreground: 240 6% 10%;
@@ -90,6 +60,12 @@
     --border: 240 6% 90%;
     --input: 240 6% 90%;
     --ring: 262 82% 60%;
+
+    --chart-1: 271 82% 45%;
+    --chart-2: 190 90% 45%;
+    --chart-3: 330 85% 55%;
+    --chart-4: 110 70% 40%;
+    --chart-5: 220 10% 45%;
   }
 
   * {

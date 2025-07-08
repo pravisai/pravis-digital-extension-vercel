@@ -82,8 +82,8 @@ export function ClarityChat() {
                 </Avatar>
                 <div>
                     <h1 className="font-semibold text-lg">Pravis AI</h1>
-                    <p className="text-xs text-green-500 flex items-center gap-1">
-                        <span className="h-2 w-2 rounded-full bg-green-500 inline-block"></span>
+                    <p className="text-xs text-chart-4 flex items-center gap-1">
+                        <span className="h-2 w-2 rounded-full bg-chart-4 inline-block"></span>
                         Online
                     </p>
                 </div>

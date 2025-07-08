@@ -39,15 +39,15 @@ interface Task {
 }
 
 const categoryConfig: Record<TaskCategory, { color: string, badge: string }> = {
-  Work: { color: 'bg-blue-500', badge: 'bg-blue-100 text-blue-800' },
-  Personal: { color: 'bg-green-500', badge: 'bg-green-100 text-green-800' },
-  Management: { color: 'bg-purple-500', badge: 'bg-purple-100 text-purple-800' },
+  Work: { color: 'bg-chart-2', badge: 'bg-chart-2/20 text-chart-2' },
+  Personal: { color: 'bg-chart-4', badge: 'bg-chart-4/20 text-chart-4' },
+  Management: { color: 'bg-chart-1', badge: 'bg-chart-1/20 text-chart-1' },
 };
 
 const priorityConfig: Record<TaskPriority, { color: string, badge: string }> = {
-  Low: { color: 'text-gray-500', badge: 'border-gray-300 text-gray-500' },
-  Medium: { color: 'text-yellow-500', badge: 'border-yellow-300 text-yellow-600 bg-yellow-50' },
-  High: { color: 'text-red-500', badge: 'border-red-300 text-red-600 bg-red-50' },
+  Low: { color: 'text-muted-foreground', badge: 'border-muted text-muted-foreground' },
+  Medium: { color: 'text-chart-2', badge: 'border-chart-2/50 text-chart-2 bg-chart-2/10' },
+  High: { color: 'text-destructive', badge: 'border-destructive/50 text-destructive bg-destructive/10' },
 };
 
 export function CreativePartner() {
@@ -149,7 +149,7 @@ export function CreativePartner() {
           </label>
           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
             <Badge variant="outline" className={cn("capitalize", priorityConfig[task.priority].badge)}>{task.priority}</Badge>
-            <Badge variant="outline" className={categoryConfig[task.category].badge}>{task.category}</Badge>
+            <Badge variant="outline" className={cn(categoryConfig[task.category].badge, "border-none")}>{task.category}</Badge>
             {task.dueDate && (
               <span className="flex items-center gap-1">
                 <CalendarIcon className="h-3 w-3" />
@@ -278,7 +278,7 @@ export function CreativePartner() {
             <CardContent className="space-y-2">
                 {(['All', 'Work', 'Personal', 'Management'] as const).map(cat => (
                     <Button key={cat} variant={filter.category === cat ? "secondary" : "ghost"} className="w-full justify-start" onClick={() => setFilter({ ...filter, category: cat })}>
-                        {cat !== 'All' && <span className={`h-2 w-2 rounded-full mr-2 ${categoryConfig[cat as TaskCategory].color}`}></span>}
+                        {cat !== 'All' && <span className={cn("h-2 w-2 rounded-full mr-2", cat !== 'All' && categoryConfig[cat as TaskCategory].color)}></span>}
                         {cat}
                         <span className="ml-auto text-muted-foreground text-xs">
                             {cat === 'All' ? tasks.length : tasks.filter(t => t.category === cat).length}

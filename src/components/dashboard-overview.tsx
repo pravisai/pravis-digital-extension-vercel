@@ -11,28 +11,28 @@ const activities = [
         icon: Mail,
         title: "Send Payment Reminder",
         subtitle: "Jessi Johnson sent a payment reminder",
-        accent: "bg-purple-500",
+        accent: "bg-chart-1",
         avatar: "JJ"
     },
     {
         icon: Phone,
         title: "Call about the contract",
         subtitle: "Brian Carpenter, Google meets",
-        accent: "bg-yellow-500",
+        accent: "bg-chart-2",
         avatar: "BC"
     },
     {
         icon: CheckCircle,
         title: "Finalize Project Proposal",
         subtitle: "Due in 2 days",
-        accent: "bg-green-500",
+        accent: "bg-chart-4",
         avatar: "PP"
     },
      {
         icon: Video,
         title: "Team Sync",
         subtitle: "10:00 AM - Project Pravis",
-        accent: "bg-sky-500",
+        accent: "bg-chart-3",
         avatar: "TS"
     },
 ]

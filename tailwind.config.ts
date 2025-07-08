@@ -62,6 +62,10 @@ export default {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+        'neon-purple': '#9D00FF',
+        'electric-blue': '#00FFFF',
+        'bright-pink': '#FF007F',
+        'acid-green': '#39FF14',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -69,7 +73,7 @@ export default {
         sm: 'calc(var(--radius) - 4px)',
       },
       boxShadow: {
-        'neon-primary': '0 0 15px hsl(var(--primary) / 0.4)',
+        'neon-primary': '0 0 10px hsl(var(--primary)), 0 0 20px hsl(var(--primary) / 0.5), 0 0 30px hsl(var(--primary) / 0.3)',
       },
       dropShadow: {
         'neon-primary': '0 0 10px hsl(var(--primary) / 0.8)',
@@ -95,12 +99,24 @@ export default {
           from: { transform: 'rotate(360deg)' },
           to: { transform: 'rotate(0deg)' },
         },
+        'glitch': {
+          '0%, 100%': { transform: 'none', opacity: '1' },
+          '25%': { transform: 'skew(-0.5deg, -0.25deg)', opacity: '0.75' },
+          '50%': { transform: 'none', opacity: '1' },
+          '75%': { transform: 'skew(0.5deg, 0.25deg)', opacity: '0.75' },
+        },
+        'glow-sweep': {
+          '0%': { transform: 'translateX(-100%) skewX(-15deg)' },
+          '100%': { transform: 'translateX(200%) skewX(-15deg)' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'spin-slow': 'spin 20s linear infinite',
         'spin-reverse-slow': 'spin-reverse 20s linear infinite',
+        'glitch-hover': 'glitch 0.5s linear 2',
+        'glow-sweep': 'glow-sweep 2s ease-in-out 1',
       },
     },
   },
