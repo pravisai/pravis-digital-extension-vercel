@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -68,6 +69,9 @@ export default {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      boxShadow: {
+        'neon-primary': '0 0 10px hsl(var(--primary)), 0 0 20px hsl(var(--primary) / 0.5), 0 0 30px hsl(var(--primary) / 0.3)',
+      },
       keyframes: {
         'accordion-down': {
           from: {
@@ -89,12 +93,24 @@ export default {
           from: { transform: 'rotate(360deg)' },
           to: { transform: 'rotate(0deg)' },
         },
+        'glitch': {
+          '0%, 100%': { transform: 'none', opacity: '1' },
+          '25%': { transform: 'skew(-0.5deg, -0.25deg)', opacity: '0.75' },
+          '50%': { transform: 'none', opacity: '1' },
+          '75%': { transform: 'skew(0.5deg, 0.25deg)', opacity: '0.75' },
+        },
+        'glow-sweep': {
+          '0%': { transform: 'translateX(-100%) skewX(-15deg)' },
+          '100%': { transform: 'translateX(200%) skewX(-15deg)' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'spin-slow': 'spin 20s linear infinite',
         'spin-reverse-slow': 'spin-reverse 20s linear infinite',
+        'glitch-hover': 'glitch 0.3s linear 2',
+        'glow-sweep': 'glow-sweep 1.5s ease-in-out 1',
       },
     },
   },

@@ -106,7 +106,7 @@ function DashboardHeader() {
               <span className="sr-only">Back</span>
             </Button>
           )}
-           <Link href="/dashboard" className="font-bold text-lg hidden md:block">PRAVIS</Link>
+           <Link href="/dashboard" className="font-bold text-lg hidden md:block animate-glitch-hover">PRAVIS</Link>
           <nav className="hidden items-center gap-1 md:flex">
             {menuItems.map(item => (
               <Button asChild variant={pathname === item.href ? "secondary" : "ghost"} size="sm" key={item.href}>

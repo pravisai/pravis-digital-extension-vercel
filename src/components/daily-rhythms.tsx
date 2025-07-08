@@ -48,10 +48,13 @@ export function Modules() {
         <section>
             <h2 className="text-2xl font-bold mb-4 tracking-tight">Modules</h2>
             <FadeIn stagger className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {modules.map((item) => (
+                {modules.map((item, index) => (
                     <StaggeredListItem key={item.label}>
                       <Link href={item.href} className="group">
-                          <Card className="h-full hover:border-primary/50 transition-colors">
+                          <Card 
+                            className="h-full hover:border-primary/50 transition-all duration-300 hover:shadow-neon-primary glow-sweep-effect"
+                            style={{ '--animation-delay': `${index * 0.1}s` } as React.CSSProperties}
+                          >
                               <CardContent className="p-6 flex flex-col items-start gap-4">
                                 <div className={cn("p-3 rounded-lg", item.bgClass)}>
                                       <item.icon className={cn("w-7 h-7", item.iconClass)} />

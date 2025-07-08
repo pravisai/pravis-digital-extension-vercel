@@ -47,7 +47,10 @@ export function ActivityFeed() {
             <FadeIn stagger className="space-y-4">
                 {activities.map((item, index) => (
                   <StaggeredListItem key={index}>
-                    <div className="flex items-start gap-4">
+                    <div 
+                      className="flex items-start gap-4 p-3 rounded-lg transition-all duration-300 hover:bg-card hover:shadow-neon-primary glow-sweep-effect"
+                      style={{'--animation-delay': `${0.4 + index * 0.1}s`} as React.CSSProperties}
+                    >
                           <Avatar>
                               <div className={`w-full h-full rounded-full flex items-center justify-center ${item.accent}`}>
                                 <item.icon className="w-5 h-5 text-white" />
