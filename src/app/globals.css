@@ -14,8 +14,8 @@
     --popover: 222 83% 4%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 271 91% 70%;
-    --primary-foreground: 271 91% 10%;
+    --primary: 262 82% 50%;
+    --primary-foreground: 0 0% 98%;
 
     --secondary: 263 70% 25%;
     --secondary-foreground: 210 40% 98%;
@@ -170,8 +170,8 @@
     position: absolute;
     width: 250px;
     height: 250px;
-    background: linear-gradient(135deg, #1a1a1a, #2e2e2e);
-    border: 1px solid #444;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: 1px solid #764ba2;
     border-radius: var(--radius);
     display: flex;
     flex-direction: column;
@@ -186,8 +186,8 @@
   }
 
   .cube-face:hover {
-    border-color: #00FFFF;
-    box-shadow: 0 0 15px #00ffff50, 0 0 5px #00ffff inset;
+    border-color: #a39cc9;
+    box-shadow: 0 0 20px rgba(118, 75, 162, 0.6);
   }
 
   .front { transform: rotateY(0deg) translateZ(125px); }
@@ -213,35 +213,18 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 1rem;
+    color: #f0f0f0;
   }
   
-  .icon-electric-blue {
-    color: #00FFFF;
-    filter: drop-shadow(0 0 5px #00FFFF);
-  }
-  .icon-neon-purple {
-    color: #9D00FF;
-    filter: drop-shadow(0 0 5px #9D00FF);
-  }
-  .icon-bright-pink {
-    color: #FF007F;
-    filter: drop-shadow(0 0 5px #FF007F);
-  }
-  .icon-acid-green {
-    color: #39FF14;
-    filter: drop-shadow(0 0 5px #39FF14);
-  }
-
-
   .cube-face h3 {
-    color: #EAEAEA;
+    color: #f0f0f0;
     font-size: 1.25rem;
     font-weight: 600;
     margin: 0 0 0.5rem 0;
   }
 
   .cube-face p {
-    color: #888;
+    color: #e0e0e0;
     font-size: 0.875rem;
     margin: 0;
     line-height: 1.4;

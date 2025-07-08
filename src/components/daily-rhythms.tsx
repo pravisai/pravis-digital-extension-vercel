@@ -12,7 +12,6 @@ const modules = [
       icon: BrainCircuit,
       label: "Loud Think",
       description: "AI-powered brainstorming and productivity suite.",
-      colorClass: "icon-neon-purple",
       face: "front"
     },
     {
@@ -20,7 +19,6 @@ const modules = [
       icon: Calendar,
       label: "Calendar",
       description: "Manage your schedule and events seamlessly.",
-      colorClass: "icon-electric-blue",
       face: "right"
     },
     {
@@ -28,7 +26,6 @@ const modules = [
       icon: Share2,
       label: "Socials",
       description: "Connect and manage your social media presence.",
-      colorClass: "icon-bright-pink",
       face: "back"
     },
     {
@@ -36,7 +33,6 @@ const modules = [
       icon: Mail,
       label: "Email Assistant",
       description: "Draft replies and manage your inbox with AI.",
-      colorClass: "icon-acid-green",
       face: "left"
     },
     {
@@ -44,7 +40,6 @@ const modules = [
       icon: Cpu,
       label: "Pravis Core",
       description: "System Hub",
-      colorClass: "icon-electric-blue",
       face: "top"
     },
     {
@@ -52,7 +47,6 @@ const modules = [
       icon: Settings,
       label: "Settings",
       description: "Configure your experience",
-      colorClass: "icon-electric-blue",
       face: "bottom"
     },
 ];
@@ -78,8 +72,8 @@ export function Modules() {
         stopAutoRotation();
         autoRotateIntervalRef.current = setInterval(() => {
             if (!isDraggingRef.current) {
-                currentRotationRef.current.y += 0.375;
-                currentRotationRef.current.x += 0.125;
+                currentRotationRef.current.y += 0.46875;
+                currentRotationRef.current.x += 0.15625;
                 if (cubeRef.current) {
                     const { x, y } = currentRotationRef.current;
                     cubeRef.current.style.transition = 'none';
@@ -199,11 +193,11 @@ export function Modules() {
                                 onClick={() => handleFaceClick(item.href)}
                             >
                                 <div className="module-icon">
-                                    <item.icon className={cn("w-7 h-7", item.colorClass)} />
+                                    <item.icon className={cn("w-7 h-7")} />
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-lg mb-1">{item.label}</h3>
-                                    <p className="text-muted-foreground text-sm">{item.description}</p>
+                                    <p className="text-sm">{item.description}</p>
                                 </div>
                             </div>
                         ))}
