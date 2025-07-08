@@ -3,7 +3,7 @@
 
 import React, { useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { BrainCircuit, Calendar, Share2, Mail } from "lucide-react";
+import { BrainCircuit, Calendar, Share2, Mail, Cpu, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const modules = [
@@ -43,19 +43,45 @@ const modules = [
       iconClass: "text-emerald-400",
       face: "left"
     },
+    {
+      href: "/dashboard",
+      icon: Cpu,
+      label: "Pravis Core",
+      description: "System Hub",
+      bgClass: "bg-gray-600/10",
+      iconClass: "text-gray-400",
+      face: "top"
+    },
+    {
+      href: "/dashboard",
+      icon: Settings,
+      label: "Settings",
+      description: "Configure your experience",
+      bgClass: "bg-gray-600/10",
+      iconClass: "text-gray-400",
+      face: "bottom"
+    },
 ];
 
 export function Modules() {
     const router = useRouter();
     const cubeRef = useRef<HTMLDivElement>(null);
     const isDraggingRef = useRef(false);
-    const startXRef = useRef(0);
-    const currentRotationRef = useRef(0);
+    const startCoordsRef = useRef({ x: 0, y: 0 });
+    const currentRotationRef = useRef({ x: -20, y: 30 }); // Initial rotation
+    const lastRotationRef = useRef({ x: -20, y: 30 });
     const didDragRef = useRef(false);
 
-    const handleDragStart = useCallback((clientX: number) => {
+    useEffect(() => {
+      if (cubeRef.current) {
+        const { x, y } = currentRotationRef.current;
+        cubeRef.current.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
+      }
+    }, []);
+
+    const handleDragStart = useCallback((clientX: number, clientY: number) => {
         isDraggingRef.current = true;
-        startXRef.current = clientX;
+        startCoordsRef.current = { x: clientX, y: clientY };
         didDragRef.current = false;
         if (cubeRef.current) {
             cubeRef.current.style.transition = 'none';
@@ -63,39 +89,42 @@ export function Modules() {
         }
     }, []);
 
-    const handleDragMove = useCallback((clientX: number) => {
+    const handleDragMove = useCallback((clientX: number, clientY: number) => {
         if (!isDraggingRef.current || !cubeRef.current) return;
 
-        const deltaX = clientX - startXRef.current;
-        if (Math.abs(deltaX) > 5) { // Threshold to differentiate click from drag
+        const deltaX = clientX - startCoordsRef.current.x;
+        const deltaY = clientY - startCoordsRef.current.y;
+
+        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
             didDragRef.current = true;
         }
 
         const rotationSpeed = 0.5;
-        const rotation = currentRotationRef.current + (deltaX * rotationSpeed);
-        cubeRef.current.style.transform = `rotateY(${rotation}deg)`;
+        const rotationX = currentRotationRef.current.x - (deltaY * rotationSpeed); 
+        const rotationY = currentRotationRef.current.y + (deltaX * rotationSpeed);
+        
+        lastRotationRef.current = { x: rotationX, y: rotationY };
+        cubeRef.current.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
     }, []);
 
     const handleDragEnd = useCallback(() => {
-        if (!isDraggingRef.current) return;
+        if (!isDraggingRef.current || !cubeRef.current) return;
         isDraggingRef.current = false;
 
         if (cubeRef.current) {
             cubeRef.current.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
             cubeRef.current.style.cursor = 'grab';
 
-            const currentTransform = cubeRef.current.style.transform;
-            const match = currentTransform.match(/rotateY\(([^deg]+)deg\)/);
-            const currentRotation = match ? parseFloat(match[1]) : currentRotationRef.current;
+            const snapRotationX = Math.round(lastRotationRef.current.x / 90) * 90;
+            const snapRotationY = Math.round(lastRotationRef.current.y / 90) * 90;
 
-            const snapRotation = Math.round(currentRotation / 90) * 90;
-            currentRotationRef.current = snapRotation;
-            cubeRef.current.style.transform = `rotateY(${snapRotation}deg)`;
+            currentRotationRef.current = { x: snapRotationX, y: snapRotationY };
+            cubeRef.current.style.transform = `rotateX(${snapRotationX}deg) rotateY(${snapRotationY}deg)`;
         }
     }, []);
 
     const handleFaceClick = (href: string) => {
-        if (didDragRef.current) return;
+        if (didDragRef.current || href === '#') return;
         router.push(href);
     };
 
@@ -103,12 +132,15 @@ export function Modules() {
         const cubeEl = cubeRef.current;
         if (!cubeEl) return;
 
-        const onMouseDown = (e: MouseEvent) => handleDragStart(e.clientX);
-        const onMouseMove = (e: MouseEvent) => handleDragMove(e.clientX);
+        const onMouseDown = (e: MouseEvent) => handleDragStart(e.clientX, e.clientY);
+        const onMouseMove = (e: MouseEvent) => handleDragMove(e.clientX, e.clientY);
         const onMouseUp = () => handleDragEnd();
 
-        const onTouchStart = (e: TouchEvent) => handleDragStart(e.touches[0].clientX);
-        const onTouchMove = (e: TouchEvent) => handleDragMove(e.touches[0].clientX);
+        const onTouchStart = (e: TouchEvent) => handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
+        const onTouchMove = (e: TouchEvent) => {
+            if (isDraggingRef.current) e.preventDefault();
+            handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
+        };
         const onTouchEnd = () => handleDragEnd();
 
         cubeEl.addEventListener('mousedown', onMouseDown);
@@ -116,7 +148,7 @@ export function Modules() {
         window.addEventListener('mouseup', onMouseUp);
 
         cubeEl.addEventListener('touchstart', onTouchStart, { passive: true });
-        window.addEventListener('touchmove', onTouchMove);
+        cubeEl.addEventListener('touchmove', onTouchMove, { passive: false });
         window.addEventListener('touchend', onTouchEnd);
         
         cubeEl.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -127,7 +159,7 @@ export function Modules() {
             window.removeEventListener('mouseup', onMouseUp);
 
             cubeEl.removeEventListener('touchstart', onTouchStart);
-            window.removeEventListener('touchmove', onTouchMove);
+            cubeEl.removeEventListener('touchmove', onTouchMove);
             window.removeEventListener('touchend', onTouchEnd);
         };
     }, [handleDragStart, handleDragMove, handleDragEnd]);

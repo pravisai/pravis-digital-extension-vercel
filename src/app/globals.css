@@ -184,19 +184,27 @@
     transition: all 0.3s ease;
     cursor: pointer;
     user-select: none;
-    backface-visibility: hidden; /* Improves rendering */
+    backface-visibility: hidden;
   }
 
   .cube-face:hover {
     border-color: hsl(var(--primary));
-    transform: translateZ(135px);
   }
 
-  /* Face positions */
   .front { transform: rotateY(0deg) translateZ(125px); }
   .right { transform: rotateY(90deg) translateZ(125px); }
   .back { transform: rotateY(180deg) translateZ(125px); }
   .left { transform: rotateY(-90deg) translateZ(125px); }
+  .top { transform: rotateX(90deg) translateZ(125px); }
+  .bottom { transform: rotateX(-90deg) translateZ(125px); }
+  
+  .front:hover { transform: rotateY(0deg) translateZ(135px); }
+  .right:hover { transform: rotateY(90deg) translateZ(135px); }
+  .back:hover { transform: rotateY(180deg) translateZ(135px); }
+  .left:hover { transform: rotateY(-90deg) translateZ(135px); }
+  .top:hover { transform: rotateX(90deg) translateZ(135px); }
+  .bottom:hover { transform: rotateX(-90deg) translateZ(135px); }
+
 
   .module-icon {
     width: 60px;
@@ -241,9 +249,14 @@
     .right { transform: rotateY(90deg) translateZ(100px); }
     .back { transform: rotateY(180deg) translateZ(100px); }
     .left { transform: rotateY(-90deg) translateZ(100px); }
+    .top { transform: rotateX(90deg) translateZ(100px); }
+    .bottom { transform: rotateX(-90deg) translateZ(100px); }
 
-    .cube-face:hover {
-      transform: translateZ(110px);
-    }
+    .front:hover { transform: rotateY(0deg) translateZ(110px); }
+    .right:hover { transform: rotateY(90deg) translateZ(110px); }
+    .back:hover { transform: rotateY(180deg) translateZ(110px); }
+    .left:hover { transform: rotateY(-90deg) translateZ(110px); }
+    .top:hover { transform: rotateX(90deg) translateZ(110px); }
+    .bottom:hover { transform: rotateX(-90deg) translateZ(110px); }
   }
 }
