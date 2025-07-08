@@ -244,7 +244,7 @@ export default function DashboardLayout({
     <div className="flex min-h-screen w-full flex-col">
       <DashboardHeader />
       <main className={cn(
-        "flex-1 pb-24 md:pb-0",
+        "flex-1 pb-20 md:pb-0",
         {
           "p-4 md:p-8": !isEmailPage,
           "md:h-[calc(100vh-4rem)]": isFullHeightPage,
