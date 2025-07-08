@@ -1,9 +1,10 @@
 import { ClarityChat } from "@/components/clarity-chat";
+import { FadeIn } from "@/components/animations/fade-in";
 
 export default function ClarityChatPage() {
     return (
-        <div className="h-full flex flex-col">
+        <FadeIn className="h-full flex flex-col">
             <ClarityChat />
-        </div>
+        </FadeIn>
     )
 }

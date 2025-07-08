@@ -1,10 +1,10 @@
-
 import { CreativePartner } from "@/components/creative-partner";
+import { FadeIn } from "@/components/animations/fade-in";
 
 export default function CreativePartnerPage() {
     return (
-        <div className="w-full h-full">
+        <FadeIn className="w-full h-full">
             <CreativePartner />
-        </div>
+        </FadeIn>
     )
 }
