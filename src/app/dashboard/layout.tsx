@@ -29,6 +29,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ClarityChat } from "@/components/clarity-chat"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 
 const statCards = [
@@ -133,6 +134,7 @@ function DashboardHeader() {
         </div>
   
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="shrink-0">
