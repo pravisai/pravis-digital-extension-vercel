@@ -3,7 +3,7 @@ import { DashboardOverview } from "@/components/dashboard-overview";
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-8">
+    <div className="px-6 py-10">
       <DailyRhythms />
       <DashboardOverview />
     </div>

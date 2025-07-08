@@ -68,6 +68,12 @@ export default {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      boxShadow: {
+        'neon-primary': '0 0 15px hsl(var(--primary) / 0.4)',
+      },
+      dropShadow: {
+        'neon-primary': '0 0 10px hsl(var(--primary) / 0.8)',
+      },
       keyframes: {
         'accordion-down': {
           from: {
