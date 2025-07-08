@@ -1,36 +1,36 @@
 
 "use client"
 
-import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, Mail, MessageSquare, Timer } from "lucide-react";
 import Link from "next/link";
+import { BrainCircuit, Calendar, Share2, Mail } from "lucide-react";
 
-const statCards = [
-  {
-    title: "Tasks Completed",
-    value: "24",
-    icon: CheckCircle2,
-    href: "/dashboard/creative-partner"
-  },
-  {
-    title: "Emails Processed",
-    value: "156",
-    icon: Mail,
-    href: "/dashboard/email-assistant"
-  },
-  {
-    title: "AI Conversations",
-    value: "42",
-    icon: MessageSquare,
-    href: "/dashboard/clarity-chat"
-  },
-  {
-    title: "Time Saved",
-    value: "3.2h",
-    icon: Timer,
-    href: "#"
-  },
-]
+const hudButtons = [
+    {
+      href: "/dashboard/creative-partner",
+      icon: BrainCircuit,
+      label: "Loud Think",
+      stagger: "stagger-1",
+    },
+    {
+      href: "/dashboard/calendar",
+      icon: Calendar,
+      label: "Calendar",
+      stagger: "stagger-2",
+    },
+    {
+      href: "/dashboard/social-media",
+      icon: Share2,
+      label: "Socials",
+      stagger: "stagger-3",
+    },
+    {
+      href: "/dashboard/email-assistant",
+      icon: Mail,
+      label: "Email Assistant",
+      stagger: "stagger-4",
+    },
+];
+
 
 export function DailyRhythms() {
     return (
@@ -38,20 +38,12 @@ export function DailyRhythms() {
             <h1 className="text-4xl font-bold text-primary mb-10 drop-shadow-neon-primary font-headline">
                 Pravis Dashboard
             </h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {statCards.map((card) => (
-                    <Link href={card.href} key={card.title}>
-                        <Card className="bg-card border-border rounded-2xl shadow-sm hover:shadow-neon-primary transition-shadow duration-300">
-                            <CardContent className="p-6">
-                                <div className="flex items-center gap-4">
-                                    <card.icon className="text-primary w-7 h-7" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">{card.title}</p>
-                                        <p className="text-2xl font-semibold">{card.value}</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                {hudButtons.map((button) => (
+                    <Link href={button.href} key={button.label} className={`hud-button ${button.stagger}`}>
+                        <div className="scanline"></div>
+                        <button.icon className="hud-icon" />
+                        <span className="hud-text">{button.label}</span>
                     </Link>
                 ))}
             </div>
