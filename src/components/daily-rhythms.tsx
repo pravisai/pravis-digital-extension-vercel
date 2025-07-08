@@ -54,12 +54,26 @@ const modules = [
 export function Modules() {
     const router = useRouter();
     const cubeRef = useRef<HTMLDivElement>(null);
+    const cubeWrapperRef = useRef<HTMLDivElement>(null);
     const isDraggingRef = useRef(false);
     const startCoordsRef = useRef({ x: 0, y: 0 });
     const currentRotationRef = useRef({ x: -20, y: 30 });
     const rotationAtDragStart = useRef({ x: 0, y: 0 });
     const didDragRef = useRef(false);
     const autoRotateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    const updateLightReflection = useCallback((rotation: { x: number, y: number }) => {
+        if (cubeWrapperRef.current) {
+            const normY = (rotation.y % 360) / 360;
+            const normX = (rotation.x % 360) / 360;
+            
+            // Adjust background position based on rotation to simulate light reflection
+            const bgX = 50 - normY * 30; // Multiplier controls sensitivity
+            const bgY = 50 + normX * 30;
+            
+            cubeWrapperRef.current.style.backgroundPosition = `${bgX}% ${bgY}%`;
+        }
+    }, []);
 
     const stopAutoRotation = useCallback(() => {
         if (autoRotateIntervalRef.current) {
@@ -74,23 +88,25 @@ export function Modules() {
             if (!isDraggingRef.current) {
                 currentRotationRef.current.y += 0.46875;
                 currentRotationRef.current.x += 0.15625;
+                const { x, y } = currentRotationRef.current;
                 if (cubeRef.current) {
-                    const { x, y } = currentRotationRef.current;
                     cubeRef.current.style.transition = 'none';
                     cubeRef.current.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
                 }
+                updateLightReflection({ x, y });
             }
         }, 30);
-    }, [stopAutoRotation]);
+    }, [stopAutoRotation, updateLightReflection]);
 
     useEffect(() => {
         if (cubeRef.current) {
             const { x, y } = currentRotationRef.current;
             cubeRef.current.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
+            updateLightReflection({ x, y });
         }
         startAutoRotation();
         return () => stopAutoRotation();
-    }, [startAutoRotation, stopAutoRotation]);
+    }, [startAutoRotation, stopAutoRotation, updateLightReflection]);
 
     const handleDragStart = useCallback((clientX: number, clientY: number) => {
         stopAutoRotation();
@@ -122,7 +138,8 @@ export function Modules() {
         
         currentRotationRef.current = { x: rotationX, y: rotationY };
         cubeRef.current.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
-    }, []);
+        updateLightReflection({ x: rotationX, y: rotationY });
+    }, [updateLightReflection]);
 
     const handleDragEnd = useCallback(() => {
         if (!isDraggingRef.current) return;
@@ -183,7 +200,7 @@ export function Modules() {
     return (
         <section>
             <h2 className="text-2xl font-bold mb-4 tracking-tight">Modules</h2>
-            <div className="cube-wrapper">
+            <div className="cube-wrapper" ref={cubeWrapperRef}>
                 <div className="cube-container">
                     <div ref={cubeRef} className="cube">
                         {modules.map((item) => (

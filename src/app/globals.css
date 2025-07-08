@@ -144,6 +144,13 @@
     height: 400px;
     perspective: 1000px;
     margin-top: 2rem;
+    background: radial-gradient(
+      circle at 50% 50%,
+      rgba(255, 255, 255, 0.1),
+      transparent 70%
+    );
+    background-size: 150% 150%;
+    transition: background-position 0.2s linear;
   }
 
   .cube-container {
