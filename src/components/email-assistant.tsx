@@ -22,6 +22,7 @@ import {
   Loader2,
   RefreshCw,
   AlertCircle,
+  Mail,
 } from 'lucide-react'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -253,7 +254,7 @@ export function EmailAssistant() {
                         isNavCollapsed && 'justify-center h-11 w-11 p-0'
                       )}
                     >
-                      <cat.icon className={cn('w-5 h-5', cat.color)} />
+                      <cat.icon className={cn('w-5 w-5', cat.color)} />
                       <span className={cn(isNavCollapsed && "hidden")}>{cat.name}</span>
                     </Button>
                   </TooltipTrigger>
@@ -280,49 +281,53 @@ export function EmailAssistant() {
                 </Button>
               </FadeIn>
             </div>
-            <ScrollArea className="flex-1">
-              <div className="flex flex-col">
-                {isFetchingEmails && Array.from({ length: 10 }).map((_, i) => (
-                   <div key={i} className="flex flex-col gap-2 p-4 border-b border-border/20">
-                     <Skeleton className="h-5 w-1/3" />
-                     <Skeleton className="h-4 w-2/3" />
-                     <Skeleton className="h-4 w-full" />
-                   </div>
-                ))}
-                {!isFetchingEmails && fetchError && (
+            <ScrollArea className="flex-1 relative">
+              {isFetchingEmails ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+                    <div className="relative h-24 w-24 mb-4">
+                        <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
+                        <div className="absolute inset-2 border-4 border-primary/40 rounded-full animate-spin-reverse-slow"></div>
+                        <div className="absolute inset-4 border-4 border-primary/60 rounded-full animate-spin-slow"></div>
+                        <Mail className="h-10 w-10 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                    </div>
+                    <Typewriter text="Accessing Email Datastream..." className="text-lg font-headline text-primary" speed={0.08} />
+                    <p className="text-muted-foreground mt-1 text-sm">Please stand by.</p>
+                </div>
+              ) : fetchError ? (
                   <Alert variant="destructive" className="m-4">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Error Fetching Emails</AlertTitle>
                     <AlertDescription>{fetchError}</AlertDescription>
                   </Alert>
-                )}
-                {!isFetchingEmails && !fetchError && emails.length === 0 && (
+              ) : emails.length === 0 ? (
                   <div className="text-center p-10 text-muted-foreground">
                     <Inbox className="mx-auto h-12 w-12" />
                     <p className="mt-4">Your inbox is empty or you haven't fetched it yet.</p>
                   </div>
-                )}
-                {!isFetchingEmails && emails.map((email) => (
-                  <button
-                    key={email.id}
-                    onClick={() => setSelectedEmail(email)}
-                    className={cn(
-                      'flex flex-col gap-1.5 p-4 border-b border-border/20 text-left hover:bg-accent focus:bg-accent outline-none transition-colors',
-                      selectedEmail?.id === email.id && 'bg-accent',
-                      !email.read && 'bg-primary/5',
-                    )}
-                  >
-                    <div className="flex justify-between items-center">
-                      <h3 className={cn("text-base font-semibold", !email.read && "text-primary-foreground/90")}>{email.sender}</h3>
-                      {email.date && <p className="text-xs text-muted-foreground">{format(new Date(email.date), 'MMM d')}</p>}
-                    </div>
-                    <h4 className={cn("text-sm font-medium", !email.read && "text-primary-foreground/80")}>{email.subject}</h4>
-                    <p className='text-sm text-muted-foreground truncate'>
-                      {email.body}
-                    </p>
-                  </button>
-                ))}
-              </div>
+              ) : (
+                <div className="flex flex-col">
+                  {emails.map((email) => (
+                    <button
+                      key={email.id}
+                      onClick={() => setSelectedEmail(email)}
+                      className={cn(
+                        'flex flex-col gap-1.5 p-4 border-b border-border/20 text-left hover:bg-accent focus:bg-accent outline-none transition-colors',
+                        selectedEmail?.id === email.id && 'bg-accent',
+                        !email.read && 'bg-primary/5',
+                      )}
+                    >
+                      <div className="flex justify-between items-center">
+                        <h3 className={cn("text-base font-semibold", !email.read && "text-primary-foreground/90")}>{email.sender}</h3>
+                        {email.date && <p className="text-xs text-muted-foreground">{format(new Date(email.date), 'MMM d')}</p>}
+                      </div>
+                      <h4 className={cn("text-sm font-medium", !email.read && "text-primary-foreground/80")}>{email.subject}</h4>
+                      <p className='text-sm text-muted-foreground truncate'>
+                        {email.body}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              )}
             </ScrollArea>
           </div>
 
