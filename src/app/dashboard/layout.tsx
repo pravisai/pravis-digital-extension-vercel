@@ -107,7 +107,7 @@ function DashboardHeader() {
 
   const menuItems = [
     { href: "/dashboard/email-assistant", label: "Email Assistant" },
-    { href: "/dashboard/creative-partner", label: "Productivity Suite" },
+    { href: "/dashboard/tasks", label: "Tasks" },
   ];
   
   return (
@@ -205,7 +205,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const { isPanelOpen } = useChat();
   
-    const isFullHeightPage = pathname === '/dashboard/creative-partner' || pathname === '/dashboard/clarity-chat' || pathname.startsWith('/dashboard/email-assistant');
+    const isFullHeightPage = pathname === '/dashboard/creative-partner' || pathname === '/dashboard/clarity-chat' || pathname.startsWith('/dashboard/email-assistant') || pathname === '/dashboard/tasks';
 
     return (
         <div className="flex min-h-screen w-full flex-col">
