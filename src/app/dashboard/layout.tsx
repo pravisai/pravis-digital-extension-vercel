@@ -217,12 +217,12 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
                     "h-[calc(100vh-4rem)]": isFullHeightPage,
                 },
                  // Add padding to the bottom to avoid content being hidden by the chat input on mobile
-                "pb-24 md:pb-0"
+                 (pathname === '/dashboard') && "pb-24 md:pb-0"
             )}>
                 {children}
             </main>
             <div className="md:hidden">
-              {isPanelOpen ? <ChatPanel /> : <PersistentChatInput />}
+              {isPanelOpen ? <ChatPanel /> : (pathname === '/dashboard' && <PersistentChatInput />)}
             </div>
         </div>
     )
