@@ -171,7 +171,7 @@ export function InteractivePyramid({ faces }: InteractivePyramidProps) {
                             )}
                             onClick={() => handleFaceClick(item)}
                         >
-                            <div className={cn("pyramid-content", item.position !== 'base' && 'pb-12')}>
+                            <div className="pyramid-content">
                                 <item.icon className="pyramid-icon" />
                                 <h3 className="pyramid-title">{item.title}</h3>
                                 <p className="pyramid-description">{item.description}</p>

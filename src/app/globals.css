@@ -247,8 +247,8 @@
 
   .pyramid-face {
     position: absolute;
-    width: 200px;
-    height: 200px;
+    top: 50%;
+    left: 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -269,36 +269,31 @@
     border-color: rgba(255, 255, 255, 0.2);
     box-shadow: 0 0 20px 5px hsl(var(--primary)/0.2);
   }
-
+  
   .pyramid-side {
-    clip-path: polygon(50% 0, 0 100%, 100% 100%);
+    width: 200px;
+    height: 200px;
+    margin-left: -100px;
+    margin-top: -100px;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
   }
 
   .pyramid-base {
-    border-radius: 4px;
-    transform: translateY(68px) rotateX(-90deg);
+    width: 200px;
+    height: 200px;
+    margin-left: -100px;
+    margin-top: -100px;
+    transform: rotateX(90deg) translateZ(100px);
   }
-
-  .pyramid-front {
-    transform-origin: bottom;
-    transform: rotateY(0deg) rotateX(30deg) translateY(-32px);
-  }
-  .pyramid-back {
-    transform-origin: bottom;
-    transform: rotateY(180deg) rotateX(30deg) translateY(-32px);
-  }
-  .pyramid-left {
-    transform-origin: bottom;
-    transform: rotateY(-90deg) rotateX(30deg) translateY(-32px);
-  }
-  .pyramid-right {
-    transform-origin: bottom;
-    transform: rotateY(90deg) rotateX(30deg) translateY(-32px);
-  }
+  
+  .pyramid-front  { transform: rotateY(0deg) translateZ(100px) rotateX(30deg); transform-origin: 50% 100%; }
+  .pyramid-right  { transform: rotateY(90deg) translateZ(100px) rotateX(30deg); transform-origin: 50% 100%; }
+  .pyramid-back   { transform: rotateY(180deg) translateZ(100px) rotateX(30deg); transform-origin: 50% 100%; }
+  .pyramid-left   { transform: rotateY(-90deg) translateZ(100px) rotateX(30deg); transform-origin: 50% 100%; }
   
   .pyramid-ground {
     position: absolute;
-    bottom: -20px;
+    top: calc(50% + 100px);
     left: 50%;
     transform: translateX(-50%) rotateX(90deg);
     width: 250px;
@@ -314,7 +309,11 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding-bottom: 2rem; /* Push content up on the triangle */
+    padding-bottom: 2rem;
+  }
+
+  .pyramid-base .pyramid-content {
+    padding-bottom: 0;
   }
 
   .pyramid-icon {
