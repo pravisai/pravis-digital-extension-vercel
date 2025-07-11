@@ -1,4 +1,5 @@
 
+"use client";
 
 import { InteractivePyramid, type PyramidFace } from "@/components/interactive-pyramid";
 import { FadeIn } from "@/components/animations/fade-in";
