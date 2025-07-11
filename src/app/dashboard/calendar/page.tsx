@@ -6,6 +6,7 @@ import { FadeIn } from "@/components/animations/fade-in";
 import { useToast } from "@/hooks/use-toast";
 import { getStoredAccessToken, signInWithGoogle } from "@/lib/firebase/auth";
 import React, { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function CalendarPage() {
     const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -42,6 +43,7 @@ export default function CalendarPage() {
         return (
             <div className="flex items-center justify-center h-full">
                 <div className="text-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
                     <p className="text-lg font-semibold">Initializing Calendar...</p>
                 </div>
             </div>

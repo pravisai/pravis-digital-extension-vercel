@@ -6,10 +6,12 @@ export interface CalendarEvent {
     start: {
       dateTime?: string;
       date?: string;
+      timeZone?: string;
     };
     end: {
       dateTime?: string;
       date?: string;
+      timeZone?: string;
     };
     attendees?: {
       email: string;
@@ -17,5 +19,9 @@ export interface CalendarEvent {
     }[];
     hangoutLink?: string;
     location?: string;
+    creator?: {
+      email: string;
+      self: boolean;
+    };
   }
   

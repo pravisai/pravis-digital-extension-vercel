@@ -1,8 +1,8 @@
 
 "use client"
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Search, Calendar as CalendarIcon, Edit, Trash2, ChevronDown, ListFilter, BarChart, Sun, Zap } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Plus, Search, Calendar as CalendarIcon, Edit, Trash2, ChevronDown, ListFilter, BarChart, Sun, Zap, Loader2, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { format, isSameDay } from 'date-fns';
+import { format, isSameDay, parseISO, startOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -24,136 +24,150 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import type { CalendarEvent } from '@/types/calendar';
+import { fetchCalendarEvents, createCalendarEvent } from '@/lib/calender';
+import { useToast } from '@/hooks/use-toast';
 
 
-type TaskCategory = "Work" | "Personal" | "Management";
-type TaskPriority = "Low" | "Medium" | "High";
+export function CreativePartner({ accessToken }: { accessToken: string }) {
+  const [tasks, setTasks] = useState<CalendarEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
-interface Task {
-  id: string;
-  title: string;
-  category: TaskCategory;
-  priority: TaskPriority;
-  dueDate: Date | null;
-  completed: boolean;
-}
-
-const categoryConfig: Record<TaskCategory, { color: string, badge: string }> = {
-  Work: { color: 'bg-chart-2', badge: 'bg-chart-2/20 text-chart-2' },
-  Personal: { color: 'bg-chart-4', badge: 'bg-chart-4/20 text-chart-4' },
-  Management: { color: 'bg-chart-1', badge: 'bg-chart-1/20 text-chart-1' },
-};
-
-const priorityConfig: Record<TaskPriority, { color: string, badge: string }> = {
-  Low: { color: 'text-muted-foreground', badge: 'border-muted text-muted-foreground' },
-  Medium: { color: 'text-chart-2', badge: 'border-chart-2/50 text-chart-2 bg-chart-2/10' },
-  High: { color: 'text-destructive', badge: 'border-destructive/50 text-destructive bg-destructive/10' },
-};
-
-export function CreativePartner() {
-  const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [newTaskDueDate, setNewTaskDueDate] = useState<Date | undefined>();
+  const [isAddingTask, setIsAddingTask] = useState(false);
+
+  const [editingTask, setEditingTask] = useState<CalendarEvent | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<{ category: TaskCategory | 'All', status: 'All' | 'Completed' | 'Incomplete' }>({ category: 'All', status: 'All' });
+  const [filter, setFilter] = useState<{ status: 'All' | 'Completed' | 'Incomplete' }>({ status: 'All' });
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
-  useEffect(() => {
+  const fetchTasks = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
     try {
-        const storedTasks = localStorage.getItem('productivity-suite-tasks');
-        if (storedTasks) {
-            const parsedTasks = JSON.parse(storedTasks).map((t: any) => ({
-                ...t,
-                dueDate: t.dueDate ? new Date(t.dueDate) : null,
-            }));
-            setTasks(parsedTasks);
+        const { events: fetchedEvents, error: fetchError } = await fetchCalendarEvents(accessToken, true); // true for tasks
+        if (fetchError) {
+            throw new Error(fetchError);
         }
-    } catch (error) {
-        console.error("Failed to parse tasks from localStorage", error)
-        setTasks([])
+        setTasks(fetchedEvents);
+    } catch (err: any) {
+        console.error("Failed to fetch tasks:", err);
+        setError(err.message || "An unknown error occurred while fetching tasks.");
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not fetch tasks from Google Calendar.",
+        });
+    } finally {
+        setIsLoading(false);
     }
-  }, []);
+  }, [accessToken, toast]);
 
   useEffect(() => {
-    localStorage.setItem('productivity-suite-tasks', JSON.stringify(tasks));
-  }, [tasks]);
+    fetchTasks();
+  }, [fetchTasks]);
 
-  const handleAddTask = (e: React.FormEvent) => {
+  const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTaskTitle.trim()) return;
-    const newTask: Task = {
-      id: Date.now().toString(),
-      title: newTaskTitle.trim(),
-      category: 'Work',
-      priority: 'Medium',
-      dueDate: null,
-      completed: false,
+    if (!newTaskTitle.trim() || !newTaskDueDate) {
+      toast({
+        variant: "destructive",
+        title: "Missing Information",
+        description: "Please provide a title and a due date for the task."
+      });
+      return;
     };
-    setTasks([newTask, ...tasks]);
-    setNewTaskTitle('');
-  };
-
-  const handleToggleComplete = (id: string) => {
-    setTasks(tasks.map(task => task.id === id ? { ...task, completed: !task.completed } : task));
+    setIsAddingTask(true);
+    try {
+      const result = await createCalendarEvent(accessToken, newTaskTitle, "Created from Pravis Productivity Suite.", newTaskDueDate);
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      toast({
+        title: "Task Created",
+        description: `"${newTaskTitle}" has been added to your calendar.`,
+      });
+      setNewTaskTitle('');
+      setNewTaskDueDate(undefined);
+      fetchTasks(); // Refresh tasks
+    } catch (err: any) {
+      console.error("Failed to create task:", err);
+      toast({
+          variant: "destructive",
+          title: "Error Creating Task",
+          description: err.message || "Could not create the task. Please try again.",
+      });
+    } finally {
+      setIsAddingTask(false);
+    }
   };
   
   const handleDeleteTask = (id: string) => {
-    setTasks(tasks.filter(task => task.id !== id));
+    // TODO: Implement Google Calendar event deletion
+    console.log("Deleting task:", id);
+    toast({ title: "Note", description: "Deleting events from calendar is not yet implemented."})
   };
 
-  const handleUpdateTask = (updatedTask: Task) => {
-    setTasks(tasks.map(task => task.id === updatedTask.id ? updatedTask : task));
+  const handleUpdateTask = (updatedTask: CalendarEvent) => {
+    // TODO: Implement Google Calendar event update
+     console.log("Updating task:", updatedTask);
+    toast({ title: "Note", description: "Updating events from calendar is not yet implemented."})
     setEditingTask(null);
   }
 
   const filteredTasks = useMemo(() => {
     return tasks
-      .filter(task => searchTerm === '' || task.title.toLowerCase().includes(searchTerm.toLowerCase()))
-      .filter(task => filter.category === 'All' || task.category === filter.category)
-      .filter(task => {
-        if (filter.status === 'All') return true;
-        if (filter.status === 'Completed') return task.completed;
-        if (filter.status === 'Incomplete') return !task.completed;
-        return true;
-      })
+      .filter(task => searchTerm === '' || task.summary.toLowerCase().includes(searchTerm.toLowerCase()))
       .filter(task => {
         if (!selectedDate) return true;
-        // Only show tasks for the selected date. isSameDay is from date-fns
-        return task.dueDate && isSameDay(task.dueDate, selectedDate);
+        const eventDate = task.start?.date ? startOfDay(parseISO(task.start.date)) : (task.start?.dateTime ? parseISO(task.start.dateTime) : null);
+        return eventDate && isSameDay(eventDate, selectedDate);
       });
-  }, [tasks, searchTerm, filter, selectedDate]);
+  }, [tasks, searchTerm, selectedDate]);
 
   const completionProgress = useMemo(() => {
-    const completed = tasks.filter(t => t.completed).length;
-    return tasks.length > 0 ? (completed / tasks.length) * 100 : 0;
+    // Cannot determine completion from calendar events easily, so this is illustrative
+    return 50;
   }, [tasks]);
   
   const dueDates = useMemo(() => {
     return tasks
-        .filter(task => task.dueDate)
-        .map(task => task.dueDate as Date);
+      .map(task => {
+        if (task.start?.dateTime) return parseISO(task.start.dateTime);
+        if (task.start?.date) return startOfDay(parseISO(task.start.date));
+        return null;
+      })
+      .filter((d): d is Date => d !== null);
   }, [tasks]);
 
-  const TaskItem = ({ task }: { task: Task }) => (
-    <Card className={`mb-2 group transition-shadow duration-200 hover:shadow-md ${task.completed ? 'bg-muted/50' : 'bg-card'}`}>
+  const TaskItem = ({ task }: { task: CalendarEvent }) => (
+    <Card className={`mb-2 group transition-shadow duration-200 hover:shadow-md bg-card`}>
       <CardContent className="p-3 flex items-center gap-4">
         <Checkbox
           id={`task-${task.id}`}
-          checked={task.completed}
-          onCheckedChange={() => handleToggleComplete(task.id)}
+          // checked={task.completed}
+          // onCheckedChange={() => handleToggleComplete(task.id)}
           className="h-5 w-5"
         />
         <div className="flex-1">
-          <label htmlFor={`task-${task.id}`} className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
-            {task.title}
+          <label htmlFor={`task-${task.id}`} className={`font-medium`}>
+            {task.summary}
           </label>
           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-            <Badge variant="outline" className={cn("capitalize", priorityConfig[task.priority].badge)}>{task.priority}</Badge>
-            <Badge variant="outline" className={cn(categoryConfig[task.category].badge, "border-none")}>{task.category}</Badge>
-            {task.dueDate && (
+             {task.start?.date && (
               <span className="flex items-center gap-1">
                 <CalendarIcon className="h-3 w-3" />
-                {format(task.dueDate, 'MMM d')}
+                {format(startOfDay(parseISO(task.start.date)), 'MMM d')}
+              </span>
+            )}
+             {task.start?.dateTime && (
+              <span className="flex items-center gap-1">
+                <CalendarIcon className="h-3 w-3" />
+                {format(parseISO(task.start.dateTime), 'MMM d, h:mm a')}
               </span>
             )}
           </div>
@@ -168,7 +182,7 @@ export function CreativePartner() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete this task.
+                    This action cannot be undone. This will permanently delete this task from your calendar.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -187,16 +201,42 @@ export function CreativePartner() {
       <div className="lg:col-span-2 flex flex-col gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Add New Task</CardTitle>
+            <CardTitle>Add New Task to Calendar</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleAddTask} className="flex gap-2">
+            <form onSubmit={handleAddTask} className="flex flex-col md:flex-row gap-2">
               <Input
                 value={newTaskTitle}
                 onChange={(e) => setNewTaskTitle(e.target.value)}
-                placeholder="e.g., Finish the report for Q3"
+                placeholder="e.g., Finalize project proposal"
+                className="flex-grow"
               />
-              <Button type="submit"><Plus className="mr-2 h-4 w-4"/>Add Task</Button>
+              <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full md:w-[280px] justify-start text-left font-normal",
+                        !newTaskDueDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {newTaskDueDate ? format(newTaskDueDate, "PPP") : <span>Pick a due date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={newTaskDueDate}
+                      onSelect={setNewTaskDueDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+              </Popover>
+              <Button type="submit" disabled={isAddingTask} className="w-full md:w-auto">
+                {isAddingTask ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4"/>}
+                Add Task
+              </Button>
             </form>
           </CardContent>
         </Card>
@@ -205,9 +245,9 @@ export function CreativePartner() {
             <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                     <CardTitle>
-                        {selectedDate ? `Tasks for ${format(selectedDate, 'MMM d')}` : "Today's Tasks"}
+                        {selectedDate ? `Tasks for ${format(selectedDate, 'MMM d')}` : "All Tasks"}
                     </CardTitle>
-                    <CardDescription>{filteredTasks.length} tasks</CardDescription>
+                    <CardDescription>{filteredTasks.length} tasks from your calendar</CardDescription>
                 </div>
                  <div className="flex items-center gap-2">
                     <div className="relative">
@@ -219,24 +259,24 @@ export function CreativePartner() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline"><ListFilter className="mr-2 h-4 w-4"/>Filter</Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuItem onClick={() => setFilter({ ...filter, status: 'All' })}>All</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setFilter({ ...filter, status: 'Incomplete' })}>Incomplete</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setFilter({ ...filter, status: 'Completed' })}>Completed</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
                  </div>
             </CardHeader>
             <CardContent className="flex-1 overflow-y-auto pr-3">
-                {filteredTasks.length > 0 ? (
+                {isLoading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : error ? (
+                  <Alert variant="destructive" className="m-4">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Error Fetching Tasks</AlertTitle>
+                      <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                ) : filteredTasks.length > 0 ? (
                     filteredTasks.map(task => <TaskItem key={task.id} task={task} />)
                 ) : (
                     <div className="text-center text-muted-foreground py-10">
-                        {selectedDate ? "No tasks for this day." : "No tasks found."}
+                        {tasks.length > 0 ? "No tasks match your filters." : "You have no tasks in your calendar."}
                     </div>
                 )}
             </CardContent>
@@ -247,7 +287,7 @@ export function CreativePartner() {
         <Card>
             <CardHeader>
                 <CardTitle>Progress</CardTitle>
-                <CardDescription>You've completed {tasks.filter(t=>t.completed).length} of {tasks.length} tasks.</CardDescription>
+                <CardDescription>Visualizing progress from calendar tasks.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Progress value={completionProgress} className="h-3" />
@@ -259,6 +299,7 @@ export function CreativePartner() {
                 <CardDescription>
                     {selectedDate ? `Filtered to ${format(selectedDate, 'PPP')}` : 'Select a day to filter tasks.'}
                 </CardDescription>
+                 <Button variant="link" size="sm" className="p-0 h-auto" onClick={() => setSelectedDate(undefined)}>Clear selection</Button>
             </CardHeader>
             <CardContent className="flex justify-center">
                 <Calendar
@@ -271,20 +312,6 @@ export function CreativePartner() {
                         hasDueDate: 'relative bg-primary/10 rounded-md',
                     }}
                 />
-            </CardContent>
-        </Card>
-        <Card>
-            <CardHeader><CardTitle>Categories</CardTitle></CardHeader>
-            <CardContent className="space-y-2">
-                {(['All', 'Work', 'Personal', 'Management'] as const).map(cat => (
-                    <Button key={cat} variant={filter.category === cat ? "secondary" : "ghost"} className="w-full justify-start" onClick={() => setFilter({ ...filter, category: cat })}>
-                        {cat !== 'All' && <span className={cn("h-2 w-2 rounded-full mr-2", cat !== 'All' && categoryConfig[cat as TaskCategory].color)}></span>}
-                        {cat}
-                        <span className="ml-auto text-muted-foreground text-xs">
-                            {cat === 'All' ? tasks.length : tasks.filter(t => t.category === cat).length}
-                        </span>
-                    </Button>
-                ))}
             </CardContent>
         </Card>
         <Card>
@@ -302,14 +329,26 @@ export function CreativePartner() {
   )
 }
 
-function EditTaskDialog({ task, onSave, onCancel }: { task: Task, onSave: (task: Task) => void, onCancel: () => void }) {
-    const [title, setTitle] = useState(task.title);
-    const [category, setCategory] = useState<TaskCategory>(task.category);
-    const [priority, setPriority] = useState<TaskPriority>(task.priority);
-    const [dueDate, setDueDate] = useState<Date | null>(task.dueDate);
+function EditTaskDialog({ task, onSave, onCancel }: { task: CalendarEvent, onSave: (task: CalendarEvent) => void, onCancel: () => void }) {
+    const [summary, setSummary] = useState(task.summary);
+    const [dueDate, setDueDate] = useState<Date | null>(task.start?.date ? startOfDay(parseISO(task.start.date)) : (task.start?.dateTime ? parseISO(task.start.dateTime) : null));
 
     const handleSave = () => {
-        onSave({ ...task, title, category, priority, dueDate });
+        // Create an updated task object to send back
+        // For simplicity, we'll keep the existing start/end times if they exist
+        const updatedTask = { ...task, summary };
+        if (dueDate) {
+          // If only a date is present, it's an all-day event
+          if (task.start.date && !task.start.dateTime) {
+            updatedTask.start.date = format(dueDate, 'yyyy-MM-dd');
+            updatedTask.end.date = format(dueDate, 'yyyy-MM-dd');
+          } else { // It's a timed event
+            // This is a simplified update, assumes event duration is constant
+             updatedTask.start.dateTime = dueDate.toISOString();
+             updatedTask.end.dateTime = new Date(dueDate.getTime() + (new Date(task.end.dateTime!).getTime() - new Date(task.start.dateTime!).getTime())).toISOString();
+          }
+        }
+        onSave(updatedTask);
     };
 
     return (
@@ -319,31 +358,7 @@ function EditTaskDialog({ task, onSave, onCancel }: { task: Task, onSave: (task:
                     <AlertDialogTitle>Edit Task</AlertDialogTitle>
                 </AlertDialogHeader>
                 <div className="space-y-4 py-4">
-                    <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Task title"/>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-full justify-between">
-                                {category} <ChevronDown className="h-4 w-4"/>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-[var(--radix-popover-trigger-width)]">
-                            <DropdownMenuItem onClick={() => setCategory('Work')}>Work</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setCategory('Personal')}>Personal</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setCategory('Management')}>Management</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-full justify-between">
-                                {priority} Priority <ChevronDown className="h-4 w-4"/>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-[var(--radix-popover-trigger-width)]">
-                            <DropdownMenuItem onClick={() => setPriority('Low')}>Low</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setPriority('Medium')}>Medium</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setPriority('High')}>High</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Input value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="Task summary"/>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
