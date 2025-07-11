@@ -1,7 +1,6 @@
 
 "use client"
 
-import { provideClarityThroughChat } from "@/ai/flows/provide-clarity-through-chat"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,17 +9,10 @@ import { BrainCircuit, Send, User, Paperclip, Mic, Smile, Camera } from "lucide-
 import React, { useRef, useState, useEffect } from "react"
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
-import { cn } from "@/lib/utils"
-
-interface Message {
-  role: "user" | "pravis"
-  content: string
-}
+import { useChat } from "@/contexts/chat-context"
 
 export function ClarityChat() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const { messages, isLoading, input, setInput, handleSendMessage } = useChat();
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -30,17 +22,6 @@ export function ClarityChat() {
     });
     return () => unsubscribe();
   }, []);
-  
-  useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([
-        {
-          role: "pravis",
-          content: "Hello! I'm Pravis, your personal AI assistant. How can I help you find clarity today?",
-        }
-      ])
-    }
-  }, [messages.length])
 
   useEffect(() => {
     // Scroll to bottom when messages change
@@ -49,32 +30,6 @@ export function ClarityChat() {
         if(viewport) viewport.scrollTop = viewport.scrollHeight;
     }
   }, [messages, isLoading]);
-
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim()) return
-
-    const userMessage: Message = { role: "user", content: input }
-    setMessages((prev) => [...prev, userMessage])
-    setInput("")
-    setIsLoading(true)
-
-    try {
-      const result = await provideClarityThroughChat({ userMessage: input })
-      const pravisMessage: Message = { role: "pravis", content: result.pravisResponse }
-      setMessages((prev) => [...prev, pravisMessage])
-    } catch (error: any) {
-      console.error("Error fetching response from Pravis:", error)
-      let messageContent = "I'm having trouble connecting right now. Please try again later."
-      if (error?.message && /503|overloaded/i.test(error.message)) {
-        messageContent = "The AI is currently experiencing high demand. Please try your request again in a moment."
-      }
-      const errorMessage: Message = { role: "pravis", content: messageContent }
-      setMessages((prev) => [...prev, errorMessage])
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   return (
     <div className="flex flex-col h-full bg-card shadow-sm">

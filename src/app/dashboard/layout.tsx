@@ -30,9 +30,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { useEmail } from "@/contexts/email-context"
-import { EmailProvider } from "@/contexts/email-context"
+import { EmailProvider, useEmail } from "@/contexts/email-context"
 import { ChatPanel } from "@/components/chat-panel"
+import { ChatProvider, useChat } from "@/contexts/chat-context"
+import { PersistentChatInput } from "@/components/persistent-chat-input"
 
 
 const statCards = [
@@ -202,6 +203,7 @@ function DashboardHeader() {
 
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
+    const { isPanelOpen } = useChat();
   
     const isFullHeightPage = pathname === '/dashboard/creative-partner' || pathname === '/dashboard/clarity-chat' || pathname.startsWith('/dashboard/email-assistant');
 
@@ -214,13 +216,13 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
                     "p-4 md:p-8": !isFullHeightPage,
                     "h-[calc(100vh-4rem)]": isFullHeightPage,
                 },
-                 // Add padding to the bottom to avoid content being hidden by the chat panel on mobile
-                "pb-20 md:pb-0"
+                 // Add padding to the bottom to avoid content being hidden by the chat input on mobile
+                "pb-24 md:pb-0"
             )}>
                 {children}
             </main>
             <div className="md:hidden">
-              <ChatPanel />
+              {isPanelOpen ? <ChatPanel /> : <PersistentChatInput />}
             </div>
         </div>
     )
@@ -237,10 +239,16 @@ export default function DashboardLayout({
   if (pathname === '/dashboard/email-assistant' || pathname.startsWith('/dashboard/email-assistant/')) {
     return (
       <EmailProvider>
-        <LayoutWrapper>{children}</LayoutWrapper>
+        <ChatProvider>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </ChatProvider>
       </EmailProvider>
     )
   }
 
-  return <LayoutWrapper>{children}</LayoutWrapper>
+  return (
+    <ChatProvider>
+      <LayoutWrapper>{children}</LayoutWrapper>
+    </ChatProvider>
+  )
 }
