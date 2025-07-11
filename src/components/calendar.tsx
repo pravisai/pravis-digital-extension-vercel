@@ -96,7 +96,10 @@ export function CalendarView({ accessToken }: { accessToken: string }) {
         setIsLoading(true);
         setError(null);
         try {
-            const fetchedEvents = await fetchCalendarEvents(accessToken);
+            const { events: fetchedEvents, error: fetchError } = await fetchCalendarEvents(accessToken);
+            if (fetchError) {
+                throw new Error(fetchError);
+            }
             setEvents(fetchedEvents);
         } catch (err: any) {
             console.error("Failed to fetch calendar events:", err);
@@ -123,9 +126,9 @@ export function CalendarView({ accessToken }: { accessToken: string }) {
                 return eventDate && isSameDay(eventDate, date);
             })
             .sort((a, b) => {
-                const aDate = a.start.dateTime ? parseISO(a.start.dateTime) : 0;
-                const bDate = b.start.dateTime ? parseISO(b.start.dateTime) : 0;
-                return aDate.valueOf() - bDate.valueOf();
+                const aDate = a.start.dateTime ? parseISO(a.start.dateTime).valueOf() : 0;
+                const bDate = b.start.dateTime ? parseISO(b.start.dateTime).valueOf() : 0;
+                return aDate - bDate;
             });
     }, [date, events]);
     
@@ -201,4 +204,3 @@ export function CalendarView({ accessToken }: { accessToken: string }) {
         </div>
     );
 }
-

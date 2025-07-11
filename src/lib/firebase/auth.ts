@@ -8,7 +8,7 @@ import {
 } from 'firebase/auth';
 import { auth } from './config';
 
-// ✅ Setup Google provider with Gmail scopes
+// ✅ Setup Google provider with Gmail & Calendar scopes
 const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('https://www.googleapis.com/auth/gmail.readonly');
 googleProvider.addScope('https://www.googleapis.com/auth/gmail.send');
@@ -16,7 +16,7 @@ googleProvider.addScope('https://www.googleapis.com/auth/gmail.modify');
 googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly');
 googleProvider.addScope('https://www.googleapis.com/auth/calendar.events'); // to create/edit events
 
-
+// ✅ Sign in and get Gmail/Calendar OAuth token
 export const signInWithGoogle = async (): Promise<{
   userCredential: UserCredential;
   accessToken: string | null;
@@ -24,11 +24,10 @@ export const signInWithGoogle = async (): Promise<{
   try {
     const result = await signInWithPopup(auth, googleProvider);
 
-    // ✅ Extract the access token for Gmail API
     const credential = GoogleAuthProvider.credentialFromResult(result);
     const accessToken = credential?.accessToken ?? null;
 
-    // ✅ Store in sessionStorage for the current session
+    // ✅ Store token in sessionStorage (valid during session)
     if (accessToken) {
       sessionStorage.setItem('gmail_access_token', accessToken);
     }
@@ -40,17 +39,18 @@ export const signInWithGoogle = async (): Promise<{
   }
 };
 
+// ✅ Sign out and clear token
 export const signOutUser = async (): Promise<void> => {
   try {
     await signOut(auth);
-    sessionStorage.removeItem('gmail_access_token'); // ✅ Clear token on sign-out
+    sessionStorage.removeItem('gmail_access_token');
   } catch (error) {
-    console.error('Error signing out: ', error);
+    console.error('Error signing out:', error);
     throw error;
   }
 };
 
-// ✅ Utility function to get stored Gmail access token
+// ✅ Get access token from sessionStorage
 export const getStoredAccessToken = (): string | null => {
   if (typeof window === 'undefined') return null;
   return sessionStorage.getItem('gmail_access_token');
