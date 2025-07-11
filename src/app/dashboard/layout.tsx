@@ -132,7 +132,7 @@ function DashboardHeader() {
   
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          {pathname === '/dashboard/email-assistant' && <EmailFetchButton />}
+          {(pathname === '/dashboard/email-assistant' || pathname.startsWith('/dashboard/email-assistant/')) && <EmailFetchButton />}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="shrink-0">
@@ -247,7 +247,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [isChatOpen, setIsChatOpen] = useState(false);
   
-    const isFullHeightPage = pathname === '/dashboard/creative-partner' || pathname === '/dashboard/clarity-chat' || pathname === '/dashboard/email-assistant';
+    const isFullHeightPage = pathname === '/dashboard/creative-partner' || pathname === '/dashboard/clarity-chat' || pathname.startsWith('/dashboard/email-assistant');
 
     return (
         <div className="flex min-h-screen w-full flex-col">
@@ -265,6 +265,9 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
             
             <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
                 <SheetContent side="bottom" className="h-[90vh] p-0 border-none flex flex-col bg-card rounded-t-lg">
+                    <SheetHeader>
+                        <SheetTitle className="sr-only">Pravis Assistant</SheetTitle>
+                    </SheetHeader>
                     <ClarityChat />
                 </SheetContent>
             </Sheet>
@@ -280,7 +283,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname()
 
-  if (pathname === '/dashboard/email-assistant') {
+  if (pathname === '/dashboard/email-assistant' || pathname.startsWith('/dashboard/email-assistant/')) {
     return (
       <EmailProvider>
         <LayoutWrapper>{children}</LayoutWrapper>
