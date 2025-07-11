@@ -1,28 +1,56 @@
-import { Calendar as CalendarIcon } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
+
+"use client";
+
+import { CalendarView } from "@/components/calendar";
 import { FadeIn } from "@/components/animations/fade-in";
+import { useToast } from "@/hooks/use-toast";
+import { getStoredAccessToken, signInWithGoogle } from "@/lib/firebase/auth";
+import React, { useEffect, useState } from "react";
 
 export default function CalendarPage() {
-  return (
-    <div className="flex justify-center items-start pt-10 p-4">
-      <FadeIn>
-        <Card className="w-full max-w-2xl">
-          <CardHeader className="items-center text-center">
-              <CalendarIcon className="h-12 w-12 text-primary mb-4" />
-            <CardTitle>Your Calendar</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center">
-            <Calendar
-              mode="single"
-              className="p-0 rounded-md border"
-            />
-            <p className="text-center text-muted-foreground mt-6">
-              This is a placeholder for your calendar integration.
-            </p>
-          </CardContent>
-        </Card>
-      </FadeIn>
-    </div>
-  )
+    const [accessToken, setAccessToken] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        const initializeToken = async () => {
+            try {
+                let token = getStoredAccessToken();
+                if (!token) {
+                    const { accessToken: newAccessToken } = await signInWithGoogle();
+                    if (!newAccessToken) {
+                        throw new Error('Failed to obtain access token.');
+                    }
+                    token = newAccessToken;
+                }
+                setAccessToken(token);
+            } catch (error: any) {
+                console.error("Authentication error:", error);
+                toast({
+                    variant: "destructive",
+                    title: "Authentication Failed",
+                    description: error.message || "Could not authenticate with Google to fetch calendar events.",
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        initializeToken();
+    }, [toast]);
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                    <p className="text-lg font-semibold">Initializing Calendar...</p>
+                </div>
+            </div>
+        );
+    }
+    
+    return (
+        <FadeIn className="h-full w-full">
+           {accessToken ? <CalendarView accessToken={accessToken} /> : <div className="text-center p-8">Could not load calendar. Access token is missing.</div>}
+        </FadeIn>
+    );
 }
