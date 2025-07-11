@@ -43,7 +43,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import type { Email } from '@/types/email'
 import { Typewriter } from '@/components/animations/typewriter'
 import { FadeIn, StaggeredListItem } from '@/components/animations/fade-in'
-import { useEmail, type MailboxView } from '@/contexts/email-context'
+import { EmailProvider, useEmail, type MailboxView } from '@/contexts/email-context'
 
 const replyFormSchema = z.object({
   tone: z.string().min(1, { message: "Please select a tone." }),
