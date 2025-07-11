@@ -219,8 +219,8 @@
 
   /* --- Pyramid Styles --- */
   .pyramid-scene {
-    width: 350px;
-    height: 350px;
+    width: 400px;
+    height: 400px;
     perspective: 1500px;
   }
   
@@ -264,17 +264,17 @@
   }
   
   .pyramid-side {
-    width: 300px;
-    height: 259.81px;
-    margin-left: -150px;
-    margin-top: -129.9px;
+    width: 350px;
+    height: 303.11px; /* width * sqrt(3)/2 */
+    margin-left: -175px;
+    margin-top: -151.55px;
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
   }
   
   /* 3-sided pyramid (tetrahedron) */
-  .pyramid-front  { transform: rotateY(0deg) translateZ(86.6px) rotateX(19.47deg); transform-origin: 50% 100%; }
-  .pyramid-right  { transform: rotateY(120deg) translateZ(86.6px) rotateX(19.47deg); transform-origin: 50% 100%; }
-  .pyramid-back   { transform: rotateY(240deg) translateZ(86.6px) rotateX(19.47deg); transform-origin: 50% 100%; }
+  .pyramid-front  { transform: rotateY(0deg) translateZ(101.04px) rotateX(19.47deg); transform-origin: 50% 100%; }
+  .pyramid-right  { transform: rotateY(120deg) translateZ(101.04px) rotateX(19.47deg); transform-origin: 50% 100%; }
+  .pyramid-back   { transform: rotateY(240deg) translateZ(101.04px) rotateX(19.47deg); transform-origin: 50% 100%; }
   
   .pyramid-ground {
     display: none;
