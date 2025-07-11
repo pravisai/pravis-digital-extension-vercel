@@ -120,13 +120,6 @@
     height: 400px;
     perspective: 1000px;
     margin-top: 2rem;
-    background: radial-gradient(
-      circle at 50% 50%,
-      rgba(157, 0, 255, 0.1),
-      transparent 70%
-    );
-    background-size: 150% 150%;
-    transition: background-position 0.2s linear;
   }
 
   .cube-container {
@@ -226,9 +219,9 @@
 
   /* --- Pyramid Styles --- */
   .pyramid-scene {
-    width: 250px;
-    height: 250px;
-    perspective: 1000px;
+    width: 350px;
+    height: 350px;
+    perspective: 1500px;
   }
   
   .pyramid {
@@ -271,33 +264,33 @@
   }
   
   .pyramid-side {
-    width: 200px;
-    height: 200px;
-    margin-left: -100px;
-    margin-top: -100px;
+    width: 300px;
+    height: 259.81px;
+    margin-left: -150px;
+    margin-top: -129.9px;
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
   }
 
   .pyramid-base {
-    width: 200px;
-    height: 200px;
-    margin-left: -100px;
-    margin-top: -100px;
-    transform: rotateX(90deg) translateZ(100px);
+    width: 300px;
+    height: 300px;
+    margin-left: -150px;
+    margin-top: -150px;
+    transform: rotateX(90deg) translateZ(86.6px);
   }
   
-  .pyramid-front  { transform: rotateY(0deg) translateZ(100px) rotateX(30deg); transform-origin: 50% 100%; }
-  .pyramid-right  { transform: rotateY(90deg) translateZ(100px) rotateX(30deg); transform-origin: 50% 100%; }
-  .pyramid-back   { transform: rotateY(180deg) translateZ(100px) rotateX(30deg); transform-origin: 50% 100%; }
-  .pyramid-left   { transform: rotateY(-90deg) translateZ(100px) rotateX(30deg); transform-origin: 50% 100%; }
+  .pyramid-front  { transform: rotateY(0deg) translateZ(150px) rotateX(19.47deg); transform-origin: 50% 100%; }
+  .pyramid-right  { transform: rotateY(90deg) translateZ(150px) rotateX(19.47deg); transform-origin: 50% 100%; }
+  .pyramid-back   { transform: rotateY(180deg) translateZ(150px) rotateX(19.47deg); transform-origin: 50% 100%; }
+  .pyramid-left   { transform: rotateY(-90deg) translateZ(150px) rotateX(19.47deg); transform-origin: 50% 100%; }
   
   .pyramid-ground {
     position: absolute;
-    top: calc(50% + 100px);
+    top: calc(50% + 86.6px);
     left: 50%;
     transform: translateX(-50%) rotateX(90deg);
-    width: 250px;
-    height: 250px;
+    width: 350px;
+    height: 350px;
     background: radial-gradient(circle, hsl(var(--primary) / 0.1) 0%, transparent 60%);
     border-radius: 50%;
   }
@@ -330,13 +323,13 @@
   }
 
   .pyramid-title {
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     font-weight: 600;
     color: #ffffff;
   }
 
   .pyramid-description {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.75);
     margin-top: 0.25rem;
   }
