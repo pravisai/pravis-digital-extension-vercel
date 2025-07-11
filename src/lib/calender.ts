@@ -2,7 +2,8 @@
 'use server';
 
 import type { CalendarEvent } from '@/types/calendar';
-import { format } from 'date-fns';
+import { format, set, type Locale } from 'date-fns';
+import { enUS } from 'date-fns/locale';
 
 /**
  * Fetches upcoming Google Calendar events using the provided OAuth access token.
@@ -31,6 +32,7 @@ export const fetchCalendarEvents = async (
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
+      cache: 'no-store'
     }
   );
 
@@ -70,36 +72,50 @@ export const fetchCalendarEvents = async (
 };
 
 
+export interface EventCreationDetails {
+  summary: string;
+  description: string;
+  startDate: Date;
+  endDate: Date;
+  isAllDay: boolean;
+  startTime?: string; // HH:mm
+  endTime?: string; // HH:mm
+}
+
 /**
- * Creates a new all-day event in the user's primary Google Calendar.
+ * Creates a new event in the user's primary Google Calendar.
  * @param accessToken OAuth 2.0 token
- * @param summary The title of the event/task
- * @param description A description for the event
- * @param date The due date for the task
+ * @param details The details of the event to create
  */
 export const createCalendarEvent = async (
   accessToken: string,
-  summary: string,
-  description: string,
-  date: Date
+  details: EventCreationDetails
 ): Promise<{ event: CalendarEvent | null; error: string | null }> => {
 
+  let start, end;
+
+  if (details.isAllDay) {
+    start = { date: format(details.startDate, 'yyyy-MM-dd') };
+    // For all-day events, the end date is exclusive, so add one day.
+    end = { date: format(new Date(details.endDate.getTime() + 24 * 60 * 60 * 1000), 'yyyy-MM-dd') };
+  } else {
+    const [startHour, startMinute] = (details.startTime || "00:00").split(':').map(Number);
+    const startDateTime = set(details.startDate, { hours: startHour, minutes: startMinute });
+
+    const [endHour, endMinute] = (details.endTime || "00:00").split(':').map(Number);
+    const endDateTime = set(details.endDate, { hours: endHour, minutes: endMinute });
+
+    start = { dateTime: startDateTime.toISOString() };
+    end = { dateTime: endDateTime.toISOString() };
+  }
+
   const event = {
-    summary: summary,
-    description: description,
-    start: {
-      date: format(date, 'yyyy-MM-dd'),
-      timeZone: 'UTC',
-    },
-    end: {
-      date: format(date, 'yyyy-MM-dd'),
-      timeZone: 'UTC',
-    },
-    // Adding extended properties could be a more robust way to identify app-created events
+    summary: details.summary,
+    description: details.description,
+    start,
+    end,
     // extendedProperties: {
-    //   private: {
-    //     'created_by': 'pravis_app'
-    //   }
+    //   private: { 'created_by': 'pravis_app' }
     // }
   };
 

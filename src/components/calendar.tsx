@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Typewriter } from './animations/typewriter';
+import { CreateEventDialog } from './create-event-dialog';
 
 const EventItem = ({ event }: { event: CalendarEvent }) => {
     const startTime = event.start.dateTime ? format(parseISO(event.start.dateTime), 'h:mm a') : 'All day';
@@ -91,6 +92,7 @@ export function CalendarView({ accessToken }: { accessToken: string }) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
     const fetchEvents = useCallback(async () => {
         setIsLoading(true);
@@ -142,10 +144,14 @@ export function CalendarView({ accessToken }: { accessToken: string }) {
             .filter((d): d is Date => d !== null);
     }, [events]);
 
+    const handleEventCreated = () => {
+        fetchEvents(); // Refetch events to show the new one
+    };
+
     return (
         <div className="grid grid-cols-1 lg:grid-cols-4 h-full gap-6">
             <aside className="lg:col-span-1 flex flex-col gap-6">
-                <Button size="lg" className="w-full text-lg"><Plus className="mr-2 h-5 w-5"/> Create Event</Button>
+                <Button size="lg" className="w-full text-lg" onClick={() => setIsCreateDialogOpen(true)}><Plus className="mr-2 h-5 w-5"/> Create Event</Button>
                 <Card>
                     <CardContent className="p-2">
                         <Calendar
@@ -207,6 +213,12 @@ export function CalendarView({ accessToken }: { accessToken: string }) {
                     </div>
                 </ScrollArea>
             </main>
+             <CreateEventDialog 
+                accessToken={accessToken}
+                isOpen={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+                onEventCreated={handleEventCreated}
+             />
         </div>
     );
 }
