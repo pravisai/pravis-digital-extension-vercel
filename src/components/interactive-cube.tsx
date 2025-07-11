@@ -1,0 +1,197 @@
+
+"use client"
+
+import React, { useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+
+export interface CubeFace {
+  id: string;
+  icon: React.ElementType;
+  label: string;
+  description: string;
+  face: "front" | "right" | "back" | "left" | "top" | "bottom";
+  colorClass: "neon-purple" | "electric-blue" | "bright-pink" | "acid-green";
+  href?: string;
+  onClick?: (id: string) => void;
+}
+
+interface InteractiveCubeProps {
+  faces: CubeFace[];
+}
+
+export function InteractiveCube({ faces }: InteractiveCubeProps) {
+    const router = useRouter();
+    const cubeRef = useRef<HTMLDivElement>(null);
+    const cubeWrapperRef = useRef<HTMLDivElement>(null);
+    const isDraggingRef = useRef(false);
+    const startCoordsRef = useRef({ x: 0, y: 0 });
+    const currentRotationRef = useRef({ x: -20, y: 30 });
+    const rotationAtDragStart = useRef({ x: 0, y: 0 });
+    const didDragRef = useRef(false);
+    const autoRotateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    const updateLightReflection = useCallback((rotation: { x: number, y: number }) => {
+        if (cubeWrapperRef.current) {
+            const normY = (rotation.y % 360) / 360;
+            const normX = (rotation.x % 360) / 360;
+            
+            const bgX = 50 - normY * 30;
+            const bgY = 50 + normX * 30;
+            
+            cubeWrapperRef.current.style.backgroundPosition = `${bgX}% ${bgY}%`;
+        }
+    }, []);
+
+    const stopAutoRotation = useCallback(() => {
+        if (autoRotateIntervalRef.current) {
+            clearInterval(autoRotateIntervalRef.current);
+            autoRotateIntervalRef.current = null;
+        }
+    }, []);
+
+    const startAutoRotation = useCallback(() => {
+        stopAutoRotation();
+        autoRotateIntervalRef.current = setInterval(() => {
+            if (!isDraggingRef.current) {
+                currentRotationRef.current.y += 0.5859375;
+                currentRotationRef.current.x += 0.1953125;
+                const { x, y } = currentRotationRef.current;
+                if (cubeRef.current) {
+                    cubeRef.current.style.transition = 'none';
+                    cubeRef.current.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
+                }
+                updateLightReflection({ x, y });
+            }
+        }, 30);
+    }, [stopAutoRotation, updateLightReflection]);
+
+    useEffect(() => {
+        if (cubeRef.current) {
+            const { x, y } = currentRotationRef.current;
+            cubeRef.current.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
+            updateLightReflection({ x, y });
+        }
+        startAutoRotation();
+        return () => stopAutoRotation();
+    }, [startAutoRotation, stopAutoRotation, updateLightReflection]);
+
+    const handleDragStart = useCallback((clientX: number, clientY: number) => {
+        stopAutoRotation();
+        isDraggingRef.current = true;
+        didDragRef.current = false;
+        
+        rotationAtDragStart.current = { ...currentRotationRef.current };
+        startCoordsRef.current = { x: clientX, y: clientY };
+
+        if (cubeRef.current) {
+            cubeRef.current.style.transition = 'none';
+            cubeRef.current.style.cursor = 'grabbing';
+        }
+    }, [stopAutoRotation]);
+
+    const handleDragMove = useCallback((clientX: number, clientY: number) => {
+        if (!isDraggingRef.current || !cubeRef.current) return;
+
+        const deltaX = clientX - startCoordsRef.current.x;
+        const deltaY = clientY - startCoordsRef.current.y;
+
+        if (!didDragRef.current && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
+            didDragRef.current = true;
+        }
+
+        const rotationSpeed = 0.5;
+        const rotationX = rotationAtDragStart.current.x - (deltaY * rotationSpeed);
+        const rotationY = rotationAtDragStart.current.y + (deltaX * rotationSpeed);
+        
+        currentRotationRef.current = { x: rotationX, y: rotationY };
+        cubeRef.current.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+        updateLightReflection({ x: rotationX, y: rotationY });
+    }, [updateLightReflection]);
+
+    const handleDragEnd = useCallback(() => {
+        if (!isDraggingRef.current) return;
+        isDraggingRef.current = false;
+
+        if (cubeRef.current) {
+            cubeRef.current.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+            cubeRef.current.style.cursor = 'grab';
+        }
+        
+        setTimeout(startAutoRotation, 3000);
+    }, [startAutoRotation]);
+
+
+    const handleFaceClick = (face: CubeFace) => {
+        if (didDragRef.current) return;
+        if (face.href && face.href !== '#') {
+            router.push(face.href);
+        } else if (face.onClick) {
+            face.onClick(face.id);
+        }
+    };
+
+    useEffect(() => {
+        const cubeEl = cubeRef.current;
+        if (!cubeEl) return;
+
+        const onMouseDown = (e: MouseEvent) => handleDragStart(e.clientX, e.clientY);
+        const onMouseMove = (e: MouseEvent) => handleDragMove(e.clientX, e.clientY);
+        const onMouseUp = () => handleDragEnd();
+
+        const onTouchStart = (e: TouchEvent) => handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
+        const onTouchMove = (e: TouchEvent) => {
+            if (isDraggingRef.current) {
+                e.preventDefault();
+                handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        };
+        const onTouchEnd = () => handleDragEnd();
+
+        cubeEl.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+
+        cubeEl.addEventListener('touchstart', onTouchStart, { passive: true });
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
+        window.addEventListener('touchend', onTouchEnd);
+        
+        cubeEl.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        return () => {
+            cubeEl.removeEventListener('mousedown', onMouseDown);
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+
+            cubeEl.removeEventListener('touchstart', onTouchStart);
+            window.removeEventListener('touchmove', onTouchMove);
+            window.removeEventListener('touchend', onTouchEnd);
+        };
+    }, [handleDragStart, handleDragMove, handleDragEnd]);
+
+    return (
+        <section>
+            <div className="cube-wrapper" ref={cubeWrapperRef}>
+                <div className="cube-container">
+                    <div ref={cubeRef} className="cube">
+                        {faces.map((item) => (
+                            <div
+                                key={item.id}
+                                className={cn("cube-face", item.face)}
+                                onClick={() => handleFaceClick(item)}
+                            >
+                                <div className={cn("module-icon", item.colorClass)}>
+                                    <item.icon className={cn("w-7 h-7")} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-lg mb-1">{item.label}</h3>
+                                    <p className="text-sm">{item.description}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}

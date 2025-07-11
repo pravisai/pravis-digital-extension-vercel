@@ -9,11 +9,12 @@ import type { Email } from '@/types/email';
  */
 export const fetchEmails = async (accessToken: string): Promise<{ emails: Email[], error: string | null }> => {
   const response = await fetch(
-    'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=15',
+    'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=25',
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
+      cache: 'no-store', // Ensure we always get fresh data
     }
   );
 
@@ -87,6 +88,7 @@ export const fetchEmails = async (accessToken: string): Promise<{ emails: Email[
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
+          cache: 'no-store',
         }
       );
 
@@ -114,6 +116,7 @@ export const fetchEmails = async (accessToken: string): Promise<{ emails: Email[
           fullMsg.payload?.headers?.find((h: any) => h.name === 'Date')
             ?.value || new Date().toISOString(),
         read: !fullMsg.labelIds.includes('UNREAD'),
+        labelIds: fullMsg.labelIds || [],
       };
     } catch(error) {
       console.error(`Error processing email ${msg.id}:`, error);

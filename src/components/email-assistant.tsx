@@ -10,19 +10,16 @@ import {
   Send,
   Star,
   Trash2,
-  Users,
-  Tag,
-  Clock,
   MoreVertical,
   Reply,
   ReplyAll,
   Forward,
   ArrowLeft,
-  Menu,
   Loader2,
   RefreshCw,
   AlertCircle,
   Mail,
+  Clock,
 } from 'lucide-react'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -34,7 +31,6 @@ import { useToast } from '@/hooks/use-toast'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -50,21 +46,20 @@ import type { Email } from '@/types/email'
 import { signInWithGoogle, getStoredAccessToken } from '@/lib/firebase/auth'
 import { Typewriter } from './animations/typewriter'
 import { FadeIn, StaggeredListItem } from './animations/fade-in'
+import { InteractiveCube, type CubeFace } from './interactive-cube'
 
 
-const navLinks = [
-  { name: 'Inbox', icon: Inbox, count: 3 },
-  { name: 'Starred', icon: Star },
-  { name: 'Sent', icon: Send },
-  { name: 'Drafts', icon: FileText },
-  { name: 'Trash', icon: Trash2 },
-  { name: 'Archived', icon: Archive },
-]
+type MailboxView = "Inbox" | "Starred" | "Sent" | "Drafts" | "Trash" | "Archived" | "Compose";
 
-const categories = [
-  { name: 'Social', icon: Users, color: 'text-rose-400' },
-  { name: 'Promotions', icon: Tag, color: 'text-rose-400' },
-]
+const emailCubeFaces: CubeFace[] = [
+    { id: "Inbox", icon: Inbox, label: "Inbox", description: "View your incoming mail", face: "front", colorClass: "neon-purple" },
+    { id: "Starred", icon: Star, label: "Starred", description: "View starred messages", face: "right", colorClass: "electric-blue" },
+    { id: "Sent", icon: Send, label: "Sent", description: "View your sent mail", face: "back", colorClass: "bright-pink" },
+    { id: "Drafts", icon: FileText, label: "Drafts", description: "View your drafts", face: "left", colorClass: "acid-green" },
+    { id: "Trash", icon: Trash2, label: "Trash", description: "View trashed messages", face: "top", colorClass: "neon-purple" },
+    { id: "Compose", icon: PenSquare, label: "Compose", description: "Write a new email", face: "bottom", colorClass: "electric-blue" },
+];
+
 
 const replyFormSchema = z.object({
   tone: z.string().min(1, { message: "Please select a tone." }),
@@ -76,9 +71,10 @@ export function EmailAssistant() {
   const [emails, setEmails] = useState<Email[]>([]);
   const [isFetchingEmails, setIsFetchingEmails] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-
+  
+  const [activeMailbox, setActiveMailbox] = useState<MailboxView>("Inbox");
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null)
-  const [isNavCollapsed, setIsNavCollapsed] = useState(false)
+  
   const { toast } = useToast()
   
   const [isDrafting, setIsDrafting] = useState(false);
@@ -108,7 +104,6 @@ export function EmailAssistant() {
     try {
       let accessToken = getStoredAccessToken();
 
-      // If no token, trigger sign-in first
       if (!accessToken) {
         const { accessToken: newAccessToken } = await signInWithGoogle();
         if (!newAccessToken) {
@@ -119,7 +114,6 @@ export function EmailAssistant() {
 
       const result = await fetchEmails(accessToken);
 
-      // If there's an error, it might be an expired token. Try to re-authenticate.
       if (result.error) {
         console.warn('Gmail token error, attempting to re-authenticate:', result.error);
         const { accessToken: refreshedToken } = await signInWithGoogle();
@@ -127,10 +121,8 @@ export function EmailAssistant() {
           throw new Error('Unable to re-authenticate with Google.');
         }
         
-        // Retry fetching with the new token
         const retryResult = await fetchEmails(refreshedToken);
         if (retryResult.error) {
-          // If it still fails, throw the error
           throw new Error(retryResult.error);
         }
         setEmails(retryResult.emails);
@@ -174,308 +166,268 @@ export function EmailAssistant() {
     }
   }
 
+  const handleFaceClick = (id: string) => {
+    setActiveMailbox(id as MailboxView);
+    setSelectedEmail(null); // Deselect email when changing view
+  }
+
+  const enhancedEmailCubeFaces = emailCubeFaces.map(face => ({
+    ...face,
+    onClick: handleFaceClick,
+  }));
+  
+  const filteredEmails = emails.filter(email => {
+      // This is a placeholder for filtering logic.
+      // For now, all views show all emails.
+      switch(activeMailbox) {
+          case 'Inbox':
+              return !email.labelIds?.includes('TRASH') && !email.labelIds?.includes('SENT');
+          case 'Starred':
+              return email.labelIds?.includes('STARRED');
+          case 'Sent':
+              return email.labelIds?.includes('SENT');
+          case 'Trash':
+              return email.labelIds?.includes('TRASH');
+          case 'Drafts':
+              return email.labelIds?.includes('DRAFT');
+          default:
+              return true;
+      }
+  })
+
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="h-full w-full flex flex-col text-foreground bg-background">
-        <div
-          className={cn(
-            "flex-1 flex md:grid overflow-hidden",
-            "md:grid-cols-[var(--nav-width)_1fr]"
-          )}
-          style={{'--nav-width': isNavCollapsed ? '80px' : '240px'} as React.CSSProperties}
-        >
-          <div className={cn(
-            "bg-background border-r border-border/50 p-3 hidden md:flex flex-col gap-4 transition-all duration-300",
-            isNavCollapsed && "items-center px-2"
-          )}>
+      <div className="h-full w-full flex flex-col text-foreground bg-background p-4 md:p-8 space-y-6">
+        
+        <InteractiveCube faces={enhancedEmailCubeFaces} />
+
+        <div className="flex-1 flex flex-col min-h-0 bg-card border border-border rounded-lg shadow-lg">
+          <div className="flex flex-col md:grid md:grid-cols-12 flex-1 overflow-hidden">
             <div className={cn(
-              "flex items-center w-full pb-2",
-              isNavCollapsed ? "justify-center" : "justify-between"
+              "flex flex-col border-r border-border/50 md:col-span-4",
+              selectedEmail && "hidden md:flex"
             )}>
-              <span className={cn("font-bold text-lg", isNavCollapsed && "hidden")}>Inbox</span>
-              <Button variant="ghost" size="icon" onClick={() => setIsNavCollapsed(!isNavCollapsed)} className="shrink-0">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle Navigation</span>
-              </Button>
-            </div>
-
-            <div className="w-full">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="secondary" className="w-full h-11">
-                    <PenSquare className={cn(isNavCollapsed ? "h-5 w-5" : "mr-2")} />
-                    <span className={cn(isNavCollapsed && "hidden")}>Compose</span>
+              <div className="p-4 border-b border-border/50 flex items-center justify-between">
+                <Typewriter text={activeMailbox} className="text-xl font-bold tracking-tight" />
+                <FadeIn delay={0.5}>
+                  <Button onClick={handleFetchEmails} disabled={isFetchingEmails} variant="outline" size="sm">
+                    {isFetchingEmails ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4"/>}
+                    Fetch
                   </Button>
-                </TooltipTrigger>
-                {isNavCollapsed && (
-                  <TooltipContent side="right">
-                    <p>Compose</p>
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            </div>
-
-            <nav className="flex flex-col gap-1 w-full">
-              {navLinks.map((link) => (
-                <Tooltip key={link.name}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant={link.name === 'Inbox' ? "secondary" : "ghost"}
-                      className={cn(
-                        'w-full justify-start gap-3 px-3 h-11 text-base',
-                        isNavCollapsed && 'justify-center h-11 w-11 p-0'
-                      )}
-                    >
-                      <link.icon className="w-5 w-5" />
-                      <span className={cn(isNavCollapsed && "hidden")}>{link.name}</span>
-                      {link.count && !isNavCollapsed && <span className="ml-auto bg-primary/20 text-primary text-xs font-bold px-2 py-0.5 rounded-full">{link.count}</span>}
-                    </Button>
-                  </TooltipTrigger>
-                  {isNavCollapsed && (
-                    <TooltipContent side="right">
-                      <p>{link.name}</p>
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              ))}
-            </nav>
-            <Separator className={cn("bg-border/50", isNavCollapsed && "w-3/4")}/>
-            <div className={cn("px-3 text-sm font-semibold uppercase text-muted-foreground", isNavCollapsed && "hidden")}>Categories</div>
-            <nav className="flex flex-col gap-1 w-full">
-              {categories.map((cat) => (
-                <Tooltip key={cat.name}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      key={cat.name}
-                      variant="ghost"
-                      className={cn(
-                        "w-full justify-start gap-3 px-3 h-10 text-base",
-                        isNavCollapsed && 'justify-center h-11 w-11 p-0'
-                      )}
-                    >
-                      <cat.icon className={cn('w-5 w-5', cat.color)} />
-                      <span className={cn(isNavCollapsed && "hidden")}>{cat.name}</span>
-                    </Button>
-                  </TooltipTrigger>
-                  {isNavCollapsed && (
-                    <TooltipContent side="right">
-                      <p>{cat.name}</p>
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              ))}
-            </nav>
-          </div>
-
-          <div className={cn(
-            "flex flex-col border-r border-border/50 w-full",
-            selectedEmail && "hidden md:flex"
-          )}>
-            <div className="p-4 border-b border-border/50 flex items-center justify-between">
-              <Typewriter text="Inbox" className="text-xl font-bold tracking-tight" />
-              <FadeIn delay={0.5}>
-                <Button onClick={handleFetchEmails} disabled={isFetchingEmails} variant="outline" size="sm">
-                  {isFetchingEmails ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4"/>}
-                  Fetch Inbox
-                </Button>
-              </FadeIn>
-            </div>
-            <ScrollArea className="flex-1 relative">
-              {isFetchingEmails ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm z-10">
-                    <div className="relative h-24 w-24 mb-4">
-                        <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
-                        <div className="absolute inset-2 border-4 border-primary/40 rounded-full animate-spin-reverse-slow"></div>
-                        <div className="absolute inset-4 border-4 border-primary/60 rounded-full animate-spin-slow"></div>
-                        <Mail className="h-10 w-10 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-                    </div>
-                    <Typewriter text="Accessing Email Datastream..." className="text-lg font-headline text-primary" speed={0.08} />
-                    <p className="text-muted-foreground mt-1 text-sm">Please stand by.</p>
-                </div>
-              ) : fetchError ? (
-                  <Alert variant="destructive" className="m-4">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Error Fetching Emails</AlertTitle>
-                    <AlertDescription>{fetchError}</AlertDescription>
-                  </Alert>
-              ) : emails.length === 0 ? (
-                  <div className="text-center p-10 text-muted-foreground">
-                    <Inbox className="mx-auto h-12 w-12" />
-                    <p className="mt-4">Your inbox is empty or you haven't fetched it yet.</p>
-                  </div>
-              ) : (
-                <div className="flex flex-col">
-                  {emails.map((email) => (
-                    <button
-                      key={email.id}
-                      onClick={() => setSelectedEmail(email)}
-                      className={cn(
-                        'flex flex-col gap-1.5 p-4 border-b border-border/20 text-left hover:bg-accent focus:bg-accent outline-none transition-colors',
-                        selectedEmail?.id === email.id && 'bg-accent',
-                        !email.read && 'bg-primary/5',
-                      )}
-                    >
-                      <div className="flex justify-between items-center">
-                        <h3 className={cn("text-base font-semibold", !email.read && "text-primary-foreground/90")}>{email.sender}</h3>
-                        {email.date && <p className="text-xs text-muted-foreground">{format(new Date(email.date), 'MMM d')}</p>}
+                </FadeIn>
+              </div>
+              <ScrollArea className="flex-1 relative">
+                {isFetchingEmails ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+                      <div className="relative h-24 w-24 mb-4">
+                          <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
+                          <div className="absolute inset-2 border-4 border-primary/40 rounded-full animate-spin-reverse-slow"></div>
+                          <div className="absolute inset-4 border-4 border-primary/60 rounded-full animate-spin-slow"></div>
+                          <Mail className="h-10 w-10 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                       </div>
-                      <h4 className={cn("text-sm font-medium", !email.read && "text-primary-foreground/80")}>{email.subject}</h4>
-                      <p className='text-sm text-muted-foreground truncate'>
-                        {email.body}
+                      <Typewriter text="Accessing Email Datastream..." className="text-lg font-headline text-primary" speed={0.08} />
+                      <p className="text-muted-foreground mt-1 text-sm">Please stand by.</p>
+                  </div>
+                ) : fetchError ? (
+                    <Alert variant="destructive" className="m-4">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Error Fetching Emails</AlertTitle>
+                      <AlertDescription>{fetchError}</AlertDescription>
+                    </Alert>
+                ) : filteredEmails.length === 0 ? (
+                    <div className="text-center p-10 text-muted-foreground">
+                      <Inbox className="mx-auto h-12 w-12" />
+                      <p className="mt-4">
+                        {emails.length === 0 ? "Your inbox is empty or you haven't fetched it yet." : `No emails in ${activeMailbox}.`}
                       </p>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </ScrollArea>
-          </div>
+                    </div>
+                ) : (
+                  <div className="flex flex-col">
+                    {filteredEmails.map((email) => (
+                      <button
+                        key={email.id}
+                        onClick={() => setSelectedEmail(email)}
+                        className={cn(
+                          'flex flex-col gap-1.5 p-4 border-b border-border/20 text-left hover:bg-accent focus:bg-accent outline-none transition-colors',
+                          selectedEmail?.id === email.id && 'bg-accent',
+                          !email.read && 'bg-primary/5',
+                        )}
+                      >
+                        <div className="flex justify-between items-center">
+                          <h3 className={cn("text-base font-semibold", !email.read && "text-primary-foreground/90")}>{email.sender}</h3>
+                          {email.date && <p className="text-xs text-muted-foreground">{format(new Date(email.date), 'MMM d')}</p>}
+                        </div>
+                        <h4 className={cn("text-sm font-medium", !email.read && "text-primary-foreground/80")}>{email.subject}</h4>
+                        <p className='text-sm text-muted-foreground truncate'>
+                          {email.body}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
 
-          {selectedEmail && (
-            <div className="flex flex-col bg-background flex-1">
-                <div className="p-4 flex justify-between items-center border-b border-border/50">
-                  <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => setSelectedEmail(null)} className="md:hidden">
-                      <ArrowLeft className="h-5 w-5" />
-                    </Button>
-                    <Avatar className="h-11 w-11">
-                      <AvatarFallback className="text-lg">{selectedEmail.sender.slice(0,2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h2 className="font-semibold text-lg">{selectedEmail.sender}</h2>
-                      <p className="text-sm text-muted-foreground">{selectedEmail.email}</p>
+            <div className={cn(
+                "flex-col bg-background flex-1 md:col-span-8",
+                selectedEmail ? "flex" : "hidden md:flex md:items-center md:justify-center"
+            )}>
+              {selectedEmail ? (
+                <>
+                  <div className="p-4 flex justify-between items-center border-b border-border/50">
+                    <div className="flex items-center gap-4">
+                      <Button variant="ghost" size="icon" onClick={() => setSelectedEmail(null)} className="md:hidden">
+                        <ArrowLeft className="h-5 w-5" />
+                      </Button>
+                      <Avatar className="h-11 w-11">
+                        <AvatarFallback className="text-lg">{selectedEmail.sender.slice(0,2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h2 className="font-semibold text-lg">{selectedEmail.sender}</h2>
+                        <p className="text-sm text-muted-foreground">{selectedEmail.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      {selectedEmail.date && <p className="text-sm mr-2">{format(new Date(selectedEmail.date), 'PPpp')}</p>}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                           <Button variant="ghost" size="icon"><Trash2 className="h-5 w-5" /></Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Delete</TooltipContent>
+                      </Tooltip>
+                       <Tooltip>
+                        <TooltipTrigger asChild>
+                           <Button variant="ghost" size="icon"><Clock className="h-5 w-5" /></Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Snooze</TooltipContent>
+                      </Tooltip>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon"><MoreVertical className="h-5 w-5" /></Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>Mark as unread</DropdownMenuItem>
+                          <DropdownMenuItem>Star this message</DropdownMenuItem>
+                          <DropdownMenuItem>Add to tasks</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    {selectedEmail.date && <p className="text-sm mr-2">{format(new Date(selectedEmail.date), 'PPpp')}</p>}
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                         <Button variant="ghost" size="icon"><Trash2 className="h-5 w-5" /></Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Delete</TooltipContent>
-                    </Tooltip>
-                     <Tooltip>
-                      <TooltipTrigger asChild>
-                         <Button variant="ghost" size="icon"><Clock className="h-5 w-5" /></Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Snooze</TooltipContent>
-                    </Tooltip>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon"><MoreVertical className="h-5 w-5" /></Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Mark as unread</DropdownMenuItem>
-                        <DropdownMenuItem>Star this message</DropdownMenuItem>
-                        <DropdownMenuItem>Add to tasks</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-                <ScrollArea className="flex-1 p-6">
-                  <Typewriter text={selectedEmail.subject} className="text-2xl font-bold mb-6 tracking-tight" />
-                  <FadeIn delay={0.5}>
-                    <p className="text-base whitespace-pre-wrap leading-7">
-                      {selectedEmail.body}
-                    </p>
-                  </FadeIn>
-                </ScrollArea>
-                 <div className="p-6 border-t border-border/50 bg-background space-y-4">
-                  <FadeIn stagger className="flex items-center gap-2">
-                    <StaggeredListItem>
-                      <Button variant="outline"><Reply className="mr-2 h-4 w-4" /> Reply</Button>
-                    </StaggeredListItem>
-                    <StaggeredListItem>
-                      <Button variant="outline"><ReplyAll className="mr-2 h-4 w-4" /> Reply All</Button>
-                    </StaggeredListItem>
-                    <StaggeredListItem>
-                      <Button variant="outline"><Forward className="mr-2 h-4 w-4" /> Forward</Button>
-                    </StaggeredListItem>
-                  </FadeIn>
-                  <FadeIn delay={0.4}>
-                    <Card className="border-primary/20 bg-primary/5">
-                      <CardHeader>
-                        <CardTitle className="text-base font-semibold">Draft a reply with Pravis</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <Form {...form}>
-                          <form onSubmit={form.handleSubmit(onDraftReply)} className="space-y-4">
-                            <div className="grid md:grid-cols-2 gap-4">
-                              <FormField
-                                control={form.control}
-                                name="tone"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Tone of Reply</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <ScrollArea className="flex-1">
+                    <div className="p-6">
+                      <Typewriter text={selectedEmail.subject} className="text-2xl font-bold mb-6 tracking-tight" />
+                      <FadeIn delay={0.5}>
+                        <p className="text-base whitespace-pre-wrap leading-7">
+                          {selectedEmail.body}
+                        </p>
+                      </FadeIn>
+                    </div>
+                  </ScrollArea>
+                   <div className="p-6 border-t border-border/50 bg-background space-y-4">
+                    <FadeIn stagger className="flex items-center gap-2">
+                      <StaggeredListItem>
+                        <Button variant="outline"><Reply className="mr-2 h-4 w-4" /> Reply</Button>
+                      </StaggeredListItem>
+                      <StaggeredListItem>
+                        <Button variant="outline"><ReplyAll className="mr-2 h-4 w-4" /> Reply All</Button>
+                      </StaggeredListItem>
+                      <StaggeredListItem>
+                        <Button variant="outline"><Forward className="mr-2 h-4 w-4" /> Forward</Button>
+                      </StaggeredListItem>
+                    </FadeIn>
+                    <FadeIn delay={0.4}>
+                      <Card className="border-primary/20 bg-primary/5">
+                        <CardHeader>
+                          <CardTitle className="text-base font-semibold">Draft a reply with Pravis</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onDraftReply)} className="space-y-4">
+                              <div className="grid md:grid-cols-2 gap-4">
+                                <FormField
+                                  control={form.control}
+                                  name="tone"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Tone of Reply</FormLabel>
+                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Select a tone" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="Friendly">Friendly</SelectItem>
+                                          <SelectItem value="Formal">Formal</SelectItem>
+                                          <SelectItem value="Casual">Casual</SelectItem>
+                                          <SelectItem value="Professional">Professional</SelectItem>
+                                          <SelectItem value="Direct">Direct</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name="parameters"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Specific Instructions</FormLabel>
                                       <FormControl>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Select a tone" />
-                                        </SelectTrigger>
+                                        <Textarea placeholder="e.g., Acknowledge receipt and say you'll reply in full tomorrow." {...field} />
                                       </FormControl>
-                                      <SelectContent>
-                                        <SelectItem value="Friendly">Friendly</SelectItem>
-                                        <SelectItem value="Formal">Formal</SelectItem>
-                                        <SelectItem value="Casual">Casual</SelectItem>
-                                        <SelectItem value="Professional">Professional</SelectItem>
-                                        <SelectItem value="Direct">Direct</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="parameters"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Specific Instructions</FormLabel>
-                                    <FormControl>
-                                      <Textarea placeholder="e.g., Acknowledge receipt and say you'll reply in full tomorrow." {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                              <Button type="submit" disabled={isDrafting} className="w-full">
+                                {isDrafting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PenSquare className="mr-2 h-4 w-4" />}
+                                Draft Reply
+                              </Button>
+                            </form>
+                          </Form>
+                          {(isDrafting || draftedReply) && (
+                            <div className="space-y-2 pt-4">
+                              <Label>Generated Reply</Label>
+                              {isDrafting && !draftedReply ? (
+                                <div className="space-y-2 rounded-md border border-input p-4">
+                                  <Skeleton className="h-4 w-full" />
+                                  <Skeleton className="h-4 w-full" />
+                                  <Skeleton className="h-4 w-3/4" />
+                                </div>
+                              ) : (
+                                <Textarea
+                                  value={draftedReply}
+                                  readOnly
+                                  rows={5}
+                                  className="bg-background"
+                                />
+                              )}
+                              {draftedReply && !isDrafting && (
+                                <div className="flex justify-end gap-2 pt-2">
+                                  <Button variant="ghost" onClick={() => setDraftedReply('')}>Discard</Button>
+                                  <Button><Send className="mr-2 h-4 w-4" /> Send</Button>
+                                </div>
+                              )}
                             </div>
-                            <Button type="submit" disabled={isDrafting} className="w-full">
-                              {isDrafting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PenSquare className="mr-2 h-4 w-4" />}
-                              Draft Reply
-                            </Button>
-                          </form>
-                        </Form>
-                        {(isDrafting || draftedReply) && (
-                          <div className="space-y-2 pt-4">
-                            <Label>Generated Reply</Label>
-                            {isDrafting && !draftedReply ? (
-                              <div className="space-y-2 rounded-md border border-input p-4">
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-3/4" />
-                              </div>
-                            ) : (
-                              <Textarea
-                                value={draftedReply}
-                                readOnly
-                                rows={5}
-                                className="bg-background"
-                              />
-                            )}
-                            {draftedReply && !isDrafting && (
-                              <div className="flex justify-end gap-2 pt-2">
-                                <Button variant="ghost" onClick={() => setDraftedReply('')}>Discard</Button>
-                                <Button><Send className="mr-2 h-4 w-4" /> Send</Button>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </FadeIn>
-                </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </FadeIn>
+                  </div>
+                </>
+              ) : (
+                 <div className="text-center p-10 text-muted-foreground flex flex-col items-center">
+                    <Mail className="mx-auto h-16 w-16 mb-4" />
+                    <h2 className="text-xl font-semibold text-foreground mb-1">Select an email</h2>
+                    <p>Choose an email from the list to read it.</p>
+                  </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </TooltipProvider>

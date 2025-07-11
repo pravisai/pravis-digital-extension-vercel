@@ -1,4 +1,5 @@
 
+
 export type Email = {
     id: string;
     subject: string;
@@ -7,4 +8,5 @@ export type Email = {
     read: boolean;
     sender: string;
     email: string;
+    labelIds?: string[];
 };
