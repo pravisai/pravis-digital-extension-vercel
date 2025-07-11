@@ -270,29 +270,14 @@
     margin-top: -129.9px;
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
   }
-
-  .pyramid-base {
-    width: 300px;
-    height: 300px;
-    margin-left: -150px;
-    margin-top: -150px;
-    transform: rotateX(90deg) translateZ(86.6px);
-  }
   
-  .pyramid-front  { transform: rotateY(0deg) translateZ(150px) rotateX(19.47deg); transform-origin: 50% 100%; }
-  .pyramid-right  { transform: rotateY(90deg) translateZ(150px) rotateX(19.47deg); transform-origin: 50% 100%; }
-  .pyramid-back   { transform: rotateY(180deg) translateZ(150px) rotateX(19.47deg); transform-origin: 50% 100%; }
-  .pyramid-left   { transform: rotateY(-90deg) translateZ(150px) rotateX(19.47deg); transform-origin: 50% 100%; }
+  /* 3-sided pyramid (tetrahedron) */
+  .pyramid-front  { transform: rotateY(0deg) translateZ(86.6px) rotateX(19.47deg); transform-origin: 50% 100%; }
+  .pyramid-right  { transform: rotateY(120deg) translateZ(86.6px) rotateX(19.47deg); transform-origin: 50% 100%; }
+  .pyramid-back   { transform: rotateY(240deg) translateZ(86.6px) rotateX(19.47deg); transform-origin: 50% 100%; }
   
   .pyramid-ground {
-    position: absolute;
-    top: calc(50% + 86.6px);
-    left: 50%;
-    transform: translateX(-50%) rotateX(90deg);
-    width: 350px;
-    height: 350px;
-    background: radial-gradient(circle, hsl(var(--primary) / 0.1) 0%, transparent 60%);
-    border-radius: 50%;
+    display: none;
   }
 
   .pyramid-content {

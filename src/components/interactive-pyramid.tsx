@@ -162,11 +162,9 @@ export function InteractivePyramid({ faces }: InteractivePyramidProps) {
                                 "pyramid-face", 
                                 {
                                   'pyramid-side': item.position !== 'base',
-                                  'pyramid-base': item.position === 'base',
                                   'pyramid-front': item.position === 'front',
                                   'pyramid-right': item.position === 'right',
                                   'pyramid-back': item.position === 'back',
-                                  'pyramid-left': item.position === 'left',
                                 }
                             )}
                             onClick={() => handleFaceClick(item)}
