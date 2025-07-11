@@ -9,7 +9,6 @@ export interface PyramidFace {
   id: string;
   icon: React.ElementType;
   title: string;
-  description: string;
   href?: string;
   onClick?: (id: string) => void;
   position: 'front' | 'right' | 'back' | 'left' | 'base';
@@ -172,7 +171,6 @@ export function InteractivePyramid({ faces }: InteractivePyramidProps) {
                             <div className="pyramid-content">
                                 <item.icon className="pyramid-icon" />
                                 <h3 className="pyramid-title">{item.title}</h3>
-                                <p className="pyramid-description">{item.description}</p>
                             </div>
                         </div>
                     ))}

@@ -9,7 +9,6 @@ const interactionModes: PyramidFace[] = [
   {
     id: "chat",
     title: "Chat with me",
-    description: "Start a creative brainstorming session.",
     icon: MessageSquare,
     href: "/dashboard/creative-partner/chat",
     position: "front"
@@ -17,7 +16,6 @@ const interactionModes: PyramidFace[] = [
   {
     id: "call",
     title: "Call me",
-    description: "Engage in a voice conversation.",
     icon: Phone,
     href: "#", // Placeholder
     position: "right"
@@ -25,7 +23,6 @@ const interactionModes: PyramidFace[] = [
   {
     id: "train",
     title: "Train me",
-    description: "Personalize responses for you.",
     icon: BrainCircuit,
     href: "#", // Placeholder
     position: "back"
