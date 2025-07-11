@@ -16,7 +16,7 @@ export function ChatPanel() {
     <div
       className={cn(
         'fixed bottom-0 left-0 right-0 z-50 flex flex-col transition-all duration-300 ease-in-out',
-        isPanelOpen ? 'h-[85%]' : 'h-0'
+        isPanelOpen ? 'h-[70%]' : 'h-0'
       )}
     >
         <Card className="flex-1 flex flex-col rounded-t-2xl overflow-hidden border-t border-border/50">
