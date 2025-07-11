@@ -133,7 +133,13 @@ export function CalendarView({ accessToken }: { accessToken: string }) {
     }, [date, events]);
     
     const eventDays = useMemo(() => {
-        return events.map(event => event.start.dateTime ? parseISO(event.start.dateTime) : startOfDay(parseISO(event.start.date!)));
+        return events
+            .map(event => {
+                if (event.start?.dateTime) return parseISO(event.start.dateTime);
+                if (event.start?.date) return startOfDay(parseISO(event.start.date));
+                return null;
+            })
+            .filter((d): d is Date => d !== null);
     }, [events]);
 
     return (
