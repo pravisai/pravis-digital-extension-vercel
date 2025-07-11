@@ -1,7 +1,8 @@
 
+
 "use client"
 
-import { BrainCircuit, Mail, ListChecks, Bot, User, Settings, LogOut, ArrowLeft, LineChart, CheckCircle2, MessageSquare, Timer, Sun, Moon } from "lucide-react"
+import { BrainCircuit, Mail, ListChecks, Bot, User, Settings, LogOut, ArrowLeft, LineChart, CheckCircle2, MessageSquare, Timer, Sun, Moon, RefreshCw, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { signOutUser } from "@/lib/firebase/auth"
@@ -30,6 +31,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ClarityChat } from "@/components/clarity-chat"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useEmail } from "@/contexts/email-context"
+import { EmailProvider } from "@/contexts/email-context"
 
 
 const statCards = [
@@ -62,6 +65,16 @@ const statCards = [
     icon: Timer,
   },
 ]
+
+function EmailFetchButton() {
+    const { handleFetchEmails, isFetchingEmails } = useEmail();
+    return (
+        <Button onClick={handleFetchEmails} disabled={isFetchingEmails} variant="outline" size="sm">
+            {isFetchingEmails ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+            Fetch Inbox
+        </Button>
+    )
+}
 
 function DashboardHeader() {
   const pathname = usePathname();
@@ -119,6 +132,7 @@ function DashboardHeader() {
   
         <div className="flex items-center gap-2">
           <ThemeToggle />
+          {pathname === '/dashboard/email-assistant' && <EmailFetchButton />}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="shrink-0">
@@ -228,36 +242,51 @@ function MobileNav({ onChatOpen }: { onChatOpen: () => void }) {
   );
 }
 
+
+function LayoutWrapper({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    const [isChatOpen, setIsChatOpen] = useState(false);
+  
+    const isFullHeightPage = pathname === '/dashboard/creative-partner' || pathname === '/dashboard/clarity-chat' || pathname === '/dashboard/email-assistant';
+
+    return (
+        <div className="flex min-h-screen w-full flex-col">
+            <DashboardHeader />
+            <main className={cn(
+                "flex-1 pb-20 md:pb-0",
+                {
+                    "p-4 md:p-8": !isFullHeightPage,
+                    "h-[calc(100vh-4rem)]": isFullHeightPage,
+                }
+            )}>
+                {children}
+            </main>
+            <MobileNav onChatOpen={() => setIsChatOpen(true)} />
+            
+            <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
+                <SheetContent side="bottom" className="h-[90vh] p-0 border-none flex flex-col bg-card rounded-t-lg">
+                    <ClarityChat />
+                </SheetContent>
+            </Sheet>
+        </div>
+    )
+}
+
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const pathname = usePathname();
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  
-  const isEmailPage = pathname === '/dashboard/email-assistant';
-  const isFullHeightPage = pathname === '/dashboard/creative-partner' || pathname === '/dashboard/clarity-chat';
+  const pathname = usePathname()
 
-  return (
-    <div className="flex min-h-screen w-full flex-col">
-      <DashboardHeader />
-      <main className={cn(
-        "flex-1 pb-20 md:pb-0",
-        {
-          "p-4 md:p-8": !isEmailPage,
-          "md:h-[calc(100vh-4rem)]": isFullHeightPage,
-        }
-      )}>
-        {children}
-      </main>
-      <MobileNav onChatOpen={() => setIsChatOpen(true)} />
-      
-      <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
-        <SheetContent side="bottom" className="h-[90vh] p-0 border-none flex flex-col bg-card rounded-t-lg">
-           <ClarityChat />
-        </SheetContent>
-      </Sheet>
-    </div>
-  )
+  if (pathname === '/dashboard/email-assistant') {
+    return (
+      <EmailProvider>
+        <LayoutWrapper>{children}</LayoutWrapper>
+      </EmailProvider>
+    )
+  }
+
+  return <LayoutWrapper>{children}</LayoutWrapper>
 }
