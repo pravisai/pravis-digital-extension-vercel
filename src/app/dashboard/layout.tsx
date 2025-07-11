@@ -203,40 +203,17 @@ function DashboardHeader() {
 function MobileNav({ onChatOpen }: { onChatOpen: () => void }) {
   const pathname = usePathname();
 
-  const navItemsLeft = [
-    { href: "/dashboard/email-assistant", icon: Mail, label: "Email" },
-  ];
-  const navItemsRight = [
-    { href: "/dashboard/creative-partner", icon: ListChecks, label: "Tasks" },
-  ];
-
   return (
     <div className="md:hidden fixed bottom-0 left-0 z-40 w-full h-20 bg-background/80 backdrop-blur-sm border-t">
-      <div className="grid h-full grid-cols-3 mx-auto font-medium">
-        {navItemsLeft.map(item => (
-          <Link key={item.href} href={item.href} className="inline-flex flex-col items-center justify-center px-2 text-center hover:bg-accent group">
-            <item.icon className={cn("w-6 h-6 mb-1 text-muted-foreground group-hover:text-primary", { "text-primary": pathname.startsWith(item.href) })} />
-            <span className={cn("text-xs text-muted-foreground group-hover:text-primary", { "text-primary": pathname.startsWith(item.href) })}>{item.label}</span>
-          </Link>
-        ))}
-        
-        <div className="flex items-center justify-center">
-          <Button
-            onClick={onChatOpen}
-            size="icon"
-            className="w-16 h-16 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 shadow-lg shadow-primary/30 -translate-y-4"
-          >
-            <Bot className="w-8 h-8" />
-            <span className="sr-only">Open Pravis Assistant</span>
-          </Button>
-        </div>
-
-        {navItemsRight.map(item => (
-          <Link key={item.href} href={item.href} className="inline-flex flex-col items-center justify-center px-2 text-center hover:bg-accent group">
-            <item.icon className={cn("w-6 h-6 mb-1 text-muted-foreground group-hover:text-primary", { "text-primary": pathname.startsWith(item.href) })} />
-            <span className={cn("text-xs text-muted-foreground group-hover:text-primary", { "text-primary": pathname.startsWith(item.href) })}>{item.label}</span>
-          </Link>
-        ))}
+      <div className="flex items-center justify-center h-full">
+        <Button
+          onClick={onChatOpen}
+          size="icon"
+          className="w-16 h-16 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 shadow-lg shadow-primary/30 -translate-y-4"
+        >
+          <Bot className="w-8 h-8" />
+          <span className="sr-only">Open Pravis Assistant</span>
+        </Button>
       </div>
     </div>
   );
@@ -265,7 +242,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
             
             <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
                 <SheetContent side="bottom" className="h-[90vh] p-0 border-none flex flex-col bg-card rounded-t-lg">
-                    <SheetHeader>
+                    <SheetHeader className="p-4">
                         <SheetTitle className="sr-only">Pravis Assistant</SheetTitle>
                     </SheetHeader>
                     <ClarityChat />
