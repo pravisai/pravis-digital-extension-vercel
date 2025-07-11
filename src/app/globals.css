@@ -264,17 +264,17 @@
   }
   
   .pyramid-side {
-    width: 350px;
-    height: 303.11px; /* width * sqrt(3)/2 */
-    margin-left: -175px;
-    margin-top: -151.55px;
+    width: 400px;
+    height: 346.41px; /* width * sqrt(3)/2 */
+    margin-left: -200px;
+    margin-top: -173.205px;
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
   }
   
   /* 3-sided pyramid (tetrahedron) */
-  .pyramid-front  { transform: rotateY(0deg) translateZ(101.04px) rotateX(19.47deg); transform-origin: 50% 100%; }
-  .pyramid-right  { transform: rotateY(120deg) translateZ(101.04px) rotateX(19.47deg); transform-origin: 50% 100%; }
-  .pyramid-back   { transform: rotateY(240deg) translateZ(101.04px) rotateX(19.47deg); transform-origin: 50% 100%; }
+  .pyramid-front  { transform: rotateY(0deg) translateZ(115.47px) rotateX(19.47deg); transform-origin: 50% 100%; }
+  .pyramid-right  { transform: rotateY(120deg) translateZ(115.47px) rotateX(19.47deg); transform-origin: 50% 100%; }
+  .pyramid-back   { transform: rotateY(240deg) translateZ(115.47px) rotateX(19.47deg); transform-origin: 50% 100%; }
   
   .pyramid-ground {
     display: none;
@@ -288,6 +288,8 @@
     justify-content: center;
     align-items: center;
     padding-bottom: 3.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 
   .pyramid-base .pyramid-content {
