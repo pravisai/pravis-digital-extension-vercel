@@ -77,13 +77,15 @@ function EmailView() {
   });
 
   useEffect(() => {
-    // Set the active mailbox to Inbox when this page loads
-    setActiveMailbox("Inbox");
+    // Set the active mailbox to Inbox when this page loads, if not already set.
+    if (activeMailbox !== "Inbox") {
+      setActiveMailbox("Inbox");
+    }
     // Fetch emails if they haven't been fetched yet
-    if (emails.length === 0) {
+    if (emails.length === 0 && !isFetchingEmails) {
         handleFetchEmails();
     }
-  }, [setActiveMailbox, emails, handleFetchEmails]);
+  }, [activeMailbox, emails.length, handleFetchEmails, setActiveMailbox, isFetchingEmails]);
 
   useEffect(() => {
     if (selectedEmail) {
