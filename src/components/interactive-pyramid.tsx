@@ -12,6 +12,7 @@ export interface PyramidFace {
   description: string;
   href?: string;
   onClick?: (id: string) => void;
+  position: 'front' | 'right' | 'back' | 'left' | 'base';
 }
 
 interface InteractivePyramidProps {
@@ -21,25 +22,13 @@ interface InteractivePyramidProps {
 export function InteractivePyramid({ faces }: InteractivePyramidProps) {
     const router = useRouter();
     const pyramidRef = useRef<HTMLDivElement>(null);
-    const pyramidWrapperRef = useRef<HTMLDivElement>(null);
+    const wrapperRef = useRef<HTMLDivElement>(null);
     const isDraggingRef = useRef(false);
     const startCoordsRef = useRef({ x: 0, y: 0 });
-    const currentRotationRef = useRef({ x: -20, y: 30 });
+    const currentRotationRef = useRef({ x: -15, y: 30 });
     const rotationAtDragStart = useRef({ x: 0, y: 0 });
     const didDragRef = useRef(false);
     const autoRotateIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-    const updateLightReflection = useCallback((rotation: { x: number, y: number }) => {
-        if (pyramidWrapperRef.current) {
-            const normY = (rotation.y % 360) / 360;
-            const normX = (rotation.x % 360) / 360;
-            
-            const bgX = 50 - normY * 30;
-            const bgY = 50 + normX * 30;
-            
-            pyramidWrapperRef.current.style.backgroundPosition = `${bgX}% ${bgY}%`;
-        }
-    }, []);
 
     const stopAutoRotation = useCallback(() => {
         if (autoRotateIntervalRef.current) {
@@ -52,25 +41,23 @@ export function InteractivePyramid({ faces }: InteractivePyramidProps) {
         stopAutoRotation();
         autoRotateIntervalRef.current = setInterval(() => {
             if (!isDraggingRef.current) {
-                currentRotationRef.current.y += 0.5;
+                currentRotationRef.current.y += 0.25;
                 if (pyramidRef.current) {
                     pyramidRef.current.style.transition = 'none';
                     pyramidRef.current.style.transform = `rotateX(${currentRotationRef.current.x}deg) rotateY(${currentRotationRef.current.y}deg)`;
                 }
-                updateLightReflection(currentRotationRef.current);
             }
         }, 30);
-    }, [stopAutoRotation, updateLightReflection]);
+    }, [stopAutoRotation]);
 
     useEffect(() => {
         if (pyramidRef.current) {
             const { x, y } = currentRotationRef.current;
             pyramidRef.current.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
-            updateLightReflection({ x, y });
         }
         startAutoRotation();
         return () => stopAutoRotation();
-    }, [startAutoRotation, stopAutoRotation, updateLightReflection]);
+    }, [startAutoRotation, stopAutoRotation]);
 
     const handleDragStart = useCallback((clientX: number, clientY: number) => {
         stopAutoRotation();
@@ -102,8 +89,7 @@ export function InteractivePyramid({ faces }: InteractivePyramidProps) {
         
         currentRotationRef.current = { x: rotationX, y: rotationY };
         pyramidRef.current.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
-        updateLightReflection({ x: rotationX, y: rotationY });
-    }, [updateLightReflection]);
+    }, []);
 
     const handleDragEnd = useCallback(() => {
         if (!isDraggingRef.current) return;
@@ -119,14 +105,14 @@ export function InteractivePyramid({ faces }: InteractivePyramidProps) {
 
 
     const handleFaceClick = (face: PyramidFace) => {
-        if (didDragRef.current) return;
+        if (didDragRef.current || face.position === 'base') return;
         if (face.href && face.href !== '#') {
             router.push(face.href);
         } else if (face.onClick) {
             face.onClick(face.id);
         }
     };
-
+    
     useEffect(() => {
         const pyramidEl = pyramidRef.current;
         if (!pyramidEl) return;
@@ -165,26 +151,34 @@ export function InteractivePyramid({ faces }: InteractivePyramidProps) {
         };
     }, [handleDragStart, handleDragMove, handleDragEnd]);
 
-    // Use only the first 4 faces for the pyramid
-    const pyramidFaces = faces.slice(0, 4);
-
     return (
-        <div className="cube-wrapper" ref={pyramidWrapperRef}>
-            <div className="pyramid-container">
+        <div className="cube-wrapper" ref={wrapperRef}>
+            <div className="pyramid-scene">
                 <div ref={pyramidRef} className="pyramid">
-                    {pyramidFaces.map((item, index) => (
+                    {faces.map((item) => (
                         <div
                             key={item.id}
-                            className={cn("pyramid-face", `pyramid-face-${index}`)}
+                            className={cn(
+                                "pyramid-face", 
+                                {
+                                  'pyramid-side': item.position !== 'base',
+                                  'pyramid-base': item.position === 'base',
+                                  'pyramid-front': item.position === 'front',
+                                  'pyramid-right': item.position === 'right',
+                                  'pyramid-back': item.position === 'back',
+                                  'pyramid-left': item.position === 'left',
+                                }
+                            )}
                             onClick={() => handleFaceClick(item)}
                         >
-                            <div className="pyramid-content">
+                            <div className={cn("pyramid-content", item.position !== 'base' && 'pb-12')}>
                                 <item.icon className="pyramid-icon" />
                                 <h3 className="pyramid-title">{item.title}</h3>
                                 <p className="pyramid-description">{item.description}</p>
                             </div>
                         </div>
                     ))}
+                    <div className="pyramid-ground"></div>
                 </div>
             </div>
         </div>

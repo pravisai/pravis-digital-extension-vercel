@@ -224,19 +224,19 @@
     line-height: 1.4;
   }
 
-  /* Pyramid Styles */
-  .pyramid-container {
-    width: 200px;
-    height: 200px;
-    position: relative;
-    transform-style: preserve-3d;
+  /* --- Pyramid Styles --- */
+  .pyramid-scene {
+    width: 250px;
+    height: 250px;
+    perspective: 1000px;
   }
-
+  
   .pyramid {
     width: 100%;
     height: 100%;
     position: relative;
     transform-style: preserve-3d;
+    transform: rotateX(-15deg) rotateY(30deg);
     cursor: grab;
     transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
   }
@@ -244,7 +244,7 @@
   .pyramid:active {
     cursor: grabbing;
   }
-  
+
   .pyramid-face {
     position: absolute;
     width: 200px;
@@ -258,29 +258,55 @@
     user-select: none;
     backface-visibility: hidden;
     transition: all 0.3s ease;
-  }
-  
-  .pyramid-face::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
     background: linear-gradient(155deg, rgba(46, 46, 46, 0.6) 0%, rgba(26, 26, 26, 0.6) 100%);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
   }
-  
-  .pyramid-face:hover::before {
-    background: linear-gradient(155deg, rgba(46, 46, 46, 0.7), rgba(26, 26, 26, 0.7));
+
+  .pyramid-face:hover {
+     background: linear-gradient(155deg, rgba(46, 46, 46, 0.7), rgba(26, 26, 26, 0.7));
     border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 0 20px 5px var(--glow-color, rgba(255, 255, 255, 0.1));
+    box-shadow: 0 0 20px 5px hsl(var(--primary)/0.2);
+  }
+
+  .pyramid-side {
+    clip-path: polygon(50% 0, 0 100%, 100% 100%);
+  }
+
+  .pyramid-base {
+    border-radius: 4px;
+    transform: translateY(68px) rotateX(-90deg);
+  }
+
+  .pyramid-front {
+    transform-origin: bottom;
+    transform: rotateY(0deg) rotateX(30deg) translateY(-32px);
+  }
+  .pyramid-back {
+    transform-origin: bottom;
+    transform: rotateY(180deg) rotateX(30deg) translateY(-32px);
+  }
+  .pyramid-left {
+    transform-origin: bottom;
+    transform: rotateY(-90deg) rotateX(30deg) translateY(-32px);
+  }
+  .pyramid-right {
+    transform-origin: bottom;
+    transform: rotateY(90deg) rotateX(30deg) translateY(-32px);
   }
   
+  .pyramid-ground {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%) rotateX(90deg);
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, hsl(var(--primary) / 0.1) 0%, transparent 60%);
+    border-radius: 50%;
+  }
+
   .pyramid-content {
     position: relative;
     z-index: 1;
@@ -288,9 +314,9 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding-bottom: 2rem;
+    padding-bottom: 2rem; /* Push content up on the triangle */
   }
-  
+
   .pyramid-icon {
     width: 48px;
     height: 48px;
@@ -315,12 +341,6 @@
     color: rgba(255, 255, 255, 0.75);
     margin-top: 0.25rem;
   }
-
-  /* Pyramid face positions */
-  .pyramid-face-0 { transform: translateY(25%) rotateX(-30deg) rotateY(0deg) translateZ(58px); transform-origin: 50% 100%; }
-  .pyramid-face-1 { transform: translateY(25%) rotateX(-30deg) rotateY(120deg) translateZ(58px); transform-origin: 50% 100%; }
-  .pyramid-face-2 { transform: translateY(25%) rotateX(-30deg) rotateY(240deg) translateZ(58px); transform-origin: 50% 100%; }
-  .pyramid-face-3 { transform: translateY(25%) rotateX(90deg) rotateY(0deg) translateZ(58px); transform-origin: 50% 100%; }
 
 
   @media (max-width: 768px) {

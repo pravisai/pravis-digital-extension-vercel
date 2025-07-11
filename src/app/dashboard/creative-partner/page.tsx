@@ -3,7 +3,7 @@
 
 import { InteractivePyramid, type PyramidFace } from "@/components/interactive-pyramid";
 import { FadeIn } from "@/components/animations/fade-in";
-import { MessageSquare, Phone, BrainCircuit, Zap } from "lucide-react";
+import { MessageSquare, Phone, BrainCircuit, Zap, Pyramid } from "lucide-react";
 
 const interactionModes: PyramidFace[] = [
   {
@@ -12,6 +12,7 @@ const interactionModes: PyramidFace[] = [
     description: "Start a creative brainstorming session.",
     icon: MessageSquare,
     href: "/dashboard/creative-partner/chat",
+    position: "front"
   },
   {
     id: "call",
@@ -19,6 +20,7 @@ const interactionModes: PyramidFace[] = [
     description: "Engage in a voice conversation.",
     icon: Phone,
     href: "#", // Placeholder
+    position: "right"
   },
   {
     id: "train",
@@ -26,6 +28,7 @@ const interactionModes: PyramidFace[] = [
     description: "Personalize responses for you.",
     icon: BrainCircuit,
     href: "#", // Placeholder
+    position: "back"
   },
   {
     id: "future",
@@ -33,6 +36,15 @@ const interactionModes: PyramidFace[] = [
     description: "A new way to interact is coming soon.",
     icon: Zap,
     href: "#", // Placeholder
+    position: "left"
+  },
+  {
+    id: "base",
+    title: "Pravis",
+    description: "Loud Think Core",
+    icon: Pyramid,
+    href: "#",
+    position: "base"
   }
 ];
 
