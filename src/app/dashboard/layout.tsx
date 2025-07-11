@@ -28,11 +28,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ClarityChat } from "@/components/clarity-chat"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useEmail } from "@/contexts/email-context"
 import { EmailProvider } from "@/contexts/email-context"
+import { ChatPanel } from "@/components/chat-panel"
 
 
 const statCards = [
@@ -200,29 +200,8 @@ function DashboardHeader() {
 }
 
 
-function MobileNav({ onChatOpen }: { onChatOpen: () => void }) {
-  const pathname = usePathname();
-
-  return (
-    <div className="md:hidden fixed bottom-0 left-0 z-40 w-full h-20 bg-background/80 backdrop-blur-sm border-t">
-      <div className="flex items-center justify-center h-full">
-        <Button
-          onClick={onChatOpen}
-          size="icon"
-          className="w-16 h-16 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 shadow-lg shadow-primary/30 -translate-y-4"
-        >
-          <Bot className="w-8 h-8" />
-          <span className="sr-only">Open Pravis Assistant</span>
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const [isChatOpen, setIsChatOpen] = useState(false);
   
     const isFullHeightPage = pathname === '/dashboard/creative-partner' || pathname === '/dashboard/clarity-chat' || pathname.startsWith('/dashboard/email-assistant');
 
@@ -230,24 +209,19 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
         <div className="flex min-h-screen w-full flex-col">
             <DashboardHeader />
             <main className={cn(
-                "flex-1 pb-20 md:pb-0",
+                "flex-1",
                 {
                     "p-4 md:p-8": !isFullHeightPage,
                     "h-[calc(100vh-4rem)]": isFullHeightPage,
-                }
+                },
+                 // Add padding to the bottom to avoid content being hidden by the chat panel on mobile
+                "pb-20 md:pb-0"
             )}>
                 {children}
             </main>
-            <MobileNav onChatOpen={() => setIsChatOpen(true)} />
-            
-            <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
-                <SheetContent side="bottom" className="h-[90vh] p-0 border-none flex flex-col bg-card rounded-t-lg">
-                    <SheetHeader className="p-4">
-                        <SheetTitle className="sr-only">Pravis Assistant</SheetTitle>
-                    </SheetHeader>
-                    <ClarityChat />
-                </SheetContent>
-            </Sheet>
+            <div className="md:hidden">
+              <ChatPanel />
+            </div>
         </div>
     )
 }
