@@ -3,7 +3,7 @@
 
 import { InteractivePyramid, type PyramidFace } from "@/components/interactive-pyramid";
 import { FadeIn } from "@/components/animations/fade-in";
-import { MessageSquare, Phone, BrainCircuit } from "lucide-react";
+import { MessageSquare, Phone, BrainCircuit, Zap } from "lucide-react";
 
 const interactionModes: PyramidFace[] = [
   {
@@ -25,6 +25,13 @@ const interactionModes: PyramidFace[] = [
     title: "Train me",
     description: "Personalize responses for you.",
     icon: BrainCircuit,
+    href: "#", // Placeholder
+  },
+  {
+    id: "future",
+    title: "Future Feature",
+    description: "A new way to interact is coming soon.",
+    icon: Zap,
     href: "#", // Placeholder
   }
 ];
