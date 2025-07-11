@@ -9,13 +9,20 @@ export const fetchCalendarEvents = async (accessToken: string) => {
       },
     });
   
-    const data = await response.json();
-  
     if (!response.ok) {
-      console.error('Google Calendar API Error:', data);
-      throw new Error(data.error?.message || 'Failed to fetch events');
+      let errorMessage = 'Failed to fetch events';
+      try {
+        const errorData = await response.json();
+        console.error('Google Calendar API Error:', errorData);
+        errorMessage = errorData.error?.message || `API error: ${response.statusText}`;
+      } catch (e) {
+        console.error('Google Calendar API Error (non-JSON response):', await response.text());
+        errorMessage = `API error: ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
   
+    const data = await response.json();
     return data.items || [];
   };
   
