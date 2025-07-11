@@ -258,6 +258,7 @@
     user-select: none;
     backface-visibility: hidden;
     transition: all 0.3s ease;
+    transform-origin: bottom;
   }
   
   .pyramid-face::before {
@@ -317,10 +318,10 @@
   }
 
   /* Pyramid face positions */
-  .pyramid-face-0 { transform: rotateY(0deg) translateZ(70px) rotateX(15deg); }
-  .pyramid-face-1 { transform: rotateY(90deg) translateZ(70px) rotateX(15deg); }
-  .pyramid-face-2 { transform: rotateY(180deg) translateZ(70px) rotateX(15deg); }
-  .pyramid-face-3 { transform: rotateY(-90deg) translateZ(70px) rotateX(15deg); }
+  .pyramid-face-0 { transform: rotateY(0deg) rotateX(60deg) translateZ(58px); }
+  .pyramid-face-1 { transform: rotateY(90deg) rotateX(60deg) translateZ(58px); }
+  .pyramid-face-2 { transform: rotateY(180deg) rotateX(60deg) translateZ(58px); }
+  .pyramid-face-3 { transform: rotateY(-90deg) rotateX(60deg) translateZ(58px); }
 
 
   @media (max-width: 768px) {
