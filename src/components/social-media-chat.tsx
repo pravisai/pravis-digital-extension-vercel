@@ -6,7 +6,7 @@ import Image from "next/image"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Loader2, PenSquare, Send, Paperclip } from "lucide-react"
+import { Loader2, PenSquare, Send, Paperclip, ClipboardCopy } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -77,6 +77,14 @@ export function SocialPostGenerator() {
 
   const handleAttachmentClick = () => {
     fileInputRef.current?.click();
+  };
+  
+  const handleCopy = () => {
+    navigator.clipboard.writeText(generatedPost);
+    toast({
+      title: "Copied!",
+      description: "Post content copied to clipboard.",
+    });
   };
 
   return (
@@ -173,15 +181,20 @@ export function SocialPostGenerator() {
           ) : (
             <Textarea
               value={generatedPost}
-              readOnly
+              onChange={(e) => setGeneratedPost(e.target.value)}
               rows={6}
               className="bg-secondary"
             />
           )}
           {generatedPost && !isGenerating && (
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="ghost" onClick={() => setGeneratedPost('')}>Discard</Button>
-              <Button><Send className="mr-2 h-4 w-4" /> Post</Button>
+            <div className="flex justify-between items-center pt-2">
+              <Button variant="outline" onClick={handleCopy}>
+                <ClipboardCopy className="mr-2 h-4 w-4" /> Copy
+              </Button>
+              <div className="flex gap-2">
+                  <Button variant="ghost" onClick={() => setGeneratedPost('')}>Discard</Button>
+                  <Button><Send className="mr-2 h-4 w-4" /> Post</Button>
+              </div>
             </div>
           )}
         </FadeIn>
