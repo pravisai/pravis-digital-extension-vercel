@@ -62,7 +62,7 @@ export const useSpeechToText = ({ onTranscriptReady }: UseSpeechToTextOptions = 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       // The "network" error is common and can happen if the service is temporarily unavailable.
       // We can choose to log it silently or handle it gracefully.
-      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+      if (event.error !== 'no-speech' && event.error !== 'aborted' && event.error !== 'network') {
         console.error('Speech recognition error:', event.error);
       }
       setIsRecording(false);
