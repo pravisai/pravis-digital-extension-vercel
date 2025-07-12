@@ -101,6 +101,7 @@ export function SocialPostGenerator() {
         description: "Could not copy content to clipboard.",
       })
     }
+    return success;
   };
 
   const handleUndo = () => {
@@ -122,8 +123,6 @@ export function SocialPostGenerator() {
         url = `https://twitter.com/intent/tweet?text=${text}`;
         break;
       case "LinkedIn":
-        // LinkedIn's 'summary' parameter is not consistently supported for pre-filling posts.
-        // The most reliable method is to copy and open the sharing page.
         url = `https://www.linkedin.com/sharing/share-offsite/?summary=${text}`;
         break;
       case "Facebook":
@@ -131,9 +130,11 @@ export function SocialPostGenerator() {
         break;
       case "Threads":
         // Threads has no web sharing intent, so we copy and open the main page.
-        await handleCopy();
-        url = 'https://www.threads.net/';
-        needsCopyToast = true;
+        const copied = await handleCopy();
+        if (copied) {
+          url = 'https://www.threads.net/';
+          needsCopyToast = true;
+        }
         break;
     }
     
