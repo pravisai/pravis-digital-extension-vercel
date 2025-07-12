@@ -17,6 +17,7 @@ import { socialMediaChat } from "@/ai/flows/social-media-chat"
 import { Skeleton } from "./ui/skeleton"
 import { Label } from "./ui/label"
 import { FadeIn } from "./animations/fade-in"
+import { copyToClipboard } from "@/lib/clipboard"
 
 const postGeneratorSchema = z.object({
   platform: z.string().min(1, { message: "Please select a platform." }),
@@ -86,12 +87,20 @@ export function SocialPostGenerator() {
     fileInputRef.current?.click();
   };
   
-  const handleCopy = () => {
-    navigator.clipboard.writeText(generatedPost);
-    toast({
-      title: "Copied!",
-      description: "Post content copied to clipboard.",
-    });
+  const handleCopy = async () => {
+    const success = await copyToClipboard(generatedPost);
+    if (success) {
+      toast({
+        title: "Copied!",
+        description: "Post content copied to clipboard.",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Copy Failed",
+        description: "Could not copy content to clipboard.",
+      })
+    }
   };
 
   const handleUndo = () => {
@@ -103,15 +112,18 @@ export function SocialPostGenerator() {
     setOriginalGeneratedPost('');
   }
 
-  const handlePost = () => {
+  const handlePost = async () => {
     const text = encodeURIComponent(generatedPost);
     let url = "";
+    let needsCopyToast = false;
 
     switch (platform) {
       case "Twitter":
         url = `https://twitter.com/intent/tweet?text=${text}`;
         break;
       case "LinkedIn":
+        // LinkedIn's 'summary' parameter is not consistently supported for pre-filling posts.
+        // The most reliable method is to copy and open the sharing page.
         url = `https://www.linkedin.com/sharing/share-offsite/?summary=${text}`;
         break;
       case "Facebook":
@@ -119,13 +131,16 @@ export function SocialPostGenerator() {
         break;
       case "Threads":
         // Threads has no web sharing intent, so we copy and open the main page.
-        handleCopy();
+        await handleCopy();
         url = 'https://www.threads.net/';
-        toast({ title: "Copied to clipboard!", description: "Paste the content into your new Threads post." });
+        needsCopyToast = true;
         break;
     }
     
     if (url) {
+        if (needsCopyToast) {
+            toast({ title: "Copied to clipboard!", description: "Paste the content into your new Threads post." });
+        }
         window.open(url, '_blank', 'noopener,noreferrer');
     }
   }
