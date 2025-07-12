@@ -24,6 +24,8 @@ const postGeneratorSchema = z.object({
   imageDataUri: z.string().optional(),
 });
 
+type PostGeneratorValues = z.infer<typeof postGeneratorSchema>;
+
 export function SocialPostGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedPost, setGeneratedPost] = useState("");
@@ -31,7 +33,7 @@ export function SocialPostGenerator() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const form = useForm<z.infer<typeof postGeneratorSchema>>({
+  const form = useForm<PostGeneratorValues>({
     resolver: zodResolver(postGeneratorSchema),
     defaultValues: {
       platform: "Twitter",
@@ -41,9 +43,10 @@ export function SocialPostGenerator() {
   });
 
   const imageDataUri = form.watch("imageDataUri");
+  const platform = form.watch("platform");
   const isPostEdited = generatedPost !== originalGeneratedPost && originalGeneratedPost !== "";
 
-  async function onCreatePost(values: z.infer<typeof postGeneratorSchema>) {
+  async function onCreatePost(values: PostGeneratorValues) {
     setIsGenerating(true);
     setGeneratedPost("");
     setOriginalGeneratedPost("");
@@ -99,6 +102,42 @@ export function SocialPostGenerator() {
     setGeneratedPost('');
     setOriginalGeneratedPost('');
   }
+
+  const handlePost = () => {
+    const text = encodeURIComponent(generatedPost);
+    let url = "";
+
+    switch (platform) {
+        case "Twitter":
+            url = `https://twitter.com/intent/tweet?text=${text}`;
+            break;
+        case "LinkedIn":
+             // LinkedIn doesn't have a good text-sharing intent URL, so we open the feed.
+             // Best practice is to copy the text first.
+            handleCopy();
+            url = `https://www.linkedin.com/feed/`;
+            toast({ title: "Copied to clipboard!", description: "Paste the content into your new LinkedIn post." });
+            break;
+        case "Facebook":
+            // Facebook sharer works best with a URL. Since we don't have one, we'll open the main page.
+            // A better user experience is to have them copy/paste.
+            handleCopy();
+            url = 'https://www.facebook.com/';
+            toast({ title: "Copied to clipboard!", description: "Paste the content into your new Facebook post." });
+            break;
+        case "Threads":
+            // Threads has no web sharing intent, so we open the main page.
+            handleCopy();
+            url = 'https://www.threads.net/';
+            toast({ title: "Copied to clipboard!", description: "Paste the content into your new Threads post." });
+            break;
+    }
+    
+    if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  }
+
 
   return (
     <div className="w-full">
@@ -214,7 +253,7 @@ export function SocialPostGenerator() {
               </Button>
               <div className="flex gap-2">
                   <Button variant="ghost" onClick={handleDiscard}>Discard</Button>
-                  <Button><Send className="mr-2 h-4 w-4" /> Post</Button>
+                  <Button onClick={handlePost}><Send className="mr-2 h-4 w-4" /> Post</Button>
               </div>
             </div>
           )}
