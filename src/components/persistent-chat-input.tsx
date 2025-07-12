@@ -54,7 +54,7 @@ export function PersistentChatInput() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onFocus={handleFocus}
-                placeholder={isRecording ? "Listening..." : "Message Pravis..."}
+                placeholder={isRecording ? "Listening..." : "Shall we begin, sir?"}
                 className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 h-12"
                 disabled={isLoading || isRecording}
             />
