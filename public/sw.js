@@ -2,36 +2,24 @@
 
 self.addEventListener('install', (event) => {
   console.log('Service Worker: Installing...');
-  // Skip waiting to activate the new service worker immediately.
+  // Perform install steps
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   console.log('Service Worker: Activating...');
-  // Take control of all pages under its scope immediately.
+  // Perform activate steps
   event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener('push', (event) => {
-  console.log('Service Worker: Push Received.');
-  const data = event.data ? event.data.json() : { title: 'Pravis', body: 'You have a new notification.' };
-  
-  const title = data.title || 'Pravis';
-  const options = {
-    body: data.body || 'New message from Pravis.',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-96x96.png',
-    vibrate: [200, 100, 200]
-  };
-
-  event.waitUntil(self.registration.showNotification(title, options));
+self.addEventListener('fetch', (event) => {
+  // This is a basic pass-through fetch handler.
+  // More complex caching strategies can be added here later.
+  event.respondWith(fetch(event.request));
 });
 
-self.addEventListener('notificationclick', (event) => {
-  console.log('Service Worker: Notification clicked.');
-  event.notification.close();
-  
-  event.waitUntil(
-    clients.openWindow('/')
-  );
+// Listener for push notifications (placeholder for now)
+self.addEventListener('push', (event) => {
+  console.log('Service Worker: Push Received.');
+  // Future logic to display a notification will go here.
 });
