@@ -108,28 +108,21 @@ export function SocialPostGenerator() {
     let url = "";
 
     switch (platform) {
-        case "Twitter":
-            url = `https://twitter.com/intent/tweet?text=${text}`;
-            break;
-        case "LinkedIn":
-             // LinkedIn doesn't have a good text-sharing intent URL, so we open the feed.
-             // Best practice is to copy the text first.
-            handleCopy();
-            url = `https://www.linkedin.com/feed/`;
-            toast({ title: "Copied to clipboard!", description: "Paste the content into your new LinkedIn post." });
-            break;
-        case "Facebook":
-            // Facebook sharer works best with a URL. We use a sharer link with a quote.
-            handleCopy();
-            url = `https://www.facebook.com/sharer/sharer.php?u=https://app.example.com&quote=${text}`;
-            toast({ title: "Copied to clipboard!", description: "Paste the content into your new Facebook post." });
-            break;
-        case "Threads":
-            // Threads has no web sharing intent, so we open the main page.
-            handleCopy();
-            url = 'https://www.threads.net/';
-            toast({ title: "Copied to clipboard!", description: "Paste the content into your new Threads post." });
-            break;
+      case "Twitter":
+        url = `https://twitter.com/intent/tweet?text=${text}`;
+        break;
+      case "LinkedIn":
+        url = `https://www.linkedin.com/sharing/share-offsite/?summary=${text}`;
+        break;
+      case "Facebook":
+        url = `https://www.facebook.com/sharer/sharer.php?quote=${text}`;
+        break;
+      case "Threads":
+        // Threads has no web sharing intent, so we copy and open the main page.
+        handleCopy();
+        url = 'https://www.threads.net/';
+        toast({ title: "Copied to clipboard!", description: "Paste the content into your new Threads post." });
+        break;
     }
     
     if (url) {
