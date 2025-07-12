@@ -61,12 +61,11 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
                 setEmails(result.emails);
             }
         } catch (err: any) {
-            console.error('Error in email fetching process:', err);
-            let message = err.message || 'An unknown error occurred.';
-            if (err.code === 'auth/popup-closed-by-user') {
-                message = 'The sign-in popup was closed. Please try again.';
+            if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+                console.error('Error in email fetching process:', err);
+                let message = err.message || 'An unknown error occurred.';
+                setFetchError(message);
             }
-            setFetchError(message);
         } finally {
             setIsFetchingEmails(false);
         }
