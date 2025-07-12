@@ -1,11 +1,12 @@
 
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useRef } from "react"
+import Image from "next/image"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Loader2, PenSquare, Send } from "lucide-react"
+import { Loader2, PenSquare, Send, Paperclip } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -20,20 +21,25 @@ import { FadeIn } from "./animations/fade-in"
 const postGeneratorSchema = z.object({
   platform: z.string().min(1, { message: "Please select a platform." }),
   instructions: z.string().min(10, { message: "Please provide at least 10 characters of instructions." }),
+  imageDataUri: z.string().optional(),
 });
 
 export function SocialPostGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedPost, setGeneratedPost] = useState("");
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof postGeneratorSchema>>({
     resolver: zodResolver(postGeneratorSchema),
     defaultValues: {
       platform: "Twitter",
       instructions: "",
+      imageDataUri: undefined,
     },
   });
+
+  const imageDataUri = form.watch("imageDataUri");
 
   async function onCreatePost(values: z.infer<typeof postGeneratorSchema>) {
     setIsGenerating(true);
@@ -43,6 +49,7 @@ export function SocialPostGenerator() {
       const result = await socialMediaChat({
         platform: values.platform,
         instructions: values.instructions,
+        imageDataUri: values.imageDataUri,
       });
       setGeneratedPost(result.post);
     } catch (error) {
@@ -56,6 +63,21 @@ export function SocialPostGenerator() {
       setIsGenerating(false);
     }
   }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        form.setValue("imageDataUri", reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAttachmentClick = () => {
+    fileInputRef.current?.click();
+  };
 
   return (
     <div className="w-full">
@@ -101,10 +123,41 @@ export function SocialPostGenerator() {
               </FormItem>
             )}
           />
-          <Button type="submit" disabled={isGenerating} className="w-full">
-            {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PenSquare className="mr-2 h-4 w-4" />}
-            Create Post
-          </Button>
+
+          {imageDataUri && (
+            <div className="space-y-2">
+              <Label>Image Preview</Label>
+              <div className="relative w-32 h-32 rounded-md overflow-hidden">
+                <Image src={imageDataUri} alt="Preview" layout="fill" objectFit="cover" />
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-1 right-1 h-6 w-6"
+                  onClick={() => form.setValue("imageDataUri", undefined)}
+                >
+                  X
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={handleAttachmentClick}>
+                <Paperclip className="mr-2 h-4 w-4" />
+                Add Image
+            </Button>
+            <Button type="submit" disabled={isGenerating} className="flex-grow">
+              {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PenSquare className="mr-2 h-4 w-4" />}
+              Create Post
+            </Button>
+          </div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden"
+            accept="image/*"
+          />
         </form>
       </Form>
       
