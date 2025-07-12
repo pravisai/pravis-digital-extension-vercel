@@ -193,8 +193,36 @@ function DashboardHeader() {
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const { isPanelOpen } = useChat();
+    const { toast } = useToast();
   
     const isFullHeightPage = pathname === '/dashboard/creative-partner' || pathname === '/dashboard/clarity-chat' || pathname.startsWith('/dashboard/email-assistant') || pathname === '/dashboard/tasks' || pathname === '/dashboard/social-media';
+    
+    useEffect(() => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(
+                (registration) => {
+                    console.log('Service Worker registration successful with scope: ', registration.scope);
+                },
+                (err) => {
+                    console.log('Service Worker registration failed: ', err);
+                }
+            );
+        }
+    }, []);
+
+    useEffect(() => {
+        // Request notification permission on component mount
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    toast({ title: "Notifications Enabled", description: "You will now receive updates from Pravis." });
+                } else {
+                    toast({ title: "Notifications Blocked", description: "You can enable notifications in your browser settings." });
+                }
+            });
+        }
+    }, [toast]);
+
 
     return (
         <div className="flex min-h-screen w-full flex-col">
