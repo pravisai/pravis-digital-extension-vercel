@@ -1,7 +1,7 @@
 
 "use client";
 
-import { CreativePartner } from "@/components/creative-partner";
+import { ProductivitySuite } from "@/components/productivity-suite";
 import { FadeIn } from "@/components/animations/fade-in";
 import { useToast } from "@/hooks/use-toast";
 import { getStoredAccessToken, signInWithGoogle } from "@/lib/firebase/auth";
@@ -44,7 +44,7 @@ export default function TasksPage() {
             <div className="flex items-center justify-center h-full">
                  <div className="text-center">
                     <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-                    <p className="text-lg font-semibold">Loading Task Manager...</p>
+                    <p className="text-lg font-semibold">Loading Productivity Suite...</p>
                 </div>
             </div>
         );
@@ -52,7 +52,7 @@ export default function TasksPage() {
 
     return (
         <FadeIn className="w-full h-full p-4 md:p-6">
-            {accessToken ? <CreativePartner accessToken={accessToken} /> : <div className="text-center p-8">Could not load Task Manager. Access token is missing.</div>}
+            {accessToken ? <ProductivitySuite accessToken={accessToken} /> : <div className="text-center p-8">Could not load Productivity Suite. Access token is missing.</div>}
         </FadeIn>
     )
 }

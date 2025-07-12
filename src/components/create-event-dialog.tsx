@@ -1,11 +1,11 @@
 
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { createCalendarEvent } from "@/lib/calender";
+import { createCalendarEvent, updateCalendarEvent, type EventCreationDetails } from "@/lib/calender";
+import type { CalendarEvent } from '@/types/calendar';
 
 const eventFormSchema = z.object({
   summary: z.string().min(1, "Title is required."),
@@ -63,21 +64,29 @@ interface CreateEventDialogProps {
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
     onEventCreated: () => void;
+    eventToEdit?: CalendarEvent | null;
 }
 
-export function CreateEventDialog({ accessToken, isOpen, onOpenChange, onEventCreated }: CreateEventDialogProps) {
+export function CreateEventDialog({ accessToken, isOpen, onOpenChange, onEventCreated, eventToEdit }: CreateEventDialogProps) {
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
 
-    const {
-        control,
-        handleSubmit,
-        watch,
-        setValue,
-        formState: { errors },
-    } = useForm<EventFormValues>({
-        resolver: zodResolver(eventFormSchema),
-        defaultValues: {
+    const isEditing = !!eventToEdit;
+
+    const getDefaultValues = () => {
+        if (isEditing && eventToEdit) {
+            const isAllDayEvent = !!eventToEdit.start.date;
+            return {
+                summary: eventToEdit.summary || "",
+                description: eventToEdit.description || "",
+                isAllDay: isAllDayEvent,
+                startDate: parseISO(eventToEdit.start.date || eventToEdit.start.dateTime!),
+                endDate: parseISO(eventToEdit.end.date || eventToEdit.end.dateTime!),
+                startTime: isAllDayEvent ? "" : format(parseISO(eventToEdit.start.dateTime!), "HH:mm"),
+                endTime: isAllDayEvent ? "" : format(parseISO(eventToEdit.end.dateTime!), "HH:mm"),
+            }
+        }
+        return {
             summary: "",
             description: "",
             isAllDay: false,
@@ -85,35 +94,63 @@ export function CreateEventDialog({ accessToken, isOpen, onOpenChange, onEventCr
             endDate: new Date(),
             startTime: format(new Date(), "HH:mm"),
             endTime: format(new Date(new Date().getTime() + 60 * 60 * 1000), "HH:mm")
-        },
+        }
+    };
+
+    const {
+        control,
+        handleSubmit,
+        watch,
+        setValue,
+        reset,
+        formState: { errors },
+    } = useForm<EventFormValues>({
+        resolver: zodResolver(eventFormSchema),
+        defaultValues: getDefaultValues(),
     });
+
+    useEffect(() => {
+        reset(getDefaultValues());
+    }, [eventToEdit, reset]);
 
     const isAllDay = watch("isAllDay");
     const startDate = watch("startDate");
 
-     React.useEffect(() => {
-        setValue("endDate", startDate);
-    }, [startDate, setValue]);
+     useEffect(() => {
+        // When start date changes, if end date is before it, update end date.
+        const endDate = watch("endDate");
+        if (endDate < startDate) {
+           setValue("endDate", startDate);
+        }
+    }, [startDate, setValue, watch]);
 
     const onSubmit = async (data: EventFormValues) => {
         setIsLoading(true);
+        const details: EventCreationDetails = { ...data };
+
         try {
-            const result = await createCalendarEvent(accessToken, { ...data });
+            let result;
+            if (isEditing && eventToEdit) {
+                result = await updateCalendarEvent(accessToken, eventToEdit.id, details);
+            } else {
+                result = await createCalendarEvent(accessToken, details);
+            }
+
             if (result.error) {
                 throw new Error(result.error);
             }
             toast({
-                title: "Event Created",
-                description: `"${data.summary}" has been added to your calendar.`,
+                title: isEditing ? "Event Updated" : "Event Created",
+                description: `"${data.summary}" has been saved.`,
             });
             onEventCreated();
             onOpenChange(false);
         } catch (err: any) {
-            console.error("Failed to create event:", err);
+            console.error("Failed to save event:", err);
             toast({
                 variant: "destructive",
-                title: "Error Creating Event",
-                description: err.message || "Could not create the event. Please try again.",
+                title: "Error Saving Event",
+                description: err.message || "Could not save the event. Please try again.",
             });
         } finally {
             setIsLoading(false);
@@ -124,8 +161,10 @@ export function CreateEventDialog({ accessToken, isOpen, onOpenChange, onEventCr
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Create New Event</DialogTitle>
-                    <DialogDescription>Add a new event to your primary Google Calendar.</DialogDescription>
+                    <DialogTitle>{isEditing ? 'Edit Event' : 'Create New Event'}</DialogTitle>
+                    <DialogDescription>
+                        {isEditing ? 'Update the details for your event.' : 'Add a new event to your primary Google Calendar.'}
+                    </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div>
@@ -133,7 +172,7 @@ export function CreateEventDialog({ accessToken, isOpen, onOpenChange, onEventCr
                         <Controller
                             name="summary"
                             control={control}
-                            render={({ field }) => <Input id="summary" {...field} />}
+                            render={({ field }) => <Input id="summary" placeholder="e.g., Team Meeting or Task: Finish report" {...field} />}
                         />
                         {errors.summary && <p className="text-sm text-destructive mt-1">{errors.summary.message}</p>}
                     </div>
@@ -228,7 +267,7 @@ export function CreateEventDialog({ accessToken, isOpen, onOpenChange, onEventCr
                         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
                         <Button type="submit" disabled={isLoading}>
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Create Event
+                            {isEditing ? 'Save Changes' : 'Create Event'}
                         </Button>
                     </DialogFooter>
                 </form>

@@ -16,11 +16,11 @@ const modules: CubeFace[] = [
       colorClass: "neon-purple"
     },
     {
-      id: "calendar",
-      href: "/dashboard/calendar",
+      id: "tasks",
+      href: "/dashboard/tasks",
       icon: Calendar,
-      label: "Calendar",
-      description: "Manage your schedule and events seamlessly.",
+      label: "Productivity",
+      description: "Manage your schedule and tasks seamlessly.",
       face: "right",
       colorClass: "electric-blue"
     },

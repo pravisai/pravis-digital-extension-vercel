@@ -23,5 +23,6 @@ export interface CalendarEvent {
       email: string;
       self: boolean;
     };
+    isTask?: boolean;
   }
   

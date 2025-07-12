@@ -16,15 +16,9 @@ export const fetchCalendarEvents = async (
   tasksOnly = false
 ): Promise<{ events: CalendarEvent[]; error: string | null }> => {
   const now = new Date();
-  const timeMin = tasksOnly ? new Date(now.setFullYear(now.getFullYear() - 1)).toISOString() : now.toISOString();
+  const timeMin = now.toISOString();
 
   let url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin}&maxResults=250&singleEvents=true&orderBy=startTime`;
-  if (tasksOnly) {
-    // This is a simple way to identify tasks created by the app.
-    // A more robust way might be to use extended properties.
-    url += `&q=Created from Pravis Productivity Suite`;
-  }
-
 
   const response = await fetch(
     url,
@@ -66,6 +60,7 @@ export const fetchCalendarEvents = async (
     attendees: event.attendees || [],
     hangoutLink: event.hangoutLink,
     creator: event.creator,
+    isTask: event.summary?.toLowerCase().includes('task:'), // Simple task identification
   }));
 
   return { events, error: null };
@@ -149,3 +144,95 @@ export const createCalendarEvent = async (
   const createdEvent = await response.json();
   return { event: createdEvent, error: null };
 }
+
+/**
+ * Deletes an event from the user's primary Google Calendar.
+ * @param accessToken OAuth 2.0 token
+ * @param eventId The ID of the event to delete
+ */
+export const deleteCalendarEvent = async (accessToken: string, eventId: string): Promise<{ error: string | null }> => {
+  const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${eventId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    try {
+      const errorData = await response.json();
+      console.error('Google Calendar API Error (Delete):', errorData);
+      return { error: errorData?.error?.message || 'Could not delete the event.' };
+    } catch (e) {
+      const textError = await response.text();
+       console.error('Non-JSON error response (Delete):', textError);
+      return { error: textError || 'Failed to delete event.' };
+    }
+  }
+  return { error: null };
+}
+
+/**
+ * Updates an event in the user's primary Google Calendar.
+ * @param accessToken OAuth 2.0 token
+ * @param eventId The ID of the event to update
+ * @param details The updated details of the event
+ */
+export const updateCalendarEvent = async (
+  accessToken: string,
+  eventId: string,
+  details: EventCreationDetails
+): Promise<{ event: CalendarEvent | null; error: string | null }> => {
+   let start, end;
+
+  if (details.isAllDay) {
+    start = { date: format(details.startDate, 'yyyy-MM-dd') };
+    end = { date: format(new Date(details.endDate.getTime() + 24 * 60 * 60 * 1000), 'yyyy-MM-dd') };
+  } else {
+    const [startHour, startMinute] = (details.startTime || "00:00").split(':').map(Number);
+    const startDateTime = set(details.startDate, { hours: startHour, minutes: startMinute });
+
+    const [endHour, endMinute] = (details.endTime || "00:00").split(':').map(Number);
+    const endDateTime = set(details.endDate, { hours: endHour, minutes: endMinute });
+
+    start = { dateTime: startDateTime.toISOString() };
+    end = { dateTime: endDateTime.toISOString() };
+  }
+  
+  const event = {
+    summary: details.summary,
+    description: details.description,
+    start,
+    end,
+  };
+
+  const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${eventId}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(event)
+  });
+  
+  if (!response.ok) {
+     try {
+      const errorData = await response.json();
+      console.error('Google Calendar API Error (Update):', errorData);
+      return {
+        event: null,
+        error: errorData?.error?.message || 'Could not update the event.',
+      };
+    } catch (e) {
+      const textError = await response.text();
+      console.error('Non-JSON error response (Update):', textError);
+      return {
+        event: null,
+        error: textError || 'Failed to update event.',
+      };
+    }
+  }
+  
+  const updatedEvent = await response.json();
+  return { event: updatedEvent, error: null };
+};
