@@ -119,10 +119,9 @@ export function SocialPostGenerator() {
             toast({ title: "Copied to clipboard!", description: "Paste the content into your new LinkedIn post." });
             break;
         case "Facebook":
-            // Facebook sharer works best with a URL. Since we don't have one, we'll open the main page.
-            // A better user experience is to have them copy/paste.
+            // Facebook sharer works best with a URL. We use a sharer link with a quote.
             handleCopy();
-            url = 'https://www.facebook.com/';
+            url = `https://www.facebook.com/sharer/sharer.php?u=https://app.example.com&quote=${text}`;
             toast({ title: "Copied to clipboard!", description: "Paste the content into your new Facebook post." });
             break;
         case "Threads":
