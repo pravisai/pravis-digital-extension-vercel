@@ -6,3 +6,4 @@ import '@/ai/flows/facilitate-creative-brainstorming.ts';
 import '@/ai/flows/draft-email-replies.ts';
 import '@/ai/flows/provide-clarity-through-chat.ts';
 import '@/ai/flows/social-media-chat.ts';
+import '@/ai/flows/text-to-speech.ts';

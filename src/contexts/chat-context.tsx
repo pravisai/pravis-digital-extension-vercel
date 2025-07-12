@@ -2,7 +2,8 @@
 "use client";
 
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
-import { provideClarityThroughChat } from "@/ai/flows/provide-clarity-through-chat"
+import { provideClarityThroughChat } from "@/ai/flows/provide-clarity-through-chat";
+import { textToSpeech } from "@/ai/flows/text-to-speech";
 
 interface Message {
   role: "user" | "pravis";
@@ -14,9 +15,12 @@ interface ChatContextType {
     isLoading: boolean;
     input: string;
     isPanelOpen: boolean;
+    audioDataUri: string | null;
+    isSpeaking: boolean;
     setInput: (input: string) => void;
-    handleSendMessage: (e: React.FormEvent) => Promise<void>;
+    handleSendMessage: (e: React.FormEvent, isVoiceInput?: boolean) => Promise<void>;
     setPanelOpen: (isOpen: boolean) => void;
+    setAudioDataUri: (uri: string | null) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -26,6 +30,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isPanelOpen, setPanelOpen] = useState(false);
+    const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
+    const [isSpeaking, setIsSpeaking] = useState(false);
 
     useEffect(() => {
         if (messages.length === 0) {
@@ -37,21 +43,36 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
           ])
         }
     }, [messages.length]);
+    
+    useEffect(() => {
+        if (audioDataUri) {
+            setIsSpeaking(true);
+        } else {
+            setIsSpeaking(false);
+        }
+    }, [audioDataUri]);
 
-    const handleSendMessage = useCallback(async (e: React.FormEvent) => {
+    const handleSendMessage = useCallback(async (e: React.FormEvent, isVoiceInput = false) => {
         e.preventDefault();
         if (!input.trim()) return;
 
         setPanelOpen(true);
         const userMessage: Message = { role: "user", content: input };
+        const currentInput = input;
         setMessages((prev) => [...prev, userMessage]);
         setInput("");
         setIsLoading(true);
 
         try {
-            const result = await provideClarityThroughChat({ userMessage: input });
+            const result = await provideClarityThroughChat({ userMessage: currentInput });
             const pravisMessage: Message = { role: "pravis", content: result.pravisResponse };
             setMessages((prev) => [...prev, pravisMessage]);
+            
+            if (isVoiceInput) {
+                const audioResult = await textToSpeech(result.pravisResponse);
+                setAudioDataUri(audioResult.media);
+            }
+
         } catch (error: any) {
             console.error("Error fetching response from Pravis:", error);
             let messageContent = "I'm having trouble connecting right now. Please try again later.";
@@ -70,9 +91,12 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         isLoading,
         input,
         isPanelOpen,
+        audioDataUri,
+        isSpeaking,
         setInput,
         handleSendMessage,
         setPanelOpen,
+        setAudioDataUri,
     };
 
     return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

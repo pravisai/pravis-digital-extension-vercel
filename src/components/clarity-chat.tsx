@@ -14,16 +14,20 @@ import { useSpeechToText } from "@/hooks/use-speech-to-text"
 import { cn } from "@/lib/utils"
 
 export function ClarityChat() {
-  const { messages, isLoading, input, setInput, handleSendMessage } = useChat();
+  const { messages, isLoading, input, setInput, handleSendMessage, audioDataUri, setAudioDataUri } = useChat();
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const { isRecording, transcript, startRecording, stopRecording } = useSpeechToText({
     onTranscriptReady: (text) => {
         setInput(text);
         // Automatically submit the form once transcription is ready
-        setTimeout(() => formRef.current?.requestSubmit(), 100);
+        setTimeout(() => {
+            // We need to get the latest handleSendMessage function
+            formRef.current?.dispatchEvent(new CustomEvent('submit-voice', { bubbles: true }));
+        }, 100);
     }
   });
 
@@ -31,7 +35,7 @@ export function ClarityChat() {
     if (transcript) {
         setInput(transcript);
     }
-  }, [transcript]);
+  }, [transcript, setInput]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -47,6 +51,13 @@ export function ClarityChat() {
         if(viewport) viewport.scrollTop = viewport.scrollHeight;
     }
   }, [messages, isLoading]);
+  
+  useEffect(() => {
+      if (audioDataUri && audioRef.current) {
+          audioRef.current.src = audioDataUri;
+          audioRef.current.play().catch(e => console.error("Audio playback failed:", e));
+      }
+  }, [audioDataUri]);
 
   const handleMicClick = () => {
     if (isRecording) {
@@ -55,6 +66,22 @@ export function ClarityChat() {
       startRecording();
     }
   };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+      handleSendMessage(e, false);
+  }
+
+  const handleVoiceSubmit = (e: React.FormEvent) => {
+      handleSendMessage(e, true);
+  }
+
+  useEffect(() => {
+    const form = formRef.current;
+    form?.addEventListener('submit-voice', handleVoiceSubmit);
+    return () => {
+      form?.removeEventListener('submit-voice', handleVoiceSubmit);
+    }
+  }, [handleVoiceSubmit]);
 
   return (
     <div className="flex flex-col h-full bg-card shadow-sm">
@@ -119,7 +146,7 @@ export function ClarityChat() {
             </div>
       </ScrollArea>
       <footer className="p-2 border-t">
-        <form onSubmit={handleSendMessage} ref={formRef} className="flex items-center gap-2">
+        <form onSubmit={handleFormSubmit} ref={formRef} className="flex items-center gap-2">
             <div className="flex-1 flex items-center bg-secondary rounded-full px-2">
                 <Button variant="ghost" size="icon" type="button" className="shrink-0 rounded-full">
                     <Smile className="h-6 w-6 text-muted-foreground" />
@@ -164,6 +191,7 @@ export function ClarityChat() {
             )}
         </form>
       </footer>
+      <audio ref={audioRef} onEnded={() => setAudioDataUri(null)} className="hidden" />
     </div>
   )
 }
