@@ -137,7 +137,6 @@ export function SocialPostGenerator() {
     }
   }
 
-
   return (
     <div className="w-full">
       <Form {...form}>
@@ -258,8 +257,7 @@ export function SocialPostGenerator() {
           )}
           <pre className="mt-4 p-4 bg-secondary rounded-md text-xs overflow-x-auto">
             <code>
-              {
-`<changes>
+              {`<changes>
   <description>[Provide a concise summary of the overall changes being made]</description>
   <change>
     <file>[Provide the ABSOLUTE, FULL path to the file being modified]</file>
