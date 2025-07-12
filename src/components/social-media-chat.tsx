@@ -6,7 +6,7 @@ import Image from "next/image"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Loader2, PenSquare, Send, Paperclip, ClipboardCopy } from "lucide-react"
+import { Loader2, PenSquare, Send, Paperclip, ClipboardCopy, RotateCcw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -27,6 +27,7 @@ const postGeneratorSchema = z.object({
 export function SocialPostGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedPost, setGeneratedPost] = useState("");
+  const [originalGeneratedPost, setOriginalGeneratedPost] = useState("");
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -40,10 +41,12 @@ export function SocialPostGenerator() {
   });
 
   const imageDataUri = form.watch("imageDataUri");
+  const isPostEdited = generatedPost !== originalGeneratedPost && originalGeneratedPost !== "";
 
   async function onCreatePost(values: z.infer<typeof postGeneratorSchema>) {
     setIsGenerating(true);
     setGeneratedPost("");
+    setOriginalGeneratedPost("");
 
     try {
       const result = await socialMediaChat({
@@ -52,6 +55,7 @@ export function SocialPostGenerator() {
         imageDataUri: values.imageDataUri,
       });
       setGeneratedPost(result.post);
+      setOriginalGeneratedPost(result.post);
     } catch (error) {
       console.error("Failed to generate post:", error);
       toast({
@@ -86,6 +90,15 @@ export function SocialPostGenerator() {
       description: "Post content copied to clipboard.",
     });
   };
+
+  const handleUndo = () => {
+    setGeneratedPost(originalGeneratedPost);
+  }
+
+  const handleDiscard = () => {
+    setGeneratedPost('');
+    setOriginalGeneratedPost('');
+  }
 
   return (
     <div className="w-full">
@@ -169,9 +182,17 @@ export function SocialPostGenerator() {
         </form>
       </Form>
       
-      {(isGenerating || generatedPost) && (
+      {(isGenerating || generatedPost || originalGeneratedPost) && (
         <FadeIn className="mt-6 space-y-2">
-          <Label>Generated Post</Label>
+           <div className="relative">
+             <Label>Generated Post</Label>
+              {isPostEdited && (
+                <Button variant="ghost" size="icon" className="absolute top-0 right-0 h-7 w-7" onClick={handleUndo}>
+                    <RotateCcw className="h-4 w-4"/>
+                    <span className="sr-only">Undo Changes</span>
+                </Button>
+              )}
+            </div>
           {isGenerating && !generatedPost ? (
             <div className="space-y-2 rounded-md border border-input p-4">
               <Skeleton className="h-4 w-full" />
@@ -192,7 +213,7 @@ export function SocialPostGenerator() {
                 <ClipboardCopy className="mr-2 h-4 w-4" /> Copy
               </Button>
               <div className="flex gap-2">
-                  <Button variant="ghost" onClick={() => setGeneratedPost('')}>Discard</Button>
+                  <Button variant="ghost" onClick={handleDiscard}>Discard</Button>
                   <Button><Send className="mr-2 h-4 w-4" /> Post</Button>
               </div>
             </div>
