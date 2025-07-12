@@ -60,7 +60,11 @@ export const useSpeechToText = ({ onTranscriptReady }: UseSpeechToTextOptions = 
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      console.error('Speech recognition error:', event.error);
+      // The "network" error is common and can happen if the service is temporarily unavailable.
+      // We can choose to log it silently or handle it gracefully.
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        console.error('Speech recognition error:', event.error);
+      }
       setIsRecording(false);
     };
 
@@ -78,9 +82,12 @@ export const useSpeechToText = ({ onTranscriptReady }: UseSpeechToTextOptions = 
         recognitionRef.current.start();
         setIsRecording(true);
       } catch (error) {
-         console.error("Speech recognition could not be started: ", error);
-         // This can happen if start() is called again before it has truly stopped.
-         // Or if permissions are denied.
+         // This can happen if start() is called again before it has truly stopped, or if permissions are denied.
+         if ((error as DOMException).name === 'InvalidStateError') {
+            console.warn("Speech recognition is already active. Ignoring start command.");
+         } else {
+            console.error("Speech recognition could not be started: ", error);
+         }
       }
     }
   };
