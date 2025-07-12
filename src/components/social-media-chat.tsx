@@ -256,8 +256,11 @@ export function SocialPostGenerator() {
               </div>
             </div>
           )}
-        </FadeIn>
-      )}
-    </div>
-  )
-}
+          <pre className="mt-4 p-4 bg-secondary rounded-md text-xs overflow-x-auto">
+            <code>
+              {
+`<changes>
+  <description>[Provide a concise summary of the overall changes being made]</description>
+  <change>
+    <file>[Provide the ABSOLUTE, FULL path to the file being modified]</file>
+    <content><![CDATA[Provide the ENTIRE, FINAL, intended content of the file here. Do NOT provide diffs or partial snippets. Ensure all code is properly escaped within the CDATA section.
