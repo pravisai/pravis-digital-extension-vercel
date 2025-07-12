@@ -142,9 +142,9 @@ export function SocialPostGenerator() {
           )}
 
           <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={handleAttachmentClick}>
-                <Paperclip className="mr-2 h-4 w-4" />
-                Add Image
+            <Button type="button" variant="outline" size="icon" onClick={handleAttachmentClick}>
+                <Paperclip className="h-4 w-4" />
+                <span className="sr-only">Add Image</span>
             </Button>
             <Button type="submit" disabled={isGenerating} className="flex-grow">
               {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PenSquare className="mr-2 h-4 w-4" />}
