@@ -104,31 +104,20 @@ function DashboardHeader() {
       });
     }
   };
-
-  const menuItems = [
-    { href: "/dashboard/email-assistant", label: "Email Assistant" },
-    { href: "/dashboard/tasks", label: "Tasks" },
-  ];
   
   return (
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
         <div className="flex items-center gap-2">
-          {pathname !== '/dashboard' && (
+          {pathname !== '/dashboard' ? (
             <Button variant="ghost" size="icon" onClick={() => router.back()} className="shrink-0">
               <ArrowLeft className="h-5 w-5" />
               <span className="sr-only">Back</span>
             </Button>
+          ) : (
+             <Link href="/dashboard" className="font-bold text-lg md:hidden">
+                <BrainCircuit className="h-6 w-6 text-primary" />
+             </Link>
           )}
-           <Link href="/dashboard" className="font-bold text-lg hidden md:block">Dashboard</Link>
-          <nav className="hidden items-center gap-1 md:flex">
-            {menuItems.map(item => (
-              <Button asChild variant={pathname.startsWith(item.href) ? "secondary" : "ghost"} size="sm" key={item.href}>
-                <Link href={item.href}>
-                  {item.label}
-                </Link>
-              </Button>
-            ))}
-          </nav>
         </div>
   
         <div className="flex items-center gap-2">
