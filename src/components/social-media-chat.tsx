@@ -116,32 +116,27 @@ export function SocialPostGenerator() {
   const handlePost = async () => {
     const text = encodeURIComponent(generatedPost);
     let url = "";
-    let needsCopyToast = false;
 
     switch (platform) {
       case "Twitter":
         url = `https://twitter.com/intent/tweet?text=${text}`;
         break;
       case "LinkedIn":
-        url = `https://www.linkedin.com/sharing/share-offsite/?summary=${text}`;
+        await copyToClipboard(generatedPost);
+        toast({ title: "Copied to clipboard!", description: "Paste the content into your new LinkedIn post." });
+        url = 'https://www.linkedin.com/feed/';
         break;
       case "Facebook":
         url = `https://www.facebook.com/sharer/sharer.php?quote=${text}`;
         break;
       case "Threads":
-        // Threads has no web sharing intent, so we copy and open the main page.
-        const copied = await handleCopy();
-        if (copied) {
-          url = 'https://www.threads.net/';
-          needsCopyToast = true;
-        }
+        await copyToClipboard(generatedPost);
+        toast({ title: "Copied to clipboard!", description: "Paste the content into your new Threads post." });
+        url = 'https://www.threads.net/';
         break;
     }
     
     if (url) {
-        if (needsCopyToast) {
-            toast({ title: "Copied to clipboard!", description: "Paste the content into your new Threads post." });
-        }
         window.open(url, '_blank', 'noopener,noreferrer');
     }
   }
