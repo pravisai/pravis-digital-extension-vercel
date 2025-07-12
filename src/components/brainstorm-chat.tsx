@@ -5,12 +5,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { BrainCircuit, Send, User, Paperclip, Mic, Smile, Camera, Loader2 } from "lucide-react"
+import { BrainCircuit, Send, User, Mic, Loader2, Waves } from "lucide-react"
 import React, { useRef, useState, useEffect } from "react"
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
 import { facilitateCreativeBrainstorming, type FacilitateCreativeBrainstormingInput, type FacilitateCreativeBrainstormingOutput } from "@/ai/flows/facilitate-creative-brainstorming"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
+import { useSpeechToText } from "@/hooks/use-speech-to-text"
+import { cn } from "@/lib/utils"
 
 enum Stage {
   Topic,
@@ -43,6 +45,22 @@ export function BrainstormChat() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const formValues = useRef<Partial<FacilitateCreativeBrainstormingInput>>({});
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const { isRecording, transcript, startRecording, stopRecording } = useSpeechToText({
+    onTranscriptReady: (text) => {
+        setInput(text);
+        // Automatically submit the form once transcription is ready
+        setTimeout(() => formRef.current?.requestSubmit(), 100);
+    }
+  });
+
+  useEffect(() => {
+    if (transcript) {
+        setInput(transcript);
+    }
+  }, [transcript]);
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -116,6 +134,14 @@ export function BrainstormChat() {
     } else {
         setMessages(prev => [...prev, { role: "pravis", content: stagePrompts[nextStage] }]);
         setStage(nextStage);
+    }
+  };
+
+  const handleMicClick = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
     }
   };
 
@@ -228,24 +254,40 @@ export function BrainstormChat() {
             </div>
       </ScrollArea>
       <footer className="p-2 border-t">
-        <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+        <form onSubmit={handleSendMessage} ref={formRef} className="flex items-center gap-2">
             <div className="flex-1 flex items-center bg-secondary rounded-full px-2">
                 <Input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder={stage === Stage.Done ? "Brainstorming session complete." : "Your response..."}
+                    placeholder={isRecording ? "Listening..." : (stage === Stage.Done ? "Brainstorming session complete." : "Your response...")}
                     className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 h-12"
-                    disabled={isLoading || stage === Stage.Done || stage === Stage.Ready}
+                    disabled={isLoading || stage === Stage.Done || stage === Stage.Ready || isRecording}
                 />
             </div>
-            <Button 
-                type="submit" 
-                size="icon" 
-                className="rounded-full w-12 h-12 bg-primary text-primary-foreground shrink-0 transition-all duration-300" 
-                disabled={isLoading || stage === Stage.Done || stage === Stage.Ready || !input.trim()}
-            >
-                <Send className="h-6 w-6" />
-            </Button>
+
+            {input.trim() ? (
+                <Button 
+                    type="submit" 
+                    size="icon" 
+                    className="rounded-full w-12 h-12 bg-primary text-primary-foreground shrink-0 transition-all duration-300" 
+                    disabled={isLoading || stage === Stage.Done || stage === Stage.Ready}
+                >
+                    <Send className="h-6 w-6" />
+                </Button>
+            ) : (
+                 <Button 
+                    type="button" 
+                    size="icon" 
+                    onClick={handleMicClick}
+                    className={cn(
+                        "rounded-full w-12 h-12 bg-primary text-primary-foreground shrink-0 transition-all duration-300",
+                        isRecording && "bg-destructive"
+                    )}
+                    disabled={isLoading || stage === Stage.Done || stage === Stage.Ready}
+                >
+                   {isRecording ? <Waves className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
+                </Button>
+            )}
         </form>
       </footer>
     </div>

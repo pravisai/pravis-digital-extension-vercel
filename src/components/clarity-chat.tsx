@@ -5,16 +5,33 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { BrainCircuit, Send, User, Paperclip, Mic, Smile, Camera } from "lucide-react"
+import { BrainCircuit, Send, User, Paperclip, Mic, Smile, Camera, Waves } from "lucide-react"
 import React, { useRef, useState, useEffect } from "react"
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
 import { useChat } from "@/contexts/chat-context"
+import { useSpeechToText } from "@/hooks/use-speech-to-text"
+import { cn } from "@/lib/utils"
 
 export function ClarityChat() {
   const { messages, isLoading, input, setInput, handleSendMessage } = useChat();
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const { isRecording, transcript, startRecording, stopRecording } = useSpeechToText({
+    onTranscriptReady: (text) => {
+        setInput(text);
+        // Automatically submit the form once transcription is ready
+        setTimeout(() => formRef.current?.requestSubmit(), 100);
+    }
+  });
+
+  useEffect(() => {
+    if (transcript) {
+        setInput(transcript);
+    }
+  }, [transcript]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -30,6 +47,14 @@ export function ClarityChat() {
         if(viewport) viewport.scrollTop = viewport.scrollHeight;
     }
   }, [messages, isLoading]);
+
+  const handleMicClick = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-card shadow-sm">
@@ -94,7 +119,7 @@ export function ClarityChat() {
             </div>
       </ScrollArea>
       <footer className="p-2 border-t">
-        <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+        <form onSubmit={handleSendMessage} ref={formRef} className="flex items-center gap-2">
             <div className="flex-1 flex items-center bg-secondary rounded-full px-2">
                 <Button variant="ghost" size="icon" type="button" className="shrink-0 rounded-full">
                     <Smile className="h-6 w-6 text-muted-foreground" />
@@ -102,9 +127,9 @@ export function ClarityChat() {
                 <Input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Message"
+                    placeholder={isRecording ? "Listening..." : "Message"}
                     className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 h-12"
-                    disabled={isLoading}
+                    disabled={isLoading || isRecording}
                 />
                 <Button variant="ghost" size="icon" type="button" className="shrink-0 rounded-full">
                     <Paperclip className="h-6 w-6 text-muted-foreground" />
@@ -113,14 +138,30 @@ export function ClarityChat() {
                     <Camera className="h-6 w-6 text-muted-foreground" />
                 </Button>
             </div>
-            <Button 
+            
+            {input.trim() ? (
+              <Button 
                 type="submit" 
                 size="icon" 
                 className="rounded-full w-12 h-12 bg-primary text-primary-foreground shrink-0 transition-all duration-300" 
                 disabled={isLoading}
-            >
-                {input.trim() ? <Send className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
-            </Button>
+              >
+                <Send className="h-6 w-6" />
+              </Button>
+            ) : (
+              <Button 
+                type="button"
+                onClick={handleMicClick} 
+                size="icon" 
+                className={cn(
+                    "rounded-full w-12 h-12 bg-primary text-primary-foreground shrink-0 transition-all duration-300",
+                    isRecording && "bg-destructive"
+                )} 
+                disabled={isLoading}
+              >
+                {isRecording ? <Waves className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
+              </Button>
+            )}
         </form>
       </footer>
     </div>
