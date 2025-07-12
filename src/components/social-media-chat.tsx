@@ -127,7 +127,9 @@ export function SocialPostGenerator() {
         url = 'https://www.linkedin.com/feed/';
         break;
       case "Facebook":
-        url = `https://www.facebook.com/sharer/sharer.php?quote=${text}`;
+        await copyToClipboard(generatedPost);
+        toast({ title: "Copied to clipboard!", description: "Paste the content into your new Facebook post." });
+        url = `https://www.facebook.com/`;
         break;
       case "Threads":
         await copyToClipboard(generatedPost);
