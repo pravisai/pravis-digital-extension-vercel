@@ -252,12 +252,12 @@ export function SocialPostGenerator() {
           )}
           {generatedPost && !isGenerating && (
             <div className="flex justify-between items-center pt-2">
-              <Button variant="outline" onClick={handleCopy}>
-                <ClipboardCopy className="mr-2 h-4 w-4" /> Copy
-              </Button>
+              <Button variant="ghost" onClick={handleDiscard}>Discard</Button>
               <div className="flex gap-2">
-                  <Button variant="ghost" onClick={handleDiscard}>Discard</Button>
-                  <Button onClick={handlePost}><Send className="mr-2 h-4 w-4" /> Post</Button>
+                <Button variant="outline" onClick={handleCopy}>
+                  <ClipboardCopy className="mr-2 h-4 w-4" /> Copy
+                </Button>
+                <Button onClick={handlePost}><Send className="mr-2 h-4 w-4" /> Post</Button>
               </div>
             </div>
           )}
