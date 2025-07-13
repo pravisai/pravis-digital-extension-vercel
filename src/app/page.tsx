@@ -25,7 +25,7 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export default function SignInPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true); // Start as true to handle redirect check
+  const [isProcessingRedirect, setIsProcessingRedirect] = useState(true); // Handles initial redirect check
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   
@@ -37,18 +37,17 @@ export default function SignInPage() {
   useEffect(() => {
     // This effect runs once on mount to handle the redirect result from Google Sign-In on mobile.
     const processRedirect = async () => {
-      setIsLoading(true);
       try {
         const { userCredential } = await handleRedirectResult();
         if (userCredential?.user) {
           toast({ title: "Success!", description: `Authenticated as ${userCredential.user.displayName}` });
           router.push('/dashboard');
         } else {
-          setIsLoading(false);
+          setIsProcessingRedirect(false);
         }
       } catch (error: any) {
         // Errors are handled in the auth function, just stop loading
-        setIsLoading(false); 
+        setIsProcessingRedirect(false); 
       }
     };
     processRedirect();
@@ -56,7 +55,6 @@ export default function SignInPage() {
   
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
-    setIsLoading(true);
     try {
       const { userCredential } = await signInWithGoogle();
       if (userCredential?.user) {
@@ -68,7 +66,6 @@ export default function SignInPage() {
       // The function itself will throw only on unhandled errors.
     } finally {
         setIsGoogleLoading(false);
-        setIsLoading(false);
     }
   };
   
@@ -108,7 +105,7 @@ export default function SignInPage() {
     setIsEmailLoading(false);
   };
 
-  if (isLoading) {
+  if (isProcessingRedirect) {
     return (
         <div className="flex min-h-svh items-center justify-center bg-background p-4">
             <div className="flex flex-col items-center justify-center">
