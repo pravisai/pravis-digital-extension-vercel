@@ -67,7 +67,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
             const result = await provideClarityThroughChat({ userMessage: currentInput });
             const pravisResponse = result.pravisResponse;
             
-            if (pravisResponse) {
+            // This check is redundant now due to the flow change, but good for defense-in-depth
+            if (pravisResponse) { 
                 const pravisMessage: Message = { role: "pravis", content: pravisResponse };
                 setMessages((prev) => [...prev, pravisMessage]);
                 
@@ -82,7 +83,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         } catch (error: any) {
             console.error("Error fetching response from Pravis:", error);
             let messageContent = "I'm having trouble connecting right now. Please try again later.";
-            if (error?.message && /503|overloaded/i.test(error.message)) {
+            // Check for the custom error message from the flow, or other common overload indicators
+            if (error?.message && /503|overloaded|high demand/i.test(error.message)) {
                 messageContent = "The AI is currently experiencing high demand. Please try your request again in a moment.";
             } else if (error?.message) {
                 messageContent = "I'm sorry, an unexpected error occurred. Please try again."
