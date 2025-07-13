@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { InteractiveCube, type CubeFace } from './interactive-cube'
+import { Typewriter } from './animations/typewriter'
 
 
 const emailCubeFaces: CubeFace[] = [
@@ -41,7 +42,11 @@ export function EmailAssistantContent() {
   }));
 
   return (
-    <div className="h-full w-full flex flex-col text-foreground bg-background p-4 md:p-8 space-y-6">
+    <div className="h-full w-full flex flex-col items-center justify-center text-foreground bg-background p-4 md:p-8 space-y-6">
+      <div className="text-center">
+        <Typewriter text="Welcome back. Shall I prepare your environment?" className="text-3xl md:text-4xl font-bold tracking-tight justify-center" />
+        <p className="text-muted-foreground mt-2 text-lg max-w-2xl mx-auto">Interact with the cube below to access different parts of your inbox or compose a new message.</p>
+      </div>
       <InteractiveCube faces={enhancedEmailCubeFaces} />
     </div>
   )
