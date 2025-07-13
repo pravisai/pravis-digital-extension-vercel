@@ -47,7 +47,7 @@ export default function SignInPage() {
           setIsLoading(false);
         }
       } catch (error: any) {
-        console.error("Redirect handler error:", error);
+        // Errors are handled in the auth function, just stop loading
         setIsLoading(false); 
       }
     };
@@ -64,17 +64,12 @@ export default function SignInPage() {
         router.push('/dashboard');
       }
     } catch (error: any) {
-      if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
-        console.error("Sign-in error:", error);
-        toast({
-          variant: 'destructive',
-          title: 'Sign In Failed',
-          description: error.message || 'Could not sign in with Google. Please try again.',
-        });
-      }
-      setIsGoogleLoading(false);
-      setIsLoading(false);
-    } 
+      // Error handling is inside signInWithGoogle, so we just need to update loading state
+      // The function itself will throw only on unhandled errors.
+    } finally {
+        setIsGoogleLoading(false);
+        setIsLoading(false);
+    }
   };
   
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -92,7 +87,15 @@ export default function SignInPage() {
     } else {
         const { userCredential, error } = await signInWithEmail(email, password);
         if (error) {
-            toast({ variant: 'destructive', title: 'Sign In Failed', description: error.message });
+            if (error.code === 'auth/invalid-credential') {
+                toast({ 
+                    variant: 'destructive', 
+                    title: 'Login Failed', 
+                    description: "Incorrect email or password. Please check your credentials or sign up if you don't have an account." 
+                });
+            } else {
+                toast({ variant: 'destructive', title: 'Sign In Failed', description: error.message });
+            }
         } else if (userCredential?.user?.displayName) {
             toast({ title: "Success!", description: `Welcome back, ${userCredential.user.displayName}` });
             router.push('/dashboard');
