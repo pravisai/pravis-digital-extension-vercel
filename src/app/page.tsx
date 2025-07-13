@@ -93,8 +93,11 @@ export default function SignInPage() {
         const { userCredential, error } = await signInWithEmail(email, password);
         if (error) {
             toast({ variant: 'destructive', title: 'Sign In Failed', description: error.message });
-        } else if (userCredential) {
+        } else if (userCredential?.user?.displayName) {
             toast({ title: "Success!", description: `Welcome back, ${userCredential.user.displayName}` });
+            router.push('/dashboard');
+        } else if (userCredential) {
+            toast({ title: "Success!", description: `Welcome back!`});
             router.push('/dashboard');
         }
     }
