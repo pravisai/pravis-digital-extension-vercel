@@ -39,6 +39,7 @@ export default function SignInPage() {
           router.push('/dashboard');
         }
       } catch (error: any) {
+        // Don't show an error toast if the user simply closed the prompt
         if (error.code !== 'auth/popup-closed-by-user') {
           console.error(error);
           toast({

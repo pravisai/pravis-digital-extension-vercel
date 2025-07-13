@@ -60,6 +60,8 @@ export const handleRedirectResult = async (): Promise<{ userCredential: UserCred
     }
   } catch (error) {
     console.error("Error handling redirect result:", error);
+    // Rethrow to be caught by the caller
+    throw error;
   }
   return { userCredential: null, accessToken: null };
 };
