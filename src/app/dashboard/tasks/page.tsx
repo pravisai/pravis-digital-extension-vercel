@@ -26,12 +26,14 @@ export default function TasksPage() {
                 }
                 setAccessToken(token);
             } catch (error: any) {
-                console.error("Authentication error:", error);
-                toast({
-                    variant: "destructive",
-                    title: "Authentication Failed",
-                    description: error.message || "Could not authenticate with Google to fetch calendar events.",
-                });
+                if (error.code !== 'auth/popup-closed-by-user') {
+                    console.error("Authentication error:", error);
+                    toast({
+                        variant: "destructive",
+                        title: "Authentication Failed",
+                        description: error.message || "Could not authenticate with Google to fetch calendar events.",
+                    });
+                }
             } finally {
                 setIsLoading(false);
             }
