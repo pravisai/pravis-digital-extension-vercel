@@ -45,7 +45,7 @@ export const signInWithGoogle = async (): Promise<{
     }
   } catch (error) {
     console.error('❌ Error during signInWithGoogle:', error);
-    return { userCredential: null, accessToken: null };
+    throw error;
   }
 };
 
