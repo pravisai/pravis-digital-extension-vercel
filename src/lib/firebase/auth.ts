@@ -8,6 +8,9 @@ import {
   getRedirectResult,
   signOut,
   type UserCredential,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
 } from 'firebase/auth';
 import { auth } from './config';
 
@@ -84,6 +87,27 @@ export const handleRedirectResult = async (): Promise<{
 
   return { userCredential: null, accessToken: null };
 };
+
+export const signInWithEmail = async (email: string, password: string): Promise<{ userCredential: UserCredential; error?: undefined } | { userCredential?: undefined; error: any }> => {
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        return { userCredential };
+    } catch (error: any) {
+        return { error };
+    }
+};
+
+export const signUpWithEmail = async (email: string, password: string, displayName: string): Promise<{ userCredential: UserCredential; error?: undefined } | { userCredential?: undefined; error: any }> => {
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        // Set the user's display name
+        await updateProfile(userCredential.user, { displayName });
+        return { userCredential };
+    } catch (error: any) {
+        return { error };
+    }
+};
+
 
 // ✅ Sign out and clear session token
 export const signOutUser = async (): Promise<void> => {

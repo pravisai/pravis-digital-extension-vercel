@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
-import { signInWithGoogle, handleRedirectResult } from '@/lib/firebase/auth';
+import { signInWithGoogle, handleRedirectResult, signInWithEmail, signUpWithEmail } from '@/lib/firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { FadeIn, StaggeredListItem } from '@/components/animations/fade-in';
@@ -28,26 +28,27 @@ export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(true); // Start as true to handle redirect check
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isEmailLoading, setIsEmailLoading] = useState(false);
+  
+  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
 
   useEffect(() => {
     // This effect runs once on mount to handle the redirect result from Google Sign-In on mobile.
     const processRedirect = async () => {
+      setIsLoading(true);
       try {
         const { userCredential } = await handleRedirectResult();
         if (userCredential?.user) {
           toast({ title: "Success!", description: `Authenticated as ${userCredential.user.displayName}` });
           router.push('/dashboard');
         } else {
-          // No redirect result, so we're not in a redirect flow.
-          // It's safe to show the login page.
           setIsLoading(false);
         }
       } catch (error: any) {
-        // This handles cases where the user cancels the login, etc.
         console.error("Redirect handler error:", error);
-        setIsLoading(false); // Stop loading and show the login page
+        setIsLoading(false); 
       }
     };
     processRedirect();
@@ -57,11 +58,7 @@ export default function SignInPage() {
     setIsGoogleLoading(true);
     setIsLoading(true);
     try {
-      // This function handles both mobile (redirect) and desktop (popup)
       const { userCredential } = await signInWithGoogle();
-      
-      // On desktop, the userCredential will be available immediately after popup.
-      // On mobile, this will return null because a redirect has started. The useEffect above will handle the result.
       if (userCredential?.user) {
         toast({ title: "Success!", description: `Authenticated as ${userCredential.user.displayName}` });
         router.push('/dashboard');
@@ -80,17 +77,29 @@ export default function SignInPage() {
     } 
   };
   
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsEmailLoading(true);
-    setTimeout(() => {
-      toast({
-        variant: 'destructive',
-        title: 'Feature Not Available',
-        description: 'Email/password login is not yet implemented.',
-      });
-      setIsEmailLoading(false);
-    }, 1000);
+    
+    if (isSignUp) {
+        const { userCredential, error } = await signUpWithEmail(email, password, displayName);
+        if (error) {
+            toast({ variant: 'destructive', title: 'Sign Up Failed', description: error.message });
+        } else if (userCredential) {
+            toast({ title: "Account Created!", description: `Welcome, ${userCredential.user.displayName}` });
+            router.push('/dashboard');
+        }
+    } else {
+        const { userCredential, error } = await signInWithEmail(email, password);
+        if (error) {
+            toast({ variant: 'destructive', title: 'Sign In Failed', description: error.message });
+        } else if (userCredential) {
+            toast({ title: "Success!", description: `Welcome back, ${userCredential.user.displayName}` });
+            router.push('/dashboard');
+        }
+    }
+    
+    setIsEmailLoading(false);
   };
 
   if (isLoading) {
@@ -116,8 +125,8 @@ export default function SignInPage() {
         
         <StaggeredListItem>
             <div className="space-y-4 text-center">
-                <h2 className="text-2xl font-semibold tracking-tight text-foreground">Welcome Back</h2>
-                <p className="text-muted-foreground">Log in to continue your journey with Pravis.</p>
+                <h2 className="text-2xl font-semibold tracking-tight text-foreground">{isSignUp ? "Create an Account" : "Welcome Back"}</h2>
+                <p className="text-muted-foreground">{isSignUp ? "Enter your details to begin your journey." : "Log in to continue your journey with Pravis."}</p>
             </div>
         </StaggeredListItem>
         
@@ -143,14 +152,28 @@ export default function SignInPage() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                     <span className="bg-card px-2 text-muted-foreground">
-                        Or log in with email
+                        Or {isSignUp ? "sign up" : "log in"} with email
                     </span>
                 </div>
             </div>
         </StaggeredListItem>
         
         <StaggeredListItem>
-            <form onSubmit={handleEmailLogin} className="space-y-4">
+            <form onSubmit={handleEmailSubmit} className="space-y-4">
+                {isSignUp && (
+                    <div className="grid w-full items-center gap-1.5">
+                        <Label htmlFor="displayName" className="text-muted-foreground">Display Name</Label>
+                        <Input 
+                            id="displayName" 
+                            type="text" 
+                            placeholder="John Doe" 
+                            value={displayName}
+                            onChange={(e) => setDisplayName(e.target.value)}
+                            disabled={isGoogleLoading || isEmailLoading}
+                            required
+                        />
+                    </div>
+                )}
                 <div className="grid w-full items-center gap-1.5">
                     <Label htmlFor="email" className="text-muted-foreground">Email</Label>
                     <Input 
@@ -177,17 +200,17 @@ export default function SignInPage() {
                 </div>
                 <Button type="submit" className="w-full h-12 text-base" disabled={isEmailLoading || isGoogleLoading}>
                     {isEmailLoading && <Loader2 className="mr-2 animate-spin" />}
-                    Log In
+                    {isSignUp ? "Sign Up" : "Log In"}
                 </Button>
             </form>
         </StaggeredListItem>
 
         <StaggeredListItem>
-            <p className="px-8 text-center text-sm text-muted-foreground">
-                Don&apos;t have an account?{" "}
-                <a href="#" className="underline underline-offset-4 hover:text-primary">
-                    Sign Up
-                </a>
+             <p className="px-8 text-center text-sm text-muted-foreground">
+                {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+                <button onClick={() => setIsSignUp(!isSignUp)} className="underline underline-offset-4 hover:text-primary disabled:opacity-50" disabled={isEmailLoading || isGoogleLoading}>
+                    {isSignUp ? "Log In" : "Sign Up"}
+                </button>
             </p>
         </StaggeredListItem>
 
