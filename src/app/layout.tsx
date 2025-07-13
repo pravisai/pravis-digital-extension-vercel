@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from '@/components/theme-provider';
+import { AuthRedirectHandler } from '@/components/auth-redirect-handler';
 
 export const metadata: Metadata = {
   title: 'Pravis: Your Digital Extension',
@@ -25,6 +26,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
+        <AuthRedirectHandler />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

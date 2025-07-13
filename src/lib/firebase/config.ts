@@ -1,7 +1,7 @@
 // IMPORTANT: Add the Firebase SDK for Google Analytics
 // import { getAnalytics } from "firebase/analytics";
 import { getApp, getApps, initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, setPersistence, browserSessionPersistence } from 'firebase/auth';
 
 // Your web app's Firebase configuration that you get from the Firebase console
 // Replace with your actual credentials
@@ -17,6 +17,10 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
+
+// Set session persistence
+setPersistence(auth, browserSessionPersistence);
+
 // const analytics = getAnalytics(app);
 
 export { app, auth };

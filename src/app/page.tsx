@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
-import { signInWithGoogle, handleRedirectResult } from '@/lib/firebase/auth';
+import { signInWithGoogle } from '@/lib/firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { FadeIn, StaggeredListItem } from '@/components/animations/fade-in';
@@ -25,37 +25,11 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export default function SignInPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true); // Start as true to handle redirect
+  const [isLoading, setIsLoading] = useState(false);
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
-  useEffect(() => {
-    const processRedirect = async () => {
-      try {
-        const { userCredential } = await handleRedirectResult();
-        if (userCredential?.user) {
-          toast({ title: "Success!", description: `Authenticated as ${userCredential.user.displayName}` });
-          router.push('/dashboard');
-        }
-      } catch (error: any) {
-        // Don't show an error toast if the user simply closed the prompt
-        if (error.code !== 'auth/popup-closed-by-user') {
-          console.error(error);
-          toast({
-            variant: 'destructive',
-            title: 'Sign In Failed',
-            description: error.message || 'Could not sign in with Google. Please try again.',
-          });
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    processRedirect();
-  }, [router, toast]);
-
-
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
@@ -65,7 +39,7 @@ export default function SignInPage() {
         toast({ title: "Success!", description: `Authenticated as ${userCredential.user.displayName}` });
         router.push('/dashboard');
       }
-      // For mobile, the page will redirect, so no need to do anything else here.
+      // For mobile, the page will redirect, so the AuthRedirectHandler will take over.
     } catch (error: any) {
       if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
         console.error(error);
@@ -77,7 +51,6 @@ export default function SignInPage() {
       }
        setIsLoading(false);
     } 
-    // Don't set isLoading to false here for redirect flow
   };
   
   const handleEmailLogin = async (e: React.FormEvent) => {
