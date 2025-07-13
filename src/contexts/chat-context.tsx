@@ -65,12 +65,18 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
         try {
             const result = await provideClarityThroughChat({ userMessage: currentInput });
-            const pravisMessage: Message = { role: "pravis", content: result.pravisResponse };
-            setMessages((prev) => [...prev, pravisMessage]);
+            const pravisResponse = result.pravisResponse;
             
-            if (isVoiceInput) {
-                const audioResult = await textToSpeech(result.pravisResponse);
-                setAudioDataUri(audioResult.media);
+            if (pravisResponse) {
+                const pravisMessage: Message = { role: "pravis", content: pravisResponse };
+                setMessages((prev) => [...prev, pravisMessage]);
+                
+                if (isVoiceInput) {
+                    const audioResult = await textToSpeech(pravisResponse);
+                    setAudioDataUri(audioResult.media);
+                }
+            } else {
+                 throw new Error("Received an empty response from the AI.");
             }
 
         } catch (error: any) {
@@ -78,6 +84,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
             let messageContent = "I'm having trouble connecting right now. Please try again later.";
             if (error?.message && /503|overloaded/i.test(error.message)) {
                 messageContent = "The AI is currently experiencing high demand. Please try your request again in a moment.";
+            } else if (error?.message) {
+                messageContent = "I'm sorry, an unexpected error occurred. Please try again."
             }
             const errorMessage: Message = { role: "pravis", content: messageContent };
             setMessages((prev) => [...prev, errorMessage]);
