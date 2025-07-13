@@ -19,13 +19,17 @@ export default function TasksPage() {
                 let token = getStoredAccessToken();
                 if (!token) {
                     const { accessToken: newAccessToken } = await signInWithGoogle();
+                    // If signInWithGoogle returns no token (e.g., popup closed), stop loading but don't show an error.
                     if (!newAccessToken) {
-                        throw new Error('Failed to obtain access token.');
+                        setIsLoading(false);
+                        return;
                     }
                     token = newAccessToken;
                 }
                 setAccessToken(token);
             } catch (error: any) {
+                // The signInWithGoogle function already handles the popup-closed error, 
+                // but we keep this check as a safeguard.
                 if (error.code !== 'auth/popup-closed-by-user') {
                     console.error("Authentication error:", error);
                     toast({
@@ -54,7 +58,7 @@ export default function TasksPage() {
 
     return (
         <FadeIn className="w-full h-full p-4 md:p-6">
-            {accessToken ? <ProductivitySuite accessToken={accessToken} /> : <div className="text-center p-8">Could not load Productivity Suite. Access token is missing.</div>}
+            {accessToken ? <ProductivitySuite accessToken={accessToken} /> : <div className="text-center p-8">Could not load Productivity Suite. Access token is missing or authentication was cancelled.</div>}
         </FadeIn>
     )
 }

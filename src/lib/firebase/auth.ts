@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -43,9 +44,13 @@ export const signInWithGoogle = async (): Promise<{
 
       return { userCredential: result, accessToken };
     }
-  } catch (error) {
-    console.error('❌ Error during signInWithGoogle:', error);
-    throw error;
+  } catch (error: any) {
+    // Don't re-throw 'popup-closed-by-user' as it's not a real error
+    if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+        console.error('❌ Error during signInWithGoogle:', error);
+        throw error;
+    }
+    return { userCredential: null, accessToken: null };
   }
 };
 
@@ -69,7 +74,7 @@ export const handleRedirectResult = async (): Promise<{
       }
       return { userCredential: result, accessToken };
     }
-  } catch (error) {
+  } catch (error: any) {
     // Don't re-throw 'popup-closed-by-user' as it's not a real error
     if ((error as any).code !== 'auth/popup-closed-by-user' && (error as any).code !== 'auth/cancelled-popup-request') {
         console.error('❌ Error handling redirect result:', error);
