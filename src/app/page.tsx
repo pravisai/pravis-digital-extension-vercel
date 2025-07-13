@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { FadeIn, StaggeredListItem } from '@/components/animations/fade-in';
 import { Typewriter } from '@/components/animations/typewriter';
+import { AuthRedirectHandler } from '@/components/auth-redirect-handler';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg role="img" viewBox="0 0 24 24" {...props}>
@@ -39,7 +40,7 @@ export default function SignInPage() {
         toast({ title: "Success!", description: `Authenticated as ${userCredential.user.displayName}` });
         router.push('/dashboard');
       }
-      // For mobile, the page will redirect, so the AuthRedirectHandler will take over.
+      // For mobile, the page will redirect, and the AuthRedirectHandler will take over.
     } catch (error: any) {
       if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
         console.error(error);
@@ -69,6 +70,7 @@ export default function SignInPage() {
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-background p-4 font-body">
+      <AuthRedirectHandler />
       {isLoading ? (
           <div className="flex flex-col items-center justify-center">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />

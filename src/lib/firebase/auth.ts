@@ -54,6 +54,10 @@ export const handleRedirectResult = async (): Promise<{
   userCredential: UserCredential | null;
   accessToken: string | null;
 }> => {
+  if (typeof window === 'undefined') {
+    return { userCredential: null, accessToken: null };
+  }
+  
   try {
     const result = await getRedirectResult(auth);
     if (result) {
@@ -63,12 +67,14 @@ export const handleRedirectResult = async (): Promise<{
       if (accessToken) {
         sessionStorage.setItem('gmail_access_token', accessToken);
       }
-
       return { userCredential: result, accessToken };
     }
   } catch (error) {
-    console.error('❌ Error handling redirect result:', error);
-    throw error;
+    // Don't re-throw 'popup-closed-by-user' as it's not a real error
+    if ((error as any).code !== 'auth/popup-closed-by-user' && (error as any).code !== 'auth/cancelled-popup-request') {
+        console.error('❌ Error handling redirect result:', error);
+        throw error;
+    }
   }
 
   return { userCredential: null, accessToken: null };

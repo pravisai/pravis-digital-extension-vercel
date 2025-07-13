@@ -9,12 +9,18 @@ export const AuthRedirectHandler = () => {
   const router = useRouter();
 
   useEffect(() => {
-    handleRedirectResult().then((res) => {
-      if (res.userCredential?.user) {
-        console.log("✅ User signed in via redirect, navigating to dashboard.");
-        router.push('/dashboard');
-      }
-    });
+    const processRedirect = async () => {
+        try {
+            const { userCredential } = await handleRedirectResult();
+            if (userCredential?.user) {
+              console.log("✅ User signed in via redirect, navigating to dashboard.");
+              router.push('/dashboard');
+            }
+        } catch (error) {
+            console.error("Error processing redirect result in handler:", error);
+        }
+    };
+    processRedirect();
   }, [router]);
 
   return null; // it's just a background effect

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -25,22 +24,30 @@ export default function DashboardPage() {
     if (isLoading) {
       return <Skeleton className="h-10 w-64" />;
     }
-    return <Typewriter text="All checks passed. Let’s begin." className="text-4xl font-bold tracking-tight" />;
+    const displayName = user?.displayName?.split(" ")[0] || "User";
+    return (
+      <Typewriter
+        text={`Hello, ${displayName}`}
+        className="text-4xl font-bold tracking-tight"
+      />
+    );
   };
 
   return (
     <div className="space-y-8">
-       <FadeIn>
+      <FadeIn>
         <div className="text-left">
-            {getGreeting()}
-            <p className="text-muted-foreground mt-2">Here's a snapshot of your digital extension.</p>
+          {getGreeting()}
+          <p className="text-muted-foreground mt-2">
+            Here's a snapshot of your digital extension.
+          </p>
         </div>
       </FadeIn>
       <div className="grid grid-cols-1 gap-8">
         <FadeIn delay={0.2}>
-            <Modules />
+          <Modules />
         </FadeIn>
       </div>
     </div>
-  )
+  );
 }

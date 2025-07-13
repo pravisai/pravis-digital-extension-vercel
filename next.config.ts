@@ -1,7 +1,8 @@
-import type {NextConfig} from 'next';
+// next.config.ts
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: 'export', // ← makes Next.js export to out/ for Firebase Hosting
   typescript: {
     ignoreBuildErrors: true,
   },
