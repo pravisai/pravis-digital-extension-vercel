@@ -24,10 +24,9 @@ export default function DashboardPage() {
     if (isLoading) {
       return <Skeleton className="h-10 w-64" />;
     }
-    const displayName = user?.displayName?.split(" ")[0] || "User";
     return (
       <Typewriter
-        text={`Hello, ${displayName}`}
+        text="All checks passed. Let’s begin."
         className="text-4xl font-bold tracking-tight"
       />
     );

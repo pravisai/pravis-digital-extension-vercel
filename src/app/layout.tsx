@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from '@/components/theme-provider';
-import { AuthRedirectHandler } from '@/components/auth-redirect-handler';
 
 export const metadata: Metadata = {
   title: 'Pravis: Your Digital Extension',
