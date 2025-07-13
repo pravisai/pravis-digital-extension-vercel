@@ -30,7 +30,7 @@ export default function TasksPage() {
             } catch (error: any) {
                 // The signInWithGoogle function already handles the popup-closed error, 
                 // but we keep this check as a safeguard.
-                if (error.code !== 'auth/popup-closed-by-user') {
+                if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
                     console.error("Authentication error:", error);
                     toast({
                         variant: "destructive",
