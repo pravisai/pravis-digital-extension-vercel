@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -5,6 +6,8 @@ import {
   signInWithPopup,
   signOut,
   type UserCredential,
+  signInWithRedirect,
+  getRedirectResult,
 } from 'firebase/auth';
 import { auth } from './config';
 
@@ -18,26 +21,49 @@ googleProvider.addScope('https://www.googleapis.com/auth/calendar.events'); // t
 
 // ✅ Sign in and get Gmail/Calendar OAuth token
 export const signInWithGoogle = async (): Promise<{
-  userCredential: UserCredential;
+  userCredential: UserCredential | null;
   accessToken: string | null;
 }> => {
-  try {
-    const result = await signInWithPopup(auth, googleProvider);
+  if (typeof window === 'undefined') return { userCredential: null, accessToken: null };
 
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  
+  if (isMobile) {
+    // On mobile, the redirect will navigate away, so this function won't return a value here.
+    // The result is handled by handleRedirectResult after the redirect.
+    await signInWithRedirect(auth, googleProvider);
+    return { userCredential: null, accessToken: null };
+  } else {
+    // Use popup for desktop
+    const result = await signInWithPopup(auth, googleProvider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
     const accessToken = credential?.accessToken ?? null;
-
-    // ✅ Store token in sessionStorage (valid during session)
     if (accessToken) {
       sessionStorage.setItem('gmail_access_token', accessToken);
     }
-
     return { userCredential: result, accessToken };
-  } catch (error) {
-    console.error('Error signing in with Google:', error);
-    throw error;
   }
 };
+
+// Handle the redirect result on page load
+export const handleRedirectResult = async (): Promise<{ userCredential: UserCredential | null, accessToken: string | null }> => {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result) {
+      // This is the UserCredential object.
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const accessToken = credential?.accessToken ?? null;
+      if (accessToken) {
+        sessionStorage.setItem('gmail_access_token', accessToken);
+      }
+      return { userCredential: result, accessToken };
+    }
+  } catch (error) {
+    console.error("Error handling redirect result:", error);
+  }
+  return { userCredential: null, accessToken: null };
+};
+
 
 // ✅ Sign out and clear token
 export const signOutUser = async (): Promise<void> => {
