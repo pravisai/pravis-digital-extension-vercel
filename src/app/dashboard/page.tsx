@@ -1,14 +1,41 @@
+
+"use client";
+
+import { useState, useEffect } from "react";
+import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
+import { auth } from "@/lib/firebase/config";
 import { Modules } from "@/components/daily-rhythms";
 import { FadeIn } from "@/components/animations/fade-in";
 import { Typewriter } from "@/components/animations/typewriter";
-
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardPage() {
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setIsLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const getGreeting = () => {
+    if (isLoading) {
+      return <Skeleton className="h-10 w-64" />;
+    }
+    if (user?.displayName) {
+      return <Typewriter text={`Hello, ${user.displayName.split(' ')[0]}`} className="text-4xl font-bold tracking-tight" />;
+    }
+    return <Typewriter text="Welcome" className="text-4xl font-bold tracking-tight" />;
+  };
+
   return (
     <div className="space-y-8">
        <FadeIn>
         <div className="text-left">
-            <Typewriter text="Dashboard" className="text-4xl font-bold tracking-tight" />
+            {getGreeting()}
             <p className="text-muted-foreground mt-2">Here's a snapshot of your digital extension.</p>
         </div>
       </FadeIn>
