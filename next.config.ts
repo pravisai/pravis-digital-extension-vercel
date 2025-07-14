@@ -2,7 +2,6 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  output: 'export', // ← makes Next.js export to out/ for Firebase Hosting
   typescript: {
     ignoreBuildErrors: true,
   },
