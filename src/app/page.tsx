@@ -23,13 +23,6 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-const allowedDomains = [
-  "pravis-nu.vercel.app",
-  "pravis-your-digital-extension.firebaseapp.com",
-  "pravis-your-digital-extension.web.app",
-  "localhost"
-];
-
 export default function SignInPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -66,25 +59,7 @@ export default function SignInPage() {
     processRedirect();
   }, [router, toast]);
 
-  const checkDomain = () => {
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      console.log("Current hostname:", hostname);
-
-      if (hostname === 'localhost') return true;
-      if (hostname.endsWith('.firebaseapp.com')) return true;
-      if (hostname.endsWith('.web.app')) return true;
-      if (hostname.endsWith('.vercel.app')) return true;
-      
-      toast({ variant: 'destructive', title: "Unauthorized Domain", description: "Login is only available on authorized domains." });
-      return false;
-    }
-    return true; // Don't block on server-side
-  }
-  
   const handleGoogleSignIn = async () => {
-    if (!checkDomain()) return;
-
     setIsGoogleLoading(true);
     if (!isFirebaseConfigured()) {
       toast({
@@ -119,8 +94,6 @@ export default function SignInPage() {
   
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!checkDomain()) return;
-
     setIsEmailLoading(true);
     if (!isFirebaseConfigured()) {
         toast({
@@ -281,7 +254,3 @@ export default function SignInPage() {
     </div>
   );
 }
-
-    
-
-    
