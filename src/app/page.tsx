@@ -65,21 +65,25 @@ export default function SignInPage() {
     };
     processRedirect();
   }, [router, toast]);
+
+  const checkDomain = () => {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      console.log("Current hostname:", hostname);
+
+      if (hostname === 'localhost') return true;
+      if (hostname.endsWith('.firebaseapp.com')) return true;
+      if (hostname.endsWith('.web.app')) return true;
+      if (hostname.endsWith('.vercel.app')) return true;
+      
+      toast({ variant: 'destructive', title: "Unauthorized Domain", description: "Login is only available on authorized domains." });
+      return false;
+    }
+    return true; // Don't block on server-side
+  }
   
   const handleGoogleSignIn = async () => {
-    if (typeof window !== 'undefined') {
-      console.log("Current hostname:", window.location.hostname);
-      const isAllowed = allowedDomains.some(d => {
-        // For vercel, check if it's a preview deployment or the main one
-        if (d.endsWith('vercel.app')) return window.location.hostname.endsWith('vercel.app');
-        return window.location.hostname === d;
-      });
-
-      if (!isAllowed) {
-        toast({ variant: 'destructive', title: "Unauthorized Domain", description: "Login is only available on authorized domains." });
-        return;
-      }
-    }
+    if (!checkDomain()) return;
 
     setIsGoogleLoading(true);
     if (!isFirebaseConfigured()) {
@@ -115,20 +119,7 @@ export default function SignInPage() {
   
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (typeof window !== 'undefined') {
-      console.log("Current hostname:", window.location.hostname);
-      const isAllowed = allowedDomains.some(d => {
-        // For vercel, check if it's a preview deployment or the main one
-        if (d.endsWith('vercel.app')) return window.location.hostname.endsWith('vercel.app');
-        return window.location.hostname === d;
-      });
-      
-      if (!isAllowed) {
-        toast({ variant: 'destructive', title: "Unauthorized Domain", description: "Login is only available on authorized domains." });
-        return;
-      }
-    }
+    if (!checkDomain()) return;
 
     setIsEmailLoading(true);
     if (!isFirebaseConfigured()) {
