@@ -24,7 +24,7 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 const allowedDomains = [
-  "vercel.app", // Catches pravis-nu.vercel.app and all preview deployments
+  "vercel.app",
   "firebaseapp.com",
   "web.app",
   "localhost"
