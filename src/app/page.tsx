@@ -70,9 +70,8 @@ export default function SignInPage() {
     if (typeof window !== 'undefined') {
       console.log("Current hostname:", window.location.hostname);
       const isAllowed = allowedDomains.some(d => {
-        if (d === 'localhost') return window.location.hostname === d;
         // For vercel, check if it's a preview deployment or the main one
-        if (d === 'pravis-nu.vercel.app') return window.location.hostname.endsWith('vercel.app');
+        if (d.endsWith('vercel.app')) return window.location.hostname.endsWith('vercel.app');
         return window.location.hostname === d;
       });
 
@@ -120,9 +119,8 @@ export default function SignInPage() {
     if (typeof window !== 'undefined') {
       console.log("Current hostname:", window.location.hostname);
       const isAllowed = allowedDomains.some(d => {
-        if (d === 'localhost') return window.location.hostname === d;
         // For vercel, check if it's a preview deployment or the main one
-        if (d === 'pravis-nu.vercel.app') return window.location.hostname.endsWith('vercel.app');
+        if (d.endsWith('vercel.app')) return window.location.hostname.endsWith('vercel.app');
         return window.location.hostname === d;
       });
       
@@ -292,5 +290,7 @@ export default function SignInPage() {
     </div>
   );
 }
+
+    
 
     
