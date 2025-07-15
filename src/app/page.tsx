@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { signInWithGoogle, handleRedirectResult, signInWithEmail, signUpWithEmail } from '@/lib/firebase/auth';
-import { isFirebaseConfigured } from '@/lib/firebase/config';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { FadeIn, StaggeredListItem } from '@/components/animations/fade-in';
@@ -36,10 +35,6 @@ export default function SignInPage() {
   const [displayName, setDisplayName] = useState('');
 
   useEffect(() => {
-    if (!isFirebaseConfigured()) {
-        setIsProcessingRedirect(false);
-        return;
-    }
     const processRedirect = async () => {
       try {
         const { userCredential } = await handleRedirectResult();
@@ -61,16 +56,6 @@ export default function SignInPage() {
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
-    if (!isFirebaseConfigured()) {
-      toast({
-            variant: 'destructive',
-            title: 'Configuration Error',
-            description: 'Firebase environment variables are not set. Please configure them in your .env file or deployment settings.',
-            duration: 10000,
-          });
-      setIsGoogleLoading(false);
-      return;
-    }
     try {
       const { userCredential } = await signInWithGoogle();
       if (userCredential?.user) {
@@ -95,16 +80,6 @@ export default function SignInPage() {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsEmailLoading(true);
-    if (!isFirebaseConfigured()) {
-        toast({
-            variant: 'destructive',
-            title: 'Configuration Error',
-            description: 'Firebase environment variables are not set.',
-            duration: 10000,
-          });
-        setIsEmailLoading(false);
-        return;
-    }
     
     if (isSignUp) {
         const { userCredential, error } = await signUpWithEmail(email, password, displayName);
