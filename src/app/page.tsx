@@ -24,9 +24,9 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 const allowedDomains = [
-  "pravis-nu.vercel.app",
-  "pravis-your-digital-extension.firebaseapp.com",
-  "pravis-your-digital-extension.web.app",
+  "vercel.app", // Catches pravis-nu.vercel.app and all preview deployments
+  "firebaseapp.com",
+  "web.app",
   "localhost"
 ];
 
@@ -67,7 +67,7 @@ export default function SignInPage() {
   }, [router, toast]);
   
   const handleGoogleSignIn = async () => {
-    if (typeof window !== 'undefined' && !allowedDomains.some(d => window.location.hostname.includes(d))) {
+    if (typeof window !== 'undefined' && !allowedDomains.some(d => window.location.hostname.endsWith(d))) {
       toast({ variant: 'destructive', title: "Unauthorized Domain", description: "Login is only available on authorized domains." });
       return;
     }
@@ -107,7 +107,7 @@ export default function SignInPage() {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (typeof window !== 'undefined' && !allowedDomains.some(d => window.location.hostname.includes(d))) {
+    if (typeof window !== 'undefined' && !allowedDomains.some(d => window.location.hostname.endsWith(d))) {
       toast({ variant: 'destructive', title: "Unauthorized Domain", description: "Login is only available on authorized domains." });
       return;
     }

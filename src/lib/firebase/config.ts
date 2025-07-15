@@ -4,12 +4,12 @@ import { getAuth } from 'firebase/auth';
 
 // Your web app's Firebase configuration pulled from environment variables
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyD4gLIOIQEOxeztyjKJKn3Qpl7XBBcogdw",
+  authDomain: "pravis-your-digital-extension.firebaseapp.com",
+  projectId: "pravis-your-digital-extension",
+  storageBucket: "pravis-your-digital-extension.firebasestorage.app",
+  messagingSenderId: "827924117533",
+  appId: "1:827924117533:web:51d4b9d9ba16721bbbeef4"
 };
 
 // Health check for Firebase config
