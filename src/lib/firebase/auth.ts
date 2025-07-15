@@ -22,18 +22,10 @@ googleProvider.addScope('https://www.googleapis.com/auth/gmail.modify');
 googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly');
 googleProvider.addScope('https://www.googleapis.com/auth/calendar.events');
 
-// Health check for Firebase config
-const isFirebaseConfigured = () => {
-  return auth.app.options && Object.values(auth.app.options).every(value => !!value);
-};
-
 export const signInWithGoogle = async (): Promise<{
   userCredential: UserCredential | null;
   accessToken: string | null;
 }> => {
-  if (!isFirebaseConfigured()) {
-    throw new Error('Firebase configuration is missing or incomplete.');
-  }
   if (typeof window === 'undefined') return { userCredential: null, accessToken: null };
 
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -64,7 +56,7 @@ export const handleRedirectResult = async (): Promise<{
   userCredential: UserCredential | null;
   accessToken: string | null;
 }> => {
-  if (typeof window === 'undefined' || !isFirebaseConfigured()) {
+  if (typeof window === 'undefined') {
     return { userCredential: null, accessToken: null };
   }
   
@@ -88,7 +80,6 @@ export const handleRedirectResult = async (): Promise<{
 };
 
 export const signInWithEmail = async (email: string, password: string): Promise<{ userCredential: UserCredential; error?: undefined } | { userCredential?: undefined; error: any }> => {
-    if (!isFirebaseConfigured()) return { error: { message: 'Firebase not configured.' }};
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         return { userCredential };
@@ -98,7 +89,6 @@ export const signInWithEmail = async (email: string, password: string): Promise<
 };
 
 export const signUpWithEmail = async (email: string, password: string, displayName: string): Promise<{ userCredential: UserCredential; error?: undefined } | { userCredential?: undefined; error: any }> => {
-    if (!isFirebaseConfigured()) return { error: { message: 'Firebase not configured.' }};
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(userCredential.user, { displayName });

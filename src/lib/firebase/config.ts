@@ -12,8 +12,26 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
+// Health check for Firebase config
+const isFirebaseConfigured = () => {
+  return firebaseConfig.apiKey &&
+         firebaseConfig.authDomain &&
+         firebaseConfig.projectId &&
+         firebaseConfig.storageBucket &&
+         firebaseConfig.messagingSenderId &&
+         firebaseConfig.appId;
+};
 
-export { app, auth };
+// Initialize Firebase
+const app = isFirebaseConfigured() 
+  ? !getApps().length ? initializeApp(firebaseConfig) : getApp()
+  : null;
+
+const auth = app ? getAuth(app) : ({} as any); // Provide a dummy auth object if not configured
+
+if (!app) {
+  console.error("Firebase configuration is missing or incomplete. Please check your environment variables.");
+}
+
+
+export { app, auth, isFirebaseConfigured };
