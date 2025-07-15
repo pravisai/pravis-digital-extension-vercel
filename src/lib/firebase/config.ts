@@ -1,5 +1,5 @@
 import { getApp, getApps, initializeApp } from 'firebase/app';
-import { getAuth, setPersistence, browserSessionPersistence } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 
 // Your web app's Firebase configuration pulled from environment variables
 const firebaseConfig = {
@@ -14,8 +14,5 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
-
-// Set session persistence
-setPersistence(auth, browserSessionPersistence);
 
 export { app, auth };
