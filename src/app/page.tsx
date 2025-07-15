@@ -25,7 +25,7 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export default function SignInPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [isProcessingRedirect, setIsProcessingRedirect] = useState(true); // Handles initial redirect check
+  const [isProcessingRedirect, setIsProcessingRedirect] = useState(true);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   
@@ -35,19 +35,20 @@ export default function SignInPage() {
   const [displayName, setDisplayName] = useState('');
 
   useEffect(() => {
-    // This effect runs once on mount to handle the redirect result from Google Sign-In on mobile.
     const processRedirect = async () => {
       try {
         const { userCredential } = await handleRedirectResult();
         if (userCredential?.user) {
           toast({ title: "Success!", description: `Authenticated as ${userCredential.user.displayName}` });
           router.push('/dashboard');
-        } else {
-          setIsProcessingRedirect(false);
         }
       } catch (error: any) {
-        // Errors are handled in the auth function, just stop loading
-        setIsProcessingRedirect(false); 
+         if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+          console.error("Redirect Error:", error);
+          toast({ variant: 'destructive', title: 'Authentication Failed', description: error.message });
+        }
+      } finally {
+        setIsProcessingRedirect(false);
       }
     };
     processRedirect();
@@ -62,8 +63,22 @@ export default function SignInPage() {
         router.push('/dashboard');
       }
     } catch (error: any) {
-      // Error handling is inside signInWithGoogle, so we just need to update loading state
-      // The function itself will throw only on unhandled errors.
+      if (error.message.includes('Firebase configuration is missing')) {
+          toast({
+            variant: 'destructive',
+            title: 'Configuration Error',
+            description: 'Firebase environment variables are not set. Please configure them in your .env file or deployment settings.',
+            duration: 10000,
+          });
+      } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+        console.error('Google Sign In Error:', error);
+        toast({
+            variant: 'destructive',
+            title: 'Sign In Failed',
+            description: 'Could not sign in with Google. Please check the console for details and ensure your domain is authorized in Firebase.',
+            duration: 10000,
+        });
+      }
     } finally {
         setIsGoogleLoading(false);
     }
