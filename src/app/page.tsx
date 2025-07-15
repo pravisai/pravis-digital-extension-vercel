@@ -24,9 +24,9 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 const allowedDomains = [
-  "vercel.app",
-  "firebaseapp.com",
-  "web.app",
+  "pravis-nu.vercel.app",
+  "pravis-your-digital-extension.firebaseapp.com",
+  "pravis-your-digital-extension.web.app",
   "localhost"
 ];
 
@@ -67,9 +67,19 @@ export default function SignInPage() {
   }, [router, toast]);
   
   const handleGoogleSignIn = async () => {
-    if (typeof window !== 'undefined' && !allowedDomains.some(d => window.location.hostname.endsWith(d))) {
-      toast({ variant: 'destructive', title: "Unauthorized Domain", description: "Login is only available on authorized domains." });
-      return;
+    if (typeof window !== 'undefined') {
+      console.log("Current hostname:", window.location.hostname);
+      const isAllowed = allowedDomains.some(d => {
+        if (d === 'localhost') return window.location.hostname === d;
+        // For vercel, check if it's a preview deployment or the main one
+        if (d === 'pravis-nu.vercel.app') return window.location.hostname.endsWith('vercel.app');
+        return window.location.hostname === d;
+      });
+
+      if (!isAllowed) {
+        toast({ variant: 'destructive', title: "Unauthorized Domain", description: "Login is only available on authorized domains." });
+        return;
+      }
     }
 
     setIsGoogleLoading(true);
@@ -107,9 +117,19 @@ export default function SignInPage() {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (typeof window !== 'undefined' && !allowedDomains.some(d => window.location.hostname.endsWith(d))) {
-      toast({ variant: 'destructive', title: "Unauthorized Domain", description: "Login is only available on authorized domains." });
-      return;
+    if (typeof window !== 'undefined') {
+      console.log("Current hostname:", window.location.hostname);
+      const isAllowed = allowedDomains.some(d => {
+        if (d === 'localhost') return window.location.hostname === d;
+        // For vercel, check if it's a preview deployment or the main one
+        if (d === 'pravis-nu.vercel.app') return window.location.hostname.endsWith('vercel.app');
+        return window.location.hostname === d;
+      });
+      
+      if (!isAllowed) {
+        toast({ variant: 'destructive', title: "Unauthorized Domain", description: "Login is only available on authorized domains." });
+        return;
+      }
     }
 
     setIsEmailLoading(true);
@@ -272,3 +292,5 @@ export default function SignInPage() {
     </div>
   );
 }
+
+    
