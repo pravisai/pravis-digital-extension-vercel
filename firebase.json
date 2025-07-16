@@ -1,5 +1,5 @@
 {
-  "projectId": "pravis-your-digital-extension", 
+  "projectId": "pravis-your-digital-extension",
   "emulators": {
     "hosting": {
       "host": "127.0.0.1",
@@ -13,6 +13,10 @@
   },
   "hosting": {
     "public": "out",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
   }
 }
