@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -11,7 +12,7 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
 } from 'firebase/auth';
-import { auth } from './config';
+import { auth, isFirebaseConfigured } from './config';
 
 // Ensure Firebase is only initialized client-side to avoid SSG/SSR issues
 if (typeof window === 'undefined') {
@@ -23,15 +24,17 @@ const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('https://www.googleapis.com/auth/gmail.readonly');
 googleProvider.addScope('https://www.googleapis.com/auth/gmail.send');
 googleProvider.addScope('https://www.googleapis.com/auth/gmail.modify');
+googleProvider.addScope('https://www.googleapis.com/auth/calendar.events');
+googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly');
 
 
 export const signInWithGoogle = async (): Promise<{
   userCredential: UserCredential | null;
   accessToken: string | null;
 }> => {
-  // Prevent execution on server-side
-  if (typeof window === 'undefined') {
-    console.warn('signInWithGoogle: Called on server-side, returning null.');
+  // Prevent execution on server-side or if Firebase is not configured
+  if (typeof window === 'undefined' || !isFirebaseConfigured()) {
+    console.warn('signInWithGoogle: Called on server-side or Firebase not configured, returning null.');
     return { userCredential: null, accessToken: null };
   }
 
@@ -65,9 +68,9 @@ export const handleRedirectResult = async (): Promise<{
   userCredential: UserCredential | null;
   accessToken: string | null;
 }> => {
-  // Prevent execution on server-side
-  if (typeof window === 'undefined') {
-    console.warn('handleRedirectResult: Called on server-side, returning null.');
+  // Prevent execution on server-side or if Firebase is not configured
+  if (typeof window === 'undefined' || !isFirebaseConfigured()) {
+    console.warn('handleRedirectResult: Called on server-side or Firebase not configured, returning null.');
     return { userCredential: null, accessToken: null };
   }
 
@@ -96,6 +99,7 @@ export const signInWithEmail = async (
   email: string,
   password: string
 ): Promise<{ userCredential: UserCredential; error?: undefined } | { userCredential?: undefined; error: any }> => {
+  if (!isFirebaseConfigured()) return { error: { message: "Firebase not configured." }};
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return { userCredential };
@@ -112,6 +116,7 @@ export const signUpWithEmail = async (
   password: string,
   displayName: string
 ): Promise<{ userCredential: UserCredential; error?: undefined } | { userCredential?: undefined; error: any }> => {
+  if (!isFirebaseConfigured()) return { error: { message: "Firebase not configured." }};
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(userCredential.user, { displayName });
@@ -125,6 +130,7 @@ export const signUpWithEmail = async (
 };
 
 export const signOutUser = async (): Promise<void> => {
+  if (!isFirebaseConfigured()) return;
   try {
     await signOut(auth);
     sessionStorage.removeItem('gmail_access_token');
@@ -138,8 +144,8 @@ export const signOutUser = async (): Promise<void> => {
 };
 
 export const getStoredAccessToken = (): string | null => {
-  if (typeof window === 'undefined') {
-    console.warn('getStoredAccessToken: Called on server-side, returning null.');
+  if (typeof window === 'undefined' || !isFirebaseConfigured()) {
+    console.warn('getStoredAccessToken: Called on server-side or Firebase not configured, returning null.');
     return null;
   }
   return sessionStorage.getItem('gmail_access_token');
