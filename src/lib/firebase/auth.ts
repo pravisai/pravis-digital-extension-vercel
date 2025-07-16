@@ -15,7 +15,7 @@ import {
 import { auth, isFirebaseConfigured } from './config';
 
 // Ensure Firebase is only initialized client-side to avoid SSG/SSR issues
-if (typeof window === 'undefined') {
+if (typeof window === 'undefined' && !isFirebaseConfigured()) {
   console.warn('Firebase auth is not available on the server-side. Ensure client-side initialization.');
 }
 
