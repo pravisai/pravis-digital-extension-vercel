@@ -81,36 +81,31 @@ export default function SignInPage() {
     e.preventDefault();
     setIsEmailLoading(true);
     
-    if (isSignUp) {
-        const { userCredential, error } = await signUpWithEmail(email, password, displayName);
-        if (error) {
-            toast({ variant: 'destructive', title: 'Sign Up Failed', description: error.message });
-        } else if (userCredential) {
-            toast({ title: "Account Created!", description: `Welcome, ${userCredential.user.displayName}` });
-            router.push('/dashboard');
+    try {
+      if (isSignUp) {
+          const { userCredential, error } = await signUpWithEmail(email, password, displayName);
+          if (error) throw error;
+          if (userCredential) {
+              toast({ title: "Account Created!", description: `Welcome, ${userCredential.user.displayName}` });
+              router.push('/dashboard');
+          }
+      } else {
+          const { userCredential, error } = await signInWithEmail(email, password);
+          if (error) throw error;
+          if (userCredential) {
+              toast({ title: "Success!", description: `Welcome back, ${userCredential.user.displayName || 'user'}` });
+              router.push('/dashboard');
         }
-    } else {
-        const { userCredential, error } = await signInWithEmail(email, password);
-        if (error) {
-            if (error.code === 'auth/invalid-credential') {
-                toast({ 
-                    variant: 'destructive', 
-                    title: 'Login Failed', 
-                    description: "Incorrect email or password. Please check your credentials or sign up if you don't have an account." 
-                });
-            } else {
-                toast({ variant: 'destructive', title: 'Sign In Failed', description: error.message });
-            }
-        } else if (userCredential?.user?.displayName) {
-            toast({ title: "Success!", description: `Welcome back, ${userCredential.user.displayName}` });
-            router.push('/dashboard');
-        } else if (userCredential) {
-            toast({ title: "Success!", description: `Welcome back!`});
-            router.push('/dashboard');
+      }
+    } catch (error: any) {
+        let description = error.message;
+        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+            description = "Incorrect email or password. Please try again or sign up.";
         }
+        toast({ variant: 'destructive', title: isSignUp ? 'Sign Up Failed' : 'Sign In Failed', description });
+    } finally {
+        setIsEmailLoading(false);
     }
-    
-    setIsEmailLoading(false);
   };
 
   if (isProcessingRedirect) {
@@ -173,7 +168,7 @@ export default function SignInPage() {
             <form onSubmit={handleEmailSubmit} className="space-y-4">
                 {isSignUp && (
                     <div className="grid w-full items-center gap-1.5">
-                        <Label htmlFor="displayName" className="text-muted-foreground">Display Name</Label>
+                        <Label htmlFor="displayName">Display Name</Label>
                         <Input 
                             id="displayName" 
                             type="text" 
@@ -186,7 +181,7 @@ export default function SignInPage() {
                     </div>
                 )}
                 <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="email" className="text-muted-foreground">Email</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input 
                         id="email" 
                         type="email" 
@@ -198,7 +193,7 @@ export default function SignInPage() {
                     />
                 </div>
                 <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="password" className="text-muted-foreground">Password</Label>
+                    <Label htmlFor="password">Password</Label>
                     <Input 
                         id="password" 
                         type="password"

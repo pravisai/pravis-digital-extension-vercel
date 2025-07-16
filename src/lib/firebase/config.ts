@@ -18,12 +18,13 @@ function isConfigValid(config: typeof firebaseConfig): boolean {
 let app: FirebaseApp;
 let auth: ReturnType<typeof getAuth>;
 
-if (isConfigValid(firebaseConfig)) {
+// This check prevents Firebase from being initialized on the server-side
+// or if the configuration is invalid.
+if (typeof window !== 'undefined' && isConfigValid(firebaseConfig)) {
     app = getApps().length ? getApp() : initializeApp(firebaseConfig);
     auth = getAuth(app);
 } else {
-    console.error("Firebase configuration is missing or incomplete. Please check your environment variables.");
-    // Provide dummy objects to prevent app from crashing if config is invalid.
+    // Provide dummy objects if on server or if config is invalid
     app = {} as FirebaseApp;
     auth = {} as ReturnType<typeof getAuth>;
 }

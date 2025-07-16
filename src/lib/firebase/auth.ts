@@ -11,6 +11,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
+  onAuthStateChanged,
 } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from './config';
 
@@ -38,21 +39,14 @@ export const signInWithGoogle = async (): Promise<{
     return { userCredential: null, accessToken: null };
   }
 
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
   try {
-    if (isMobile) {
-      await signInWithRedirect(auth, googleProvider);
-      return { userCredential: null, accessToken: null };
-    } else {
-      const result = await signInWithPopup(auth, googleProvider);
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const accessToken = credential?.accessToken ?? null;
-      if (accessToken) {
-        sessionStorage.setItem('gmail_access_token', accessToken);
-      }
-      return { userCredential: result, accessToken };
+    const result = await signInWithPopup(auth, googleProvider);
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    const accessToken = credential?.accessToken ?? null;
+    if (accessToken) {
+      sessionStorage.setItem('gmail_access_token', accessToken);
     }
+    return { userCredential: result, accessToken };
   } catch (error: any) {
     // Log the full error for better debugging
     console.error(`Google Sign-In Error (Code: ${error.code}):`, error.message);
@@ -153,3 +147,6 @@ export const getStoredAccessToken = (): string | null => {
   }
   return sessionStorage.getItem('gmail_access_token');
 };
+
+export { onAuthStateChanged };
+export type { UserCredential };
