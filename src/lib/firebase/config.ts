@@ -1,35 +1,68 @@
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
-// Your web app's Firebase configuration
+// Firebase configuration using environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyD4gLIOIQEOxeztyjKJKn3Qpl7XBBcogdw",
-  authDomain: "pravis-your-digital-extension.firebaseapp.com",
-  projectId: "pravis-your-digital-extension",
-  storageBucket: "pravis-your-digital-extension.appspot.com", // ✅ Corrected here
-  messagingSenderId: "827924117533",
-  appId: "1:827924117533:web:51d4b9d9ba16721bbbeef4"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Health check for Firebase config
-const isFirebaseConfigured = () => {
-  return firebaseConfig.apiKey &&
-         firebaseConfig.authDomain &&
-         firebaseConfig.projectId &&
-         firebaseConfig.storageBucket &&
-         firebaseConfig.messagingSenderId &&
-         firebaseConfig.appId;
+// Health check for Firebase configuration
+const isFirebaseConfigured = (): boolean => {
+  const requiredFields = [
+    'apiKey',
+    'authDomain',
+    'projectId',
+    'storageBucket',
+    'messagingSenderId',
+    'appId',
+  ];
+  const missingFields = requiredFields.filter(
+    (field) => !firebaseConfig[field as keyof typeof firebaseConfig]
+  );
+
+  if (missingFields.length > 0) {
+    console.error(
+      `Firebase configuration is missing or incomplete. Missing fields: ${missingFields.join(', ')}. Check environment variables.`
+    );
+    return false;
+  }
+  return true;
 };
 
-// Initialize Firebase
-const app = isFirebaseConfigured() 
-  ? (!getApps().length ? initializeApp(firebaseConfig) : getApp())
-  : null;
+// Initialize Firebase only if configuration is valid
+let app = null;
+let auth = {} as any; // Dummy auth object if initialization fails
 
-const auth = app ? getAuth(app) : ({} as any); // Provide a dummy auth object if not configured
-
-if (!app) {
-  console.error("Firebase configuration is missing or incomplete. Please check your environment variables.");
+if (isFirebaseConfigured()) {
+  try {
+    app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    auth = getAuth(app);
+  } catch (error: any) {
+    console.error('Failed to initialize Firebase:', error);
+    if (error.code === 'auth/invalid-api-key') {
+      console.error(
+        'Invalid Firebase API key. Verify NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.'
+      );
+    }
+  }
+} else {
+  console.warn(
+    'Firebase not initialized due to missing configuration. Ensure all NEXT_PUBLIC_FIREBASE_* environment variables are set.'
+  );
 }
 
-export { app, auth, isFirebaseConfigured };
+// Log configuration for debugging (avoid logging sensitive data in production)
+if (process.env.NODE_ENV === 'development') {
+  console.log('Firebase Config Status:', {
+    isConfigured: isFirebaseConfigured(),
+    apiKey: firebaseConfig.apiKey ? '[Redacted]' : 'Missing',
+    projectId: firebaseConfig.projectId || 'Missing',
+  });
+}
+
+export { app, auth, isFirebaseConfigured }; 

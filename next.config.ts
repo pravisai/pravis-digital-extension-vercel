@@ -18,6 +18,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack: (config) => {
+    // Ignore OpenTelemetry modules that cause build issues
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@opentelemetry/exporter-jaeger': false,
+      '@opentelemetry/exporter-prometheus': false,
+    };
+    return config;
+  },
 };
 
 export default nextConfig;
