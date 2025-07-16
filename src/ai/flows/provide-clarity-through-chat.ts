@@ -11,7 +11,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { z } from 'zod';
 
 const ProvideClarityThroughChatInputSchema = z.object({
   userMessage: z.string().describe('The user\u0027s message to Pravis.'),
