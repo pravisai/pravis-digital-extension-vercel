@@ -54,6 +54,9 @@ export const signInWithGoogle = async (): Promise<{
       return { userCredential: result, accessToken };
     }
   } catch (error: any) {
+    // Log the full error for better debugging
+    console.error(`Google Sign-In Error (Code: ${error.code}):`, error.message);
+    
     // Handle specific Firebase errors
     if (error.code === 'auth/invalid-api-key') {
       console.error('signInWithGoogle: Invalid Firebase API key. Check environment variables in ./config.');
