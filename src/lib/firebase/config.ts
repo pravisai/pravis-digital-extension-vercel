@@ -4,7 +4,6 @@ import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCYdzbPrsQ7vW6UrdpgSeN5KW85kzGliPA",
-    authDomain: "pravis-your-digital-extension.firebaseapp.com",
     projectId: "pravis-your-digital-extension",
     storageBucket: "pravis-your-digital-extension.firebasestorage.app",
     messagingSenderId: "827924117533",
