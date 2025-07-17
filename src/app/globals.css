@@ -144,9 +144,9 @@
     background: linear-gradient(135deg, rgba(46, 46, 46, 0.6), rgba(26, 26, 26, 0.6));
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: none;
-    outline: none;
-    box-shadow: none;
+    border: 1px solid transparent;
+    outline: none !important;
+    box-shadow: none !important;
     border-radius: var(--radius);
     display: flex;
     flex-direction: column;
@@ -161,7 +161,7 @@
   }
 
   .cube-face:hover {
-    transform: scale(1.05);
+    /* No scale transform to prevent re-triggering render bug */
   }
   
   .front:hover { transform: rotateY(0deg) translateZ(135px); }
@@ -244,7 +244,9 @@
     background: linear-gradient(155deg, rgba(46, 46, 46, 0.6) 0%, rgba(26, 26, 26, 0.6) 100%);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid transparent;
+    box-shadow: none !important;
+    outline: none !important;
   }
 
   .pyramid-face:hover {
