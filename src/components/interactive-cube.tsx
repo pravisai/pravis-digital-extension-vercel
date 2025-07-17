@@ -28,7 +28,7 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const [isDragging, setIsDragging] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [rotation, setRotation] = useState({ x: -20, y: 30 });
-    const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
+    const dragStartPos = useRef({ x: 0, y: 0 });
     const autoRotateRef = useRef<number | null>(null);
 
     const handleFaceClick = (face: CubeFace) => {
@@ -47,7 +47,7 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const startAutoRotation = () => {
         if (autoRotateRef.current) cancelAnimationFrame(autoRotateRef.current);
         const rotate = () => {
-            setRotation(prev => ({ x: prev.x + 0.1, y: prev.y + 0.15 }));
+            setRotation(prev => ({ x: prev.x, y: prev.y + 0.15 }));
             autoRotateRef.current = requestAnimationFrame(rotate);
         };
         autoRotateRef.current = requestAnimationFrame(rotate);
@@ -66,47 +66,68 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleMouseDown = (e: React.MouseEvent) => {
-        e.preventDefault();
+    const handleDragStart = (clientX: number, clientY: number) => {
         stopAutoRotation();
         setIsDragging(true);
-        setLastMousePos({ x: e.clientX, y: e.clientY });
-        if (containerRef.current) {
-            containerRef.current.style.cursor = 'grabbing';
-        }
+        dragStartPos.current = { x: clientX, y: clientY };
+        if (containerRef.current) containerRef.current.style.cursor = 'grabbing';
     };
 
-    const handleMouseMove = (e: React.MouseEvent) => {
+    const handleDragMove = (clientX: number, clientY: number) => {
         if (!isDragging) return;
-        e.preventDefault();
-        const deltaX = e.clientX - lastMousePos.x;
-        const deltaY = e.clientY - lastMousePos.y;
+        const deltaX = clientX - dragStartPos.current.x;
+        const deltaY = clientY - dragStartPos.current.y;
         
         setRotation(prev => ({
             x: prev.x - deltaY * 0.5,
             y: prev.y + deltaX * 0.5
         }));
-        setLastMousePos({ x: e.clientX, y: e.clientY });
+        dragStartPos.current = { x: clientX, y: clientY };
     };
 
-    const handleMouseUp = (e: React.MouseEvent) => {
-        e.preventDefault();
-        if (containerRef.current) {
-            containerRef.current.style.cursor = 'grab';
-        }
+    const handleDragEnd = () => {
+        if (containerRef.current) containerRef.current.style.cursor = 'grab';
+        
         setTimeout(() => {
             setIsDragging(false);
-        }, 50);
+        }, 50); // Small delay to distinguish drag from click
         
         if (!autoRotateRef.current) {
             startAutoRotation();
         }
     };
+
+    // Mouse Events
+    const handleMouseDown = (e: React.MouseEvent) => {
+        e.preventDefault();
+        handleDragStart(e.clientX, e.clientY);
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        e.preventDefault();
+        handleDragMove(e.clientX, e.clientY);
+    };
     
+    const handleMouseUp = (e: React.MouseEvent) => {
+        e.preventDefault();
+        handleDragEnd();
+    };
+
     const handleMouseLeave = (e: React.MouseEvent) => {
-        if (isDragging) {
-           handleMouseUp(e);
-        }
+        if (isDragging) handleMouseUp(e);
+    };
+
+    // Touch Events
+    const handleTouchStart = (e: React.TouchEvent) => {
+        handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
+    };
+
+    const handleTouchEnd = () => {
+        handleDragEnd();
     };
 
     return (
@@ -118,6 +139,9 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseLeave}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
                 style={{ cursor: 'grab' }}
             >
                 {isLoading && (
