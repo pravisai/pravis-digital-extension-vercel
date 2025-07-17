@@ -14,40 +14,41 @@ export interface CubeFace {
   face: "front" | "right" | "back" | "left" | "top" | "bottom";
   colorClass: "neon-purple" | "electric-blue" | "bright-pink" | "acid-green";
   href?: string;
-  onClick?: (id: string) => void;
 }
 
 interface InteractiveCubeProps {
   faces: CubeFace[];
 }
 
+const DRAG_THRESHOLD = 10; // pixels
+
 export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const router = useRouter();
     const cubeRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const [isDragging, setIsDragging] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [rotation, setRotation] = useState({ x: -20, y: 30 });
-    const dragStartPos = useRef({ x: 0, y: 0 });
     const autoRotateRef = useRef<number | null>(null);
 
+    // Refs for drag/click detection
+    const isDraggingRef = useRef(false);
+    const isPointerDownRef = useRef(false);
+    const dragStartPos = useRef({ x: 0, y: 0 });
+    const currentMousePos = useRef({ x: 0, y: 0 });
+
     const handleFaceClick = (face: CubeFace) => {
-        if (isDragging) return;
-        setIsLoading(true);
         if (face.href && face.href !== '#') {
+            setIsLoading(true);
             router.push(face.href);
-        } else if (face.onClick) {
-            face.onClick(face.id);
-        } else {
-          // If no action, don't keep loading state
-          setIsLoading(false);
         }
     };
 
     const startAutoRotation = () => {
         if (autoRotateRef.current) cancelAnimationFrame(autoRotateRef.current);
         const rotate = () => {
-            setRotation(prev => ({ x: prev.x, y: prev.y + 0.15 }));
+            if (!isPointerDownRef.current) {
+                setRotation(prev => ({ x: prev.x, y: prev.y + 0.15 }));
+            }
             autoRotateRef.current = requestAnimationFrame(rotate);
         };
         autoRotateRef.current = requestAnimationFrame(rotate);
@@ -66,82 +67,60 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleDragStart = (clientX: number, clientY: number) => {
+    const handlePointerDown = (clientX: number, clientY: number) => {
         stopAutoRotation();
-        setIsDragging(true);
+        isPointerDownRef.current = true;
+        isDraggingRef.current = false;
         dragStartPos.current = { x: clientX, y: clientY };
+        currentMousePos.current = { x: clientX, y: clientY };
         if (containerRef.current) containerRef.current.style.cursor = 'grabbing';
     };
 
-    const handleDragMove = (clientX: number, clientY: number) => {
-        if (!isDragging) return;
+    const handlePointerMove = (clientX: number, clientY: number) => {
+        if (!isPointerDownRef.current) return;
+
         const deltaX = clientX - dragStartPos.current.x;
         const deltaY = clientY - dragStartPos.current.y;
         
+        if (!isDraggingRef.current && (Math.abs(deltaX) > DRAG_THRESHOLD || Math.abs(deltaY) > DRAG_THRESHOLD)) {
+            isDraggingRef.current = true;
+        }
+        
+        const moveDeltaX = clientX - currentMousePos.current.x;
+        const moveDeltaY = clientY - currentMousePos.current.y;
+
         setRotation(prev => ({
-            x: prev.x - deltaY * 0.5,
-            y: prev.y + deltaX * 0.5
+            x: prev.x - moveDeltaY * 0.5,
+            y: prev.y + moveDeltaX * 0.5
         }));
-        dragStartPos.current = { x: clientX, y: clientY };
+        currentMousePos.current = { x: clientX, y: clientY };
     };
 
-    const handleDragEnd = () => {
+    const handlePointerUp = (face: CubeFace | null) => {
+        isPointerDownRef.current = false;
         if (containerRef.current) containerRef.current.style.cursor = 'grab';
         
-        setTimeout(() => {
-            setIsDragging(false);
-        }, 50); // Small delay to distinguish drag from click
+        if (!isDraggingRef.current && face) {
+            handleFaceClick(face);
+        }
         
         if (!autoRotateRef.current) {
             startAutoRotation();
         }
     };
 
-    // Mouse Events
-    const handleMouseDown = (e: React.MouseEvent) => {
-        e.preventDefault();
-        handleDragStart(e.clientX, e.clientY);
-    };
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        e.preventDefault();
-        handleDragMove(e.clientX, e.clientY);
-    };
-    
-    const handleMouseUp = (e: React.MouseEvent) => {
-        e.preventDefault();
-        handleDragEnd();
-    };
-
-    const handleMouseLeave = (e: React.MouseEvent) => {
-        if (isDragging) handleMouseUp(e);
-    };
-
-    // Touch Events
-    const handleTouchStart = (e: React.TouchEvent) => {
-        handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
-    };
-
-    const handleTouchMove = (e: React.TouchEvent) => {
-        handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
-    };
-
-    const handleTouchEnd = () => {
-        handleDragEnd();
-    };
-
     return (
         <section>
             <div 
-                className="cube-wrapper relative" 
+                className="cube-wrapper relative"
                 ref={containerRef}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseLeave}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
+                onMouseDown={(e) => handlePointerDown(e.clientX, e.clientY)}
+                onMouseMove={(e) => handlePointerMove(e.clientX, e.clientY)}
+                onMouseUp={() => handlePointerUp(null)} // This event won't know which face it's on.
+                onMouseLeave={() => {if (isPointerDownRef.current) handlePointerUp(null)}}
+                onTouchStart={(e) => handlePointerDown(e.touches[0].clientX, e.touches[0].clientY)}
+                onTouchMove={(e) => handlePointerMove(e.touches[0].clientX, e.touches[0].clientY)}
+                onTouchEnd={() => handlePointerUp(null)} // Same as mouseup
                 style={{ cursor: 'grab' }}
             >
                 {isLoading && (
@@ -159,7 +138,14 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
                             <div
                                 key={item.id}
                                 className={cn("cube-face", item.face)}
-                                onClick={() => handleFaceClick(item)}
+                                onMouseUp={(e) => {
+                                    e.stopPropagation(); // prevent parent onMouseUp from firing
+                                    handlePointerUp(item);
+                                }}
+                                onTouchEnd={(e) => {
+                                    e.stopPropagation();
+                                    handlePointerUp(item);
+                                }}
                             >
                                 <div className={cn("module-icon", item.colorClass)}>
                                     <item.icon className={cn("w-7 h-7")} />
