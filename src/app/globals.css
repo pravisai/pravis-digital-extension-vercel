@@ -164,16 +164,16 @@
   }
 
   .cube-face:hover {
-    background: linear-gradient(135deg, rgba(46, 46, 46, 0.7), rgba(26, 26, 26, 0.7));
+    transform: scale(1.05);
     border-color: rgba(255, 255, 255, 0.2);
   }
   
-  .front:hover { transform: rotateY(0deg) translateZ(135px); --glow-color: #9D00FF4D; }
-  .right:hover { transform: rotateY(90deg) translateZ(135px); --glow-color: #00FFFF4D;}
-  .back:hover { transform: rotateY(180deg) translateZ(135px); --glow-color: #FF007F4D;}
-  .left:hover { transform: rotateY(-90deg) translateZ(135px); --glow-color: #39FF144D;}
-  .top:hover { transform: rotateX(90deg) translateZ(135px); --glow-color: #9D00FF4D;}
-  .bottom:hover { transform: rotateX(-90deg) translateZ(135px); --glow-color: #00FFFF4D;}
+  .front:hover { transform: rotateY(0deg) translateZ(135px); }
+  .right:hover { transform: rotateY(90deg) translateZ(135px); }
+  .back:hover { transform: rotateY(180deg) translateZ(135px); }
+  .left:hover { transform: rotateY(-90deg) translateZ(135px); }
+  .top:hover { transform: rotateX(90deg) translateZ(135px); }
+  .bottom:hover { transform: rotateX(-90deg) translateZ(135px); }
 
   .front { transform: rotateY(0deg) translateZ(125px); }
   .right { transform: rotateY(90deg) translateZ(125px); }
@@ -194,13 +194,13 @@
   }
   
   .cube-face:hover .module-icon {
-    filter: drop-shadow(0 0 8px var(--glow-color, #fff));
+    filter: none;
   }
 
-  .module-icon.neon-purple { color: #9D00FF; --glow-color: #9D00FF; }
-  .module-icon.electric-blue { color: #00FFFF; --glow-color: #00FFFF; }
-  .module-icon.bright-pink { color: #FF007F; --glow-color: #FF007F; }
-  .module-icon.acid-green { color: #39FF14; --glow-color: #39FF14; }
+  .module-icon.neon-purple { color: #9D00FF; }
+  .module-icon.electric-blue { color: #00FFFF; }
+  .module-icon.bright-pink { color: #FF007F; }
+  .module-icon.acid-green { color: #39FF14; }
   
   .cube-face h3 {
     color: #ffffff;
@@ -259,7 +259,6 @@
   .pyramid-face:hover {
      background: linear-gradient(155deg, rgba(46, 46, 46, 0.7), rgba(26, 26, 26, 0.7));
     border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 0 20px 5px hsl(var(--primary)/0.2);
   }
   
   .pyramid-side {
