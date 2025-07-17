@@ -112,6 +112,7 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseLeave}
+                style={{ cursor: 'grab' }}
             >
                 <div className="cube-container">
                     <div 
