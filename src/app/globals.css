@@ -141,12 +141,8 @@
     position: absolute;
     width: 250px;
     height: 250px;
-    background: linear-gradient(135deg, rgba(46, 46, 46, 0.6), rgba(26, 26, 26, 0.6));
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid transparent;
-    outline: none !important;
-    box-shadow: none !important;
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
     border-radius: var(--radius);
     display: flex;
     flex-direction: column;
@@ -161,7 +157,8 @@
   }
 
   .cube-face:hover {
-    /* No scale transform to prevent re-triggering render bug */
+    background-color: hsl(var(--accent));
+    border-color: hsl(var(--primary));
   }
   
   .front:hover { transform: rotateY(0deg) translateZ(135px); }
@@ -241,16 +238,13 @@
     user-select: none;
     backface-visibility: hidden;
     transition: all 0.3s ease;
-    background: linear-gradient(155deg, rgba(46, 46, 46, 0.6) 0%, rgba(26, 26, 26, 0.6) 100%);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid transparent;
-    box-shadow: none !important;
-    outline: none !important;
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
   }
 
   .pyramid-face:hover {
-     background: linear-gradient(155deg, rgba(46, 46, 46, 0.7), rgba(26, 26, 26, 0.7));
+     background-color: hsl(var(--accent));
+     border-color: hsl(var(--primary));
   }
   
   .pyramid-side {

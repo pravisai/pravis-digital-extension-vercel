@@ -48,7 +48,7 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-lg mb-1">{item.label}</h3>
-                                    <p className="text-sm">{item.description}</p>
+                                    <p className="text-sm text-muted-foreground">{item.description}</p>
                                 </div>
                             </div>
                         ))}
