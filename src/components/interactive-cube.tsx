@@ -4,6 +4,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 export interface CubeFace {
   id: string;
@@ -25,16 +26,21 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const cubeRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [rotation, setRotation] = useState({ x: -20, y: 30 });
     const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
     const autoRotateRef = useRef<number | null>(null);
 
     const handleFaceClick = (face: CubeFace) => {
         if (isDragging) return;
+        setIsLoading(true);
         if (face.href && face.href !== '#') {
             router.push(face.href);
         } else if (face.onClick) {
             face.onClick(face.id);
+        } else {
+          // If no action, don't keep loading state
+          setIsLoading(false);
         }
     };
 
@@ -106,7 +112,7 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     return (
         <section>
             <div 
-                className="cube-wrapper" 
+                className="cube-wrapper relative" 
                 ref={containerRef}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
@@ -114,6 +120,11 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
                 onMouseLeave={handleMouseLeave}
                 style={{ cursor: 'grab' }}
             >
+                {isLoading && (
+                  <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-20 rounded-lg">
+                    <Loader2 className="h-12 w-12 text-primary animate-spin" />
+                  </div>
+                )}
                 <div className="cube-container">
                     <div 
                         ref={cubeRef} 
