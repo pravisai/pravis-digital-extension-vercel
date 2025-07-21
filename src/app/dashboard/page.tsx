@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -27,22 +28,22 @@ export default function DashboardPage() {
     return (
       <Typewriter
         text="All checks passed. Let’s begin."
-        className="text-4xl font-bold tracking-tight"
+        className="text-4xl font-bold tracking-tight justify-center text-center"
       />
     );
   };
 
   return (
-    <div className="space-y-8">
-      <FadeIn>
-        <div className="text-left">
+    <div className="h-full flex flex-col items-center justify-center space-y-8">
+      <FadeIn className="w-full">
+        <div className="text-center">
           {getGreeting()}
           <p className="text-muted-foreground mt-2">
             Here's a snapshot of your digital extension.
           </p>
         </div>
       </FadeIn>
-      <div className="grid grid-cols-1 gap-8">
+      <div className="w-full">
         <FadeIn delay={0.2}>
           <Modules />
         </FadeIn>

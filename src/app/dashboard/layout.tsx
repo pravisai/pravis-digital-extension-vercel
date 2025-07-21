@@ -197,7 +197,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(true);
   
-    const isFullHeightPage = pathname === '/dashboard/creative-partner' || pathname === '/dashboard/clarity-chat' || pathname.startsWith('/dashboard/email-assistant') || pathname === '/dashboard/tasks' || pathname === '/dashboard/social-media';
+    const isFullHeightPage = pathname === '/dashboard' || pathname === '/dashboard/creative-partner' || pathname === '/dashboard/clarity-chat' || pathname.startsWith('/dashboard/email-assistant') || pathname === '/dashboard/tasks' || pathname === '/dashboard/social-media';
     
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -255,7 +255,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
                     "h-[calc(100vh-4rem)]": isFullHeightPage,
                 },
                  // Add padding to the bottom to avoid content being hidden by the chat input on mobile
-                 (pathname === '/dashboard') && "pb-24 md:pb-0"
+                 (pathname === '/dashboard' && !isFullHeightPage) && "pb-24 md:pb-0"
             )}>
                 {children}
             </main>
