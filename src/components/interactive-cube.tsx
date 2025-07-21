@@ -1,10 +1,11 @@
 
 "use client"
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { Loader2, Pause, Play } from "lucide-react";
+import { Button } from "./ui/button";
 
 export interface CubeFace {
   id: string;
@@ -29,6 +30,7 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [rotation, setRotation] = useState({ x: -20, y: 30 });
     const autoRotateRef = useRef<number | null>(null);
+    const [isAutoRotating, setIsAutoRotating] = useState(true);
 
     // Refs for drag/click detection
     const isDraggingRef = useRef(false);
@@ -45,16 +47,19 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         }
     };
 
-    const startAutoRotation = () => {
+    const startAutoRotation = useCallback(() => {
         if (autoRotateRef.current) cancelAnimationFrame(autoRotateRef.current);
+        let frameCount = 0;
         const rotate = () => {
-            if (!isPointerDownRef.current) {
-                setRotation(prev => ({ x: prev.x, y: prev.y + 0.15 }));
+            if (!isPointerDownRef.current && isAutoRotating) {
+                frameCount++;
+                const bobbleX = Math.sin(frameCount * 0.005) * 5; // Slower, wider bobble
+                setRotation(prev => ({ x: -15 + bobbleX, y: prev.y + 0.10 }));
             }
             autoRotateRef.current = requestAnimationFrame(rotate);
         };
         autoRotateRef.current = requestAnimationFrame(rotate);
-    };
+    }, [isAutoRotating]);
 
     const stopAutoRotation = () => {
         if (autoRotateRef.current) {
@@ -64,10 +69,13 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     };
     
     useEffect(() => {
-        startAutoRotation();
+        if (isAutoRotating) {
+            startAutoRotation();
+        } else {
+            stopAutoRotation();
+        }
         return () => stopAutoRotation();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [isAutoRotating, startAutoRotation]);
 
     const handlePointerDown = (clientX: number, clientY: number) => {
         stopAutoRotation();
@@ -112,7 +120,7 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
             handleFaceClick(releasedFaceRef.current);
         }
         
-        if (!autoRotateRef.current) {
+        if (!autoRotateRef.current && isAutoRotating) {
             startAutoRotation();
         }
         releasedFaceRef.current = null;
@@ -126,9 +134,9 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
 
 
     return (
-        <section>
+        <section className="relative">
             <div 
-                className="cube-wrapper relative"
+                className="cube-wrapper"
                 ref={containerRef}
                 onMouseDown={(e) => handlePointerDown(e.clientX, e.clientY)}
                 onMouseMove={(e) => handlePointerMove(e.clientX, e.clientY)}
@@ -168,6 +176,16 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
                         ))}
                     </div>
                 </div>
+            </div>
+             <div className="absolute bottom-4 right-4 z-30">
+                <Button 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={() => setIsAutoRotating(!isAutoRotating)}
+                    aria-label={isAutoRotating ? "Pause animation" : "Play animation"}
+                >
+                    {isAutoRotating ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                </Button>
             </div>
         </section>
     );
