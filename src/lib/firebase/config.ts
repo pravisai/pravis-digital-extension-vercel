@@ -11,23 +11,14 @@ const firebaseConfig = {
     appId: "1:827924117533:web:51d4b9d9ba16721bbbeef4",
     measurementId: "G-3ZKWGHPVJ0"
   };
+
 function isConfigValid(config: typeof firebaseConfig): boolean {
     return Object.values(config).every(value => !!value && typeof value === 'string' && value.length > 0);
 }
 
-let app: FirebaseApp;
-let auth: ReturnType<typeof getAuth>;
+const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-// This check prevents Firebase from being initialized on the server-side
-// or if the configuration is invalid.
-if (typeof window !== 'undefined' && isConfigValid(firebaseConfig)) {
-    app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-    auth = getAuth(app);
-} else {
-    // Provide dummy objects if on server or if config is invalid
-    app = {} as FirebaseApp;
-    auth = {} as ReturnType<typeof getAuth>;
-}
 
 export function isFirebaseConfigured(): boolean {
     return isConfigValid(firebaseConfig);

@@ -11,12 +11,7 @@ import {
   updateProfile,
   onAuthStateChanged,
 } from 'firebase/auth';
-import { auth, isFirebaseConfigured } from './config';
-
-// Ensure Firebase is only initialized client-side to avoid SSG/SSR issues
-if (typeof window === 'undefined' && !isFirebaseConfigured()) {
-  console.warn('Firebase auth is not available on the server-side. Ensure client-side initialization.');
-}
+import { auth } from './config';
 
 // Add scopes for Gmail and Calendar
 const googleProvider = new GoogleAuthProvider();
@@ -31,12 +26,6 @@ export const signInWithGoogle = async (): Promise<{
   userCredential: UserCredential | null;
   accessToken: string | null;
 }> => {
-  // Prevent execution on server-side or if Firebase is not configured
-  if (typeof window === 'undefined' || !isFirebaseConfigured()) {
-    console.warn('signInWithGoogle: Called on server-side or Firebase not configured.');
-    return { userCredential: null, accessToken: null };
-  }
-
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
@@ -46,9 +35,7 @@ export const signInWithGoogle = async (): Promise<{
     }
     return { userCredential: result, accessToken };
   } catch (error: any) {
-    if (error.code === 'auth/invalid-api-key') {
-      console.error('signInWithGoogle: Invalid Firebase API key. Check environment variables in ./config.');
-    } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+    if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
       console.error(`Google Sign-In Error (Code: ${error.code}):`, error.message);
     }
     throw error;
@@ -60,15 +47,7 @@ export const signInWithEmail = async (
   email: string,
   password: string
 ): Promise<void> => {
-  if (!isFirebaseConfigured()) throw new Error("Firebase not configured.");
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (error: any) {
-    if (error.code === 'auth/invalid-api-key') {
-      console.error('signInWithEmail: Invalid Firebase API key. Check environment variables in ./config.');
-    }
-    throw error;
-  }
+  await signInWithEmailAndPassword(auth, email, password);
 };
 
 export const signUpWithEmail = async (
@@ -76,39 +55,26 @@ export const signUpWithEmail = async (
   password: string,
   displayName: string
 ): Promise<void> => {
-  if (!isFirebaseConfigured()) throw new Error("Firebase not configured.");
-  try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(userCredential.user, { displayName });
-  } catch (error: any) {
-    if (error.code === 'auth/invalid-api-key') {
-      console.error('signUpWithEmail: Invalid Firebase API key. Check environment variables in ./config.');
-    }
-    throw error;
-  }
 };
 
 export const signOutUser = async (): Promise<void> => {
-  if (!isFirebaseConfigured()) return;
   try {
     await signOut(auth);
     sessionStorage.removeItem('gmail_access_token');
   } catch (error: any) {
-    if (error.code === 'auth/invalid-api-key') {
-      console.error('signOutUser: Invalid Firebase API key. Check environment variables in ./config.');
-    }
     console.error('Error signing out:', error);
     throw error;
   }
 };
 
 export const getStoredAccessToken = (): string | null => {
-  if (typeof window === 'undefined' || !isFirebaseConfigured()) {
-    console.warn('getStoredAccessToken: Called on server-side or Firebase not configured, returning null.');
+  if (typeof window === 'undefined') {
     return null;
   }
   return sessionStorage.getItem('gmail_access_token');
 };
 
-export { onAuthStateChanged };
+export { onAuthStateChanged, auth };
 export type { UserCredential };
