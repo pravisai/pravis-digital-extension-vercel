@@ -4,7 +4,7 @@
 import React, { createContext, useState, useContext, ReactNode, useMemo, useCallback } from 'react';
 import type { Email } from '@/types/email';
 import { fetchEmails } from '@/lib/gmail';
-import { signInWithGoogle, getStoredAccessToken } from '@/lib/firebase/auth';
+import { getStoredAccessToken } from '@/lib/firebase/auth';
 
 export type MailboxView = "Inbox" | "Starred" | "Sent" | "Drafts" | "Trash" | "Archived" | "Compose" | null;
 
@@ -42,29 +42,27 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
             let accessToken = getStoredAccessToken();
 
             if (!accessToken) {
-                // If no token, initiate sign-in, which triggers a redirect.
-                // The user will be redirected back and the main sign-in page will handle the token.
-                // We show a loading state until that happens.
-                await signInWithGoogle();
+                // Do not trigger sign-in from here to prevent loops.
+                // The component using this context should handle the missing token UI.
+                setFetchError("Authentication token not found. Please log in.");
+                setIsFetchingEmails(false);
                 return;
             }
 
             const result = await fetchEmails(accessToken);
 
             if (result.error) {
-                console.warn('Gmail token error, attempting to re-authenticate:', result.error);
-                // The token might be expired, so we trigger the redirect flow again.
-                await signInWithGoogle();
-                return;
+                // If the token is expired/invalid, the user might need to log in again.
+                // We'll set an error instead of re-triggering the auth flow automatically.
+                console.warn('Gmail token error:', result.error);
+                setFetchError("Your session may have expired. Please try signing out and back in.");
             } else {
                 setEmails(result.emails);
             }
         } catch (err: any) {
-            if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
-                console.error('Error in email fetching process:', err);
-                let message = err.message || 'An unknown error occurred.';
-                setFetchError(message);
-            }
+            console.error('Error in email fetching process:', err);
+            let message = err.message || 'An unknown error occurred.';
+            setFetchError(message);
         } finally {
             setIsFetchingEmails(false);
         }
