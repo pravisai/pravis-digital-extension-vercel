@@ -4,7 +4,7 @@
 import React, { createContext, useState, useContext, ReactNode, useMemo, useCallback } from 'react';
 import type { Email } from '@/types/email';
 import { fetchEmails } from '@/lib/gmail';
-import { signInWithGoogle, getStoredAccessToken } from '@/lib/firebase/auth';
+import { signInWithGoogle, getStoredAccessToken, handleRedirectResult } from '@/lib/firebase/auth';
 
 export type MailboxView = "Inbox" | "Starred" | "Sent" | "Drafts" | "Trash" | "Archived" | "Compose" | null;
 
@@ -39,24 +39,32 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
         }
 
         try {
+            // Check for redirect result first
+            const { accessToken: redirectedToken } = await handleRedirectResult();
+            if (redirectedToken) {
+                 const result = await fetchEmails(redirectedToken);
+                 if (result.error) throw new Error(result.error);
+                 setEmails(result.emails);
+                 return; // Exit early
+            }
+
             let accessToken = getStoredAccessToken();
 
             if (!accessToken) {
-                const { accessToken: newAccessToken } = await signInWithGoogle();
-                if (!newAccessToken) throw new Error('Failed to obtain Gmail access token during login.');
-                accessToken = newAccessToken;
+                // If no token, initiate sign-in, but don't expect a result immediately
+                await signInWithGoogle();
+                // After this call, the app will redirect. We can show a loading state
+                // until the redirect completes on the next page load.
+                return;
             }
 
             const result = await fetchEmails(accessToken);
 
             if (result.error) {
                 console.warn('Gmail token error, attempting to re-authenticate:', result.error);
-                const { accessToken: refreshedToken } = await signInWithGoogle();
-                if (!refreshedToken) throw new Error('Unable to re-authenticate with Google.');
-                
-                const retryResult = await fetchEmails(refreshedToken);
-                if (retryResult.error) throw new Error(retryResult.error);
-                setEmails(retryResult.emails);
+                // The token might be expired, so we trigger the redirect flow again.
+                await signInWithGoogle();
+                return;
             } else {
                 setEmails(result.emails);
             }

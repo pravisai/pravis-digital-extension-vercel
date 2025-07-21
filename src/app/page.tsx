@@ -57,11 +57,9 @@ export default function SignInPage() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
-      const { userCredential } = await signInWithGoogle();
-      if (userCredential?.user) {
-        toast({ title: "Success!", description: `Authenticated as ${userCredential.user.displayName}` });
-        router.push('/dashboard');
-      }
+      await signInWithGoogle();
+      // The user will be redirected, so we don't need to do anything else here.
+      // The page will re-load and handleRedirectResult will pick up the result.
     } catch (error: any) {
        if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
         console.error('Google Sign In Error:', error);
@@ -72,8 +70,7 @@ export default function SignInPage() {
             duration: 10000,
         });
       }
-    } finally {
-        setIsGoogleLoading(false);
+      setIsGoogleLoading(false);
     }
   };
   
@@ -83,20 +80,13 @@ export default function SignInPage() {
     
     try {
       if (isSignUp) {
-          const { userCredential, error } = await signUpWithEmail(email, password, displayName);
-          if (error) throw error;
-          if (userCredential) {
-              toast({ title: "Account Created!", description: `Welcome, ${userCredential.user.displayName}` });
-              router.push('/dashboard');
-          }
+          await signUpWithEmail(email, password, displayName);
+          toast({ title: "Account Created!", description: `Welcome, ${displayName}` });
       } else {
-          const { userCredential, error } = await signInWithEmail(email, password);
-          if (error) throw error;
-          if (userCredential) {
-              toast({ title: "Success!", description: `Welcome back, ${userCredential.user.displayName || 'user'}` });
-              router.push('/dashboard');
-        }
+          await signInWithEmail(email, password);
+          toast({ title: "Success!", description: `Welcome back!` });
       }
+      router.push('/dashboard');
     } catch (error: any) {
         let description = error.message;
         if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {

@@ -29,29 +29,19 @@ googleProvider.addScope('https://www.googleapis.com/auth/calendar.events');
 googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly');
 
 
-export const signInWithGoogle = async (): Promise<{
-  userCredential: UserCredential | null;
-  accessToken: string | null;
-}> => {
+export const signInWithGoogle = async (): Promise<void> => {
   // Prevent execution on server-side or if Firebase is not configured
   if (typeof window === 'undefined' || !isFirebaseConfigured()) {
-    console.warn('signInWithGoogle: Called on server-side or Firebase not configured, returning null.');
-    return { userCredential: null, accessToken: null };
+    console.warn('signInWithGoogle: Called on server-side or Firebase not configured.');
+    return;
   }
 
   try {
-    const result = await signInWithPopup(auth, googleProvider);
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    const accessToken = credential?.accessToken ?? null;
-    if (accessToken) {
-      sessionStorage.setItem('gmail_access_token', accessToken);
-    }
-    return { userCredential: result, accessToken };
+    await signInWithRedirect(auth, googleProvider);
   } catch (error: any) {
     if (error.code === 'auth/invalid-api-key') {
       console.error('signInWithGoogle: Invalid Firebase API key. Check environment variables in ./config.');
     } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
-      // Log the full error for better debugging, but ignore popup closed errors
       console.error(`Google Sign-In Error (Code: ${error.code}):`, error.message);
     }
     throw error;
@@ -92,16 +82,15 @@ export const handleRedirectResult = async (): Promise<{
 export const signInWithEmail = async (
   email: string,
   password: string
-): Promise<{ userCredential: UserCredential; error?: undefined } | { userCredential?: undefined; error: any }> => {
-  if (!isFirebaseConfigured()) return { error: { message: "Firebase not configured." }};
+): Promise<void> => {
+  if (!isFirebaseConfigured()) throw new Error("Firebase not configured.");
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return { userCredential };
+    await signInWithEmailAndPassword(auth, email, password);
   } catch (error: any) {
     if (error.code === 'auth/invalid-api-key') {
       console.error('signInWithEmail: Invalid Firebase API key. Check environment variables in ./config.');
     }
-    return { error };
+    throw error;
   }
 };
 
@@ -109,17 +98,16 @@ export const signUpWithEmail = async (
   email: string,
   password: string,
   displayName: string
-): Promise<{ userCredential: UserCredential; error?: undefined } | { userCredential?: undefined; error: any }> => {
-  if (!isFirebaseConfigured()) return { error: { message: "Firebase not configured." }};
+): Promise<void> => {
+  if (!isFirebaseConfigured()) throw new Error("Firebase not configured.");
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(userCredential.user, { displayName });
-    return { userCredential };
   } catch (error: any) {
     if (error.code === 'auth/invalid-api-key') {
       console.error('signUpWithEmail: Invalid Firebase API key. Check environment variables in ./config.');
     }
-    return { error };
+    throw error;
   }
 };
 

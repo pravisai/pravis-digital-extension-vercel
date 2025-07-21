@@ -4,7 +4,7 @@
 import { ProductivitySuite } from "@/components/productivity-suite";
 import { FadeIn } from "@/components/animations/fade-in";
 import { useToast } from "@/hooks/use-toast";
-import { getStoredAccessToken, signInWithGoogle } from "@/lib/firebase/auth";
+import { getStoredAccessToken, handleRedirectResult, signInWithGoogle } from "@/lib/firebase/auth";
 import React, { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -16,20 +16,25 @@ export default function TasksPage() {
      useEffect(() => {
         const initializeToken = async () => {
             try {
+                // First, check if we are returning from a redirect
+                const { accessToken: redirectedToken } = await handleRedirectResult();
+                if (redirectedToken) {
+                    setAccessToken(redirectedToken);
+                    setIsLoading(false);
+                    return;
+                }
+
+                // If not, check for a stored token
                 let token = getStoredAccessToken();
                 if (!token) {
-                    const { accessToken: newAccessToken } = await signInWithGoogle();
-                    // If signInWithGoogle returns no token (e.g., popup closed), stop loading but don't show an error.
-                    if (!newAccessToken) {
-                        setIsLoading(false);
-                        return;
-                    }
-                    token = newAccessToken;
+                    // If no token, initiate the sign-in process
+                    await signInWithGoogle();
+                    // The page will redirect, so we don't need to do anything further here.
+                    // The next page load will handle the redirect result.
+                    return; 
                 }
                 setAccessToken(token);
             } catch (error: any) {
-                // The signInWithGoogle function already handles the popup-closed error, 
-                // but we keep this check as a safeguard.
                 if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
                     console.error("Authentication error:", error);
                     toast({
@@ -51,6 +56,7 @@ export default function TasksPage() {
                  <div className="text-center">
                     <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
                     <p className="text-lg font-semibold">Loading Productivity Suite...</p>
+                    <p className="text-sm text-muted-foreground">Authenticating with Google...</p>
                 </div>
             </div>
         );
@@ -58,7 +64,7 @@ export default function TasksPage() {
 
     return (
         <FadeIn className="w-full h-full p-4 md:p-6">
-            {accessToken ? <ProductivitySuite accessToken={accessToken} /> : <div className="text-center p-8">Could not load Productivity Suite. Access token is missing or authentication was cancelled.</div>}
+            {accessToken ? <ProductivitySuite accessToken={accessToken} /> : <div className="text-center p-8">Could not load Productivity Suite. Access token is missing or authentication was cancelled. Please refresh the page.</div>}
         </FadeIn>
     )
 }
