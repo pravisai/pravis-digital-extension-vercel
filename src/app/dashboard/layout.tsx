@@ -192,12 +192,25 @@ function DashboardHeader() {
 
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
+    const router = useRouter();
     const { isPanelOpen } = useChat();
     const { toast } = useToast();
+    const [isLoading, setIsLoading] = useState(true);
   
     const isFullHeightPage = pathname === '/dashboard/creative-partner' || pathname === '/dashboard/clarity-chat' || pathname.startsWith('/dashboard/email-assistant') || pathname === '/dashboard/tasks' || pathname === '/dashboard/social-media';
     
     useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // If the user is not logged in, redirect them to the sign-in page.
+                // This prevents getting stuck on inner pages without a valid session.
+                router.push('/');
+            } else {
+                setIsLoading(false);
+            }
+        });
+
+        // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').then(
                 (registration) => {
@@ -208,10 +221,8 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
                 }
             );
         }
-    }, []);
-
-    useEffect(() => {
-        // Request notification permission on component mount
+        
+        // Notification Permission Request
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission().then(permission => {
                 if (permission === 'granted') {
@@ -221,8 +232,18 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
                 }
             });
         }
-    }, [toast]);
+        
+        return () => unsubscribe();
+    }, [router, toast]);
 
+
+    if (isLoading) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-screen w-full flex-col">
