@@ -38,7 +38,7 @@ const modules: CubeFace[] = [
       href: "/dashboard/email-assistant",
       icon: Mail,
       label: "Comms",
-      description: "Draft replies and manage your inbox with AI.",
+      description: "your AI amplified emails",
       face: "left",
       colorClass: "acid-green"
     },
