@@ -25,7 +25,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; " +
               "font-src 'self' https://fonts.gstatic.com; " +
               "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://accounts.google.com https://*.firebaseapp.com https://*.firebaseio.com https://www.googleapis.com; " +
-              "frame-src 'self' https://accounts.google.com; " +
+              "frame-src 'self'; " +
               "img-src 'self' data: https:;"
           },
           {

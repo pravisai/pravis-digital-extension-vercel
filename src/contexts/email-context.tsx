@@ -42,8 +42,6 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
             let accessToken = getStoredAccessToken();
 
             if (!accessToken) {
-                // Do not trigger sign-in from here to prevent loops.
-                // The component using this context should handle the missing token UI.
                 setFetchError("Authentication token not found. Please log in.");
                 setIsFetchingEmails(false);
                 return;
@@ -52,8 +50,6 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
             const result = await fetchEmails(accessToken);
 
             if (result.error) {
-                // If the token is expired/invalid, the user might need to log in again.
-                // We'll set an error instead of re-triggering the auth flow automatically.
                 console.warn('Gmail token error:', result.error);
                 setFetchError("Your session may have expired. Please try signing out and back in.");
             } else {

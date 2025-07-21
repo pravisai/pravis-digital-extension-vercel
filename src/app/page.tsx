@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
-import { signInWithGoogle, signInWithEmail, signUpWithEmail, onAuthStateChanged } from '@/lib/firebase/auth';
+import { signInWithGoogle, signInWithEmail, signUpWithEmail, onAuthStateChanged, auth } from '@/lib/firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { FadeIn, StaggeredListItem } from '@/components/animations/fade-in';
@@ -35,8 +35,8 @@ export default function SignInPage() {
   const [displayName, setDisplayName] = useState('');
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth => {
-        if (auth) {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
             router.push('/dashboard');
         } else {
             setIsLoading(false);
@@ -51,7 +51,7 @@ export default function SignInPage() {
       const { userCredential } = await signInWithGoogle();
       if (userCredential?.user) {
         toast({ title: "Success!", description: `Authenticated as ${userCredential.user.displayName}` });
-        router.push('/dashboard');
+        // The onAuthStateChanged listener will handle the redirect.
       }
     } catch (error: any) {
        if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
@@ -59,11 +59,12 @@ export default function SignInPage() {
         toast({
             variant: 'destructive',
             title: 'Sign In Failed',
-            description: 'Could not sign in with Google. Please check the console for details and ensure your domain is authorized in Firebase.',
+            description: error.message || 'Could not sign in with Google. Please try again.',
             duration: 10000,
         });
       }
-      setIsGoogleLoading(false);
+    } finally {
+        setIsGoogleLoading(false);
     }
   };
   
@@ -86,6 +87,7 @@ export default function SignInPage() {
             description = "Incorrect email or password. Please try again or sign up.";
         }
         toast({ variant: 'destructive', title: isSignUp ? 'Sign Up Failed' : 'Sign In Failed', description });
+    } finally {
         setIsEmailLoading(false);
     }
   };
