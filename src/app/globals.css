@@ -145,24 +145,15 @@
     border: 1px solid hsl(var(--border));
     border-radius: var(--radius);
     display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    user-select: none;
-    backface-visibility: hidden;
-  }
-
-  .cube-face-content {
-    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
     padding: 1.5rem;
-    width: 100%;
-    height: 100%;
-    transition: transform 0.1s linear;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    user-select: none;
+    backface-visibility: hidden;
   }
 
   .cube-face:hover {
