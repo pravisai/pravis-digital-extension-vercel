@@ -11,7 +11,6 @@ import { Loader2, Send, Trash2, ArrowLeft, PenSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { getStoredAccessToken } from '@/lib/firebase/auth';
 import { sendEmail } from '@/lib/gmail';
@@ -35,12 +34,19 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Label } from '@/components/ui/label';
+import { draftEmailReplies } from '@/ai/flows/draft-email-replies';
 
 const composeSchema = z.object({
   recipient: z.string().email({ message: "Please enter a valid email address." }),
   subject: z.string().min(1, { message: "Subject cannot be empty." }),
-  body: z.string().min(1, { message: "Body cannot be empty." }),
+  instructions: z.string().min(1, { message: "Instructions cannot be empty." }),
+  tone: z.string().min(1, { message: "Please select a tone." }),
+  finalBody: z.string(),
 });
 
 type ComposeFormValues = z.infer<typeof composeSchema>;
@@ -49,17 +55,66 @@ export default function ComposeEmailPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isSending, setIsSending] = useState(false);
+  const [isDrafting, setIsDrafting] = useState(false);
+  const [generatedBody, setGeneratedBody] = useState("");
 
   const form = useForm<ComposeFormValues>({
     resolver: zodResolver(composeSchema),
     defaultValues: {
       recipient: '',
       subject: '',
-      body: '',
+      instructions: '',
+      tone: 'Friendly',
+      finalBody: '',
     },
   });
 
+  const { setValue, watch } = form;
+  const finalBodyValue = watch('finalBody');
+
+  const handleDraftEmail = async () => {
+    const { recipient, subject, instructions, tone } = form.getValues();
+    if (!recipient || !subject || !instructions) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing Fields',
+        description: 'Please fill in recipient, subject, and instructions before drafting.',
+      });
+      return;
+    }
+
+    setIsDrafting(true);
+    setGeneratedBody("");
+    try {
+      const result = await draftEmailReplies({
+        emailContent: `This is a new email. Instructions for the body: ${instructions}`,
+        tone: tone,
+        parameters: `Subject: ${subject}`,
+      });
+      setGeneratedBody(result.reply);
+      setValue('finalBody', result.reply);
+    } catch (error) {
+      console.error("Failed to draft email:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to draft email. Please try again.",
+      });
+    } finally {
+      setIsDrafting(false);
+    }
+  };
+
   const onSubmit = async (data: ComposeFormValues) => {
+    if (!data.finalBody) {
+        toast({
+            variant: 'destructive',
+            title: 'Empty Body',
+            description: 'Please draft an email or write content in the final body before sending.',
+        });
+        return;
+    }
+    
     setIsSending(true);
     const accessToken = getStoredAccessToken();
 
@@ -74,7 +129,7 @@ export default function ComposeEmailPage() {
     }
 
     try {
-      await sendEmail(accessToken, data.recipient, data.subject, data.body);
+      await sendEmail(accessToken, data.recipient, data.subject, data.finalBody);
       toast({
         title: 'Email Sent!',
         description: `Your message to ${data.recipient} has been sent.`,
@@ -141,25 +196,90 @@ export default function ComposeEmailPage() {
                             )}
                         />
                     </div>
-                    <div className="flex-1 min-h-0">
-                         <FormField
-                            control={form.control}
-                            name="body"
-                            render={({ field }) => (
-                                <FormItem className="h-full">
-                                    <FormControl>
-                                        <Textarea
-                                            className="h-full w-full resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 p-4"
-                                            placeholder="Compose your epic..."
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                </FormItem>
-                            )}
-                        />
+                    <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
+                        <Card className="border-primary/20 bg-primary/5">
+                            <CardHeader>
+                                <CardTitle className="text-base font-semibold">Draft with Pravis</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <FormField
+                                    control={form.control}
+                                    name="tone"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel>Tone of Reply</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a tone" />
+                                            </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                            <SelectItem value="Friendly">Friendly</SelectItem>
+                                            <SelectItem value="Formal">Formal</SelectItem>
+                                            <SelectItem value="Casual">Casual</SelectItem>
+                                            <SelectItem value="Professional">Professional</SelectItem>
+                                            <SelectItem value="Direct">Direct</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}
+                                    />
+                                </div>
+                                 <FormField
+                                    control={form.control}
+                                    name="instructions"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Specific Instructions for Body</FormLabel>
+                                            <FormControl>
+                                                <Textarea placeholder="e.g., Announce the new product launch for next Tuesday. Mention the key features: faster speed, new UI, and better collaboration." {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <Button type="button" onClick={handleDraftEmail} disabled={isDrafting} className="w-full">
+                                    {isDrafting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PenSquare className="mr-2 h-4 w-4" />}
+                                    Draft with Pravis
+                                </Button>
+                            </CardContent>
+                        </Card>
+                         
+                        {(isDrafting || generatedBody) && (
+                            <div className="space-y-2 pt-4">
+                              <Label htmlFor="finalBody">Generated Email Body (Editable)</Label>
+                              {isDrafting ? (
+                                <div className="space-y-2 rounded-md border border-input p-4">
+                                  <Skeleton className="h-4 w-full" />
+                                  <Skeleton className="h-4 w-full" />
+                                  <Skeleton className="h-4 w-3/4" />
+                                </div>
+                              ) : (
+                                <FormField
+                                    control={form.control}
+                                    name="finalBody"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormControl>
+                                                <Textarea
+                                                    id="finalBody"
+                                                    rows={8}
+                                                    className="bg-background"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+                              )}
+                            </div>
+                          )}
                     </div>
                     <footer className="p-4 border-t flex justify-between items-center">
-                        <Button type="submit" disabled={isSending}>
+                        <Button type="submit" disabled={isSending || isDrafting || !finalBodyValue}>
                             {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
                             Send
                         </Button>
@@ -194,3 +314,5 @@ export default function ComposeEmailPage() {
     </FadeIn>
   );
 }
+
+  
