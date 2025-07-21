@@ -20,7 +20,7 @@ const modules: CubeFace[] = [
       href: "/dashboard/tasks",
       icon: Calendar,
       label: "My Flow",
-      description: "Manage your schedule and tasks seamlessly.",
+      description: "your day perfectly orchestrated",
       face: "right",
       colorClass: "electric-blue"
     },
