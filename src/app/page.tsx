@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
-import { signInWithGoogle, handleRedirectResult, signInWithEmail, signUpWithEmail } from '@/lib/firebase/auth';
+import { signInWithGoogle, signInWithEmail, signUpWithEmail, onAuthStateChanged } from '@/lib/firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { FadeIn, StaggeredListItem } from '@/components/animations/fade-in';
@@ -25,7 +25,7 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export default function SignInPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [isProcessingRedirect, setIsProcessingRedirect] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   
@@ -35,31 +35,24 @@ export default function SignInPage() {
   const [displayName, setDisplayName] = useState('');
 
   useEffect(() => {
-    const processRedirect = async () => {
-      try {
-        const { userCredential } = await handleRedirectResult();
-        if (userCredential?.user) {
-          toast({ title: "Success!", description: `Authenticated as ${userCredential.user.displayName}` });
-          router.push('/dashboard');
+    const unsubscribe = onAuthStateChanged(auth => {
+        if (auth) {
+            router.push('/dashboard');
+        } else {
+            setIsLoading(false);
         }
-      } catch (error: any) {
-         if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
-          console.error("Redirect Error:", error);
-          toast({ variant: 'destructive', title: 'Authentication Failed', description: error.message });
-        }
-      } finally {
-        setIsProcessingRedirect(false);
-      }
-    };
-    processRedirect();
-  }, [router, toast]);
+    });
+    return () => unsubscribe();
+  }, [router]);
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
-      await signInWithGoogle();
-      // The user will be redirected, so we don't need to do anything else here.
-      // The page will re-load and handleRedirectResult will pick up the result.
+      const { userCredential } = await signInWithGoogle();
+      if (userCredential?.user) {
+        toast({ title: "Success!", description: `Authenticated as ${userCredential.user.displayName}` });
+        router.push('/dashboard');
+      }
     } catch (error: any) {
        if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
         console.error('Google Sign In Error:', error);
@@ -86,19 +79,18 @@ export default function SignInPage() {
           await signInWithEmail(email, password);
           toast({ title: "Success!", description: `Welcome back!` });
       }
-      router.push('/dashboard');
+      // The onAuthStateChanged listener will handle the redirect to dashboard
     } catch (error: any) {
         let description = error.message;
         if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
             description = "Incorrect email or password. Please try again or sign up.";
         }
         toast({ variant: 'destructive', title: isSignUp ? 'Sign Up Failed' : 'Sign In Failed', description });
-    } finally {
         setIsEmailLoading(false);
     }
   };
 
-  if (isProcessingRedirect) {
+  if (isLoading) {
     return (
         <div className="flex min-h-svh items-center justify-center bg-background p-4">
             <div className="flex flex-col items-center justify-center">

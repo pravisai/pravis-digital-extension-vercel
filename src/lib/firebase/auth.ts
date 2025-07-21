@@ -4,8 +4,6 @@
 import {
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
   signOut,
   type UserCredential,
   signInWithEmailAndPassword,
@@ -29,15 +27,24 @@ googleProvider.addScope('https://www.googleapis.com/auth/calendar.events');
 googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly');
 
 
-export const signInWithGoogle = async (): Promise<void> => {
+export const signInWithGoogle = async (): Promise<{
+  userCredential: UserCredential | null;
+  accessToken: string | null;
+}> => {
   // Prevent execution on server-side or if Firebase is not configured
   if (typeof window === 'undefined' || !isFirebaseConfigured()) {
     console.warn('signInWithGoogle: Called on server-side or Firebase not configured.');
-    return;
+    return { userCredential: null, accessToken: null };
   }
 
   try {
-    await signInWithRedirect(auth, googleProvider);
+    const result = await signInWithPopup(auth, googleProvider);
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    const accessToken = credential?.accessToken ?? null;
+    if (accessToken) {
+      sessionStorage.setItem('gmail_access_token', accessToken);
+    }
+    return { userCredential: result, accessToken };
   } catch (error: any) {
     if (error.code === 'auth/invalid-api-key') {
       console.error('signInWithGoogle: Invalid Firebase API key. Check environment variables in ./config.');
@@ -48,36 +55,6 @@ export const signInWithGoogle = async (): Promise<void> => {
   }
 };
 
-export const handleRedirectResult = async (): Promise<{
-  userCredential: UserCredential | null;
-  accessToken: string | null;
-}> => {
-  // Prevent execution on server-side or if Firebase is not configured
-  if (typeof window === 'undefined' || !isFirebaseConfigured()) {
-    console.warn('handleRedirectResult: Called on server-side or Firebase not configured, returning null.');
-    return { userCredential: null, accessToken: null };
-  }
-
-  try {
-    const result = await getRedirectResult(auth);
-    if (result) {
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const accessToken = credential?.accessToken ?? null;
-      if (accessToken) {
-        sessionStorage.setItem('gmail_access_token', accessToken);
-      }
-      return { userCredential: result, accessToken };
-    }
-    return { userCredential: null, accessToken: null };
-  } catch (error: any) {
-    if (error.code === 'auth/invalid-api-key') {
-      console.error('handleRedirectResult: Invalid Firebase API key. Check environment variables in ./config.');
-    } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
-      console.error('Error handling redirect result:', error);
-    }
-    throw error;
-  }
-};
 
 export const signInWithEmail = async (
   email: string,
