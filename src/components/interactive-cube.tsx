@@ -20,8 +20,8 @@ interface InteractiveCubeProps {
   faces: CubeFace[];
 }
 
-const DRAG_SENSITIVITY = 0.4;
-const AUTO_ROTATE_SPEED = 0.1; // Increased speed
+const AUTO_ROTATE_SPEED = 0.1;
+const HOVER_SENSITIVITY = 0.25;
 
 export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const router = useRouter();
@@ -32,27 +32,47 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const [isInteracting, setIsInteracting] = useState(false);
     
     const [rotation, setRotation] = useState({ x: -20, y: 30 });
-    
-    const isPointerDownRef = useRef(false);
-    const hasDraggedRef = useRef(false);
-    const lastPointerPos = useRef({ x: 0, y: 0 });
+    const [targetRotation, setTargetRotation] = useState({ x: -20, y: 30 });
+
     const animationFrameRef = useRef<number>();
+    const lastClickTimeRef = useRef(0);
 
     const handleFaceClick = useCallback((face: CubeFace) => {
+        // Prevent click if a drag-like interaction just happened
+        const now = Date.now();
+        if (now - lastClickTimeRef.current < 300) return;
+
         if (face.href && face.href !== '#') {
             setIsLoading(true);
             router.push(face.href);
         }
     }, [router]);
 
-    // Animation loop
+    // Animation loop for smooth rotation
     useEffect(() => {
-      const animate = (time: number) => {
-        if (!isInteracting && cubeRef.current) {
-          setRotation(prev => ({
-            x: prev.x + AUTO_ROTATE_SPEED,
-            y: prev.y + AUTO_ROTATE_SPEED,
-          }));
+      const animate = () => {
+        if (!isInteracting) {
+            // Auto-rotation and floating
+            const time = Date.now() * 0.0005;
+            const bobbleY = Math.sin(time) * 10;
+            if (cubeRef.current) {
+                cubeRef.current.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) translateY(${bobbleY}px)`;
+            }
+
+            setRotation(prev => ({
+                x: prev.x + AUTO_ROTATE_SPEED,
+                y: prev.y + AUTO_ROTATE_SPEED,
+            }));
+        } else {
+             // Smooth transition to target rotation on hover
+            setRotation(currentRotation => {
+                const newX = currentRotation.x + (targetRotation.x - currentRotation.x) * 0.1;
+                const newY = currentRotation.y + (targetRotation.y - currentRotation.y) * 0.1;
+                if (cubeRef.current) {
+                   cubeRef.current.style.transform = `rotateX(${newX}deg) rotateY(${newY}deg)`;
+                }
+                return { x: newX, y: newY };
+            });
         }
         animationFrameRef.current = requestAnimationFrame(animate);
       };
@@ -62,75 +82,57 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
           cancelAnimationFrame(animationFrameRef.current);
         }
       };
-    }, [isInteracting]);
+    }, [isInteracting, rotation, targetRotation]);
 
-    // Event listeners for manual dragging
+    // Event listeners for hover interaction
     useEffect(() => {
         const container = containerRef.current;
         if (!container) return;
 
-        const handlePointerDown = (e: PointerEvent) => {
-            isPointerDownRef.current = true;
-            hasDraggedRef.current = false;
-            setIsInteracting(true);
-            lastPointerPos.current = { x: e.clientX, y: e.clientY };
-            container.style.cursor = 'grabbing';
-        };
-
         const handlePointerMove = (e: PointerEvent) => {
-            if (!isPointerDownRef.current) return;
-            hasDraggedRef.current = true;
+            if (!containerRef.current) return;
+            setIsInteracting(true);
             
-            const deltaX = e.clientX - lastPointerPos.current.x;
-            const deltaY = e.clientY - lastPointerPos.current.y;
-            
-            setRotation(prev => ({
-                x: prev.x - deltaY * DRAG_SENSITIVITY,
-                y: prev.y + deltaX * DRAG_SENSITIVITY
-            }));
-            
-            lastPointerPos.current = { x: e.clientX, y: e.clientY };
-        };
+            const rect = containerRef.current.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
 
-        const handlePointerUp = (e: PointerEvent) => {
-            if (!isPointerDownRef.current) return;
-
-            if (!hasDraggedRef.current) {
-                const targetFace = (e.target as HTMLElement).closest<HTMLElement>('.cube-face');
-                if (targetFace) {
-                    const faceId = targetFace.dataset.faceId;
-                    const face = faces.find(f => f.id === faceId);
-                    if (face) {
-                        handleFaceClick(face);
-                    }
-                }
-            }
+            const xFromCenter = x - rect.width / 2;
+            const yFromCenter = y - rect.height / 2;
             
-            isPointerDownRef.current = false;
-            setIsInteracting(false);
-            container.style.cursor = 'grab';
+            setTargetRotation({
+                x: -yFromCenter * HOVER_SENSITIVITY,
+                y: xFromCenter * HOVER_SENSITIVITY
+            });
         };
 
         const handlePointerLeave = () => {
-            if(isPointerDownRef.current) {
-                isPointerDownRef.current = false;
-                setIsInteracting(false);
-                container.style.cursor = 'grab';
+            setIsInteracting(false);
+            // Reset target rotation to the last auto-rotated position to avoid snapping
+            setTargetRotation(rotation);
+        };
+        
+        const handleClickCapture = (e: MouseEvent) => {
+            const targetFace = (e.target as HTMLElement).closest<HTMLElement>('.cube-face');
+            if (targetFace) {
+                const faceId = targetFace.dataset.faceId;
+                const face = faces.find(f => f.id === faceId);
+                if (face) {
+                    handleFaceClick(face);
+                }
             }
         };
 
-        container.addEventListener('pointerdown', handlePointerDown);
-        window.addEventListener('pointermove', handlePointerMove);
-        window.addEventListener('pointerup', handlePointerUp);
+        container.addEventListener('pointermove', handlePointerMove);
         container.addEventListener('pointerleave', handlePointerLeave);
+        container.addEventListener('click', handleClickCapture, true);
 
         return () => {
-            container.removeEventListener('pointerdown', handlePointerDown);
-            window.removeEventListener('pointermove', handlePointerMove);
-            window.removeEventListener('pointerup', handlePointerUp);
+            container.removeEventListener('pointermove', handlePointerMove);
             container.removeEventListener('pointerleave', handlePointerLeave);
+            container.removeEventListener('click', handleClickCapture, true);
         };
-    }, [faces, handleFaceClick]);
+    }, [faces, handleFaceClick, rotation]);
 
     return (
         <section className="relative">
@@ -147,8 +149,7 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
                 <div className="cube-container">
                     <div 
                         ref={cubeRef} 
-                        className="cube" 
-                        style={{ transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)` }}
+                        className="cube"
                     >
                         {faces.map((item) => (
                             <div
