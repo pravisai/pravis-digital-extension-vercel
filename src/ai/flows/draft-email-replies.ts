@@ -11,14 +11,14 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const DraftEmailRepliesInputSchema = z.object({
-  emailContent: z.string().describe('The content of the email to reply to.'),
+  instructions: z.string().describe('Instructions for what the email should be about.'),
   tone: z.string().describe('The desired tone of the reply (e.g., formal, informal, friendly).'),
-  parameters: z.string().describe('Any specific parameters or instructions for the reply.'),
 });
 export type DraftEmailRepliesInput = z.infer<typeof DraftEmailRepliesInputSchema>;
 
 const DraftEmailRepliesOutputSchema = z.object({
-  reply: z.string().describe('The drafted email reply.'),
+  subject: z.string().describe('The generated subject line for the email.'),
+  reply: z.string().describe('The drafted email reply body.'),
 });
 export type DraftEmailRepliesOutput = z.infer<typeof DraftEmailRepliesOutputSchema>;
 
@@ -32,13 +32,12 @@ const prompt = ai.definePrompt({
   output: {schema: DraftEmailRepliesOutputSchema},
   prompt: `You are Pravis, a personal assistant designed to draft email replies.
 
-  Based on the email content, desired tone, and any specific parameters, draft an email reply.
+  Based on the instructions and desired tone, draft an email reply including a subject line.
 
-  Email Content: {{{emailContent}}}
+  Instructions: {{{instructions}}}
   Tone: {{{tone}}}
-  Parameters: {{{parameters}}}
-
-  Reply:`, 
+  
+  Generate a suitable subject line and a reply body.`, 
 });
 
 const draftEmailRepliesFlow = ai.defineFlow(

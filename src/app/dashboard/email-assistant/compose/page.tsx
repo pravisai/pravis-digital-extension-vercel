@@ -44,9 +44,9 @@ import { Separator } from '@/components/ui/separator';
 
 const composeSchema = z.object({
   recipient: z.string().email({ message: "Please enter a valid email address." }),
-  subject: z.string().min(1, { message: "Subject cannot be empty." }),
   instructions: z.string().min(1, { message: "Instructions cannot be empty." }),
   tone: z.string().min(1, { message: "Please select a tone." }),
+  subject: z.string(),
   finalBody: z.string(),
 });
 
@@ -57,42 +57,43 @@ export default function ComposeEmailPage() {
   const { toast } = useToast();
   const [isSending, setIsSending] = useState(false);
   const [isDrafting, setIsDrafting] = useState(false);
-  const [generatedBody, setGeneratedBody] = useState("");
+  const [generatedContent, setGeneratedContent] = useState<{subject: string, body: string} | null>(null);
 
   const form = useForm<ComposeFormValues>({
     resolver: zodResolver(composeSchema),
     defaultValues: {
       recipient: '',
-      subject: '',
       instructions: '',
       tone: 'Friendly',
+      subject: '',
       finalBody: '',
     },
   });
 
   const { setValue, watch } = form;
   const finalBodyValue = watch('finalBody');
+  const subjectValue = watch('subject');
 
   const handleDraftEmail = async () => {
-    const { recipient, subject, instructions, tone } = form.getValues();
-    if (!recipient || !subject || !instructions) {
+    const { recipient, instructions, tone } = form.getValues();
+    if (!recipient || !instructions) {
       toast({
         variant: 'destructive',
         title: 'Missing Fields',
-        description: 'Please fill in recipient, subject, and instructions before drafting.',
+        description: 'Please fill in recipient and instructions before drafting.',
       });
       return;
     }
 
     setIsDrafting(true);
-    setGeneratedBody("");
+    setGeneratedContent(null);
     try {
       const result = await draftEmailReplies({
-        emailContent: `This is a new email. Instructions for the body: ${instructions}`,
+        instructions: instructions,
         tone: tone,
-        parameters: `Subject: ${subject}`,
       });
-      setGeneratedBody(result.reply);
+      setGeneratedContent({ subject: result.subject, body: result.reply });
+      setValue('subject', result.subject);
       setValue('finalBody', result.reply);
     } catch (error) {
       console.error("Failed to draft email:", error);
@@ -107,11 +108,11 @@ export default function ComposeEmailPage() {
   };
 
   const onSubmit = async (data: ComposeFormValues) => {
-    if (!data.finalBody) {
+    if (!data.finalBody || !data.subject) {
         toast({
             variant: 'destructive',
-            title: 'Empty Body',
-            description: 'Please draft an email or write content in the final body before sending.',
+            title: 'Empty Content',
+            description: 'Please draft an email before sending.',
         });
         return;
     }
@@ -182,23 +183,17 @@ export default function ComposeEmailPage() {
                          <Separator />
                          <FormField
                             control={form.control}
-                            name="subject"
+                            name="instructions"
                             render={({ field }) => (
-                                <FormItem className="flex items-center gap-2">
-                                    <FormLabel className="text-muted-foreground w-16 text-right">Subject</FormLabel>
+                                <FormItem>
                                     <FormControl>
-                                        <Input
-                                            className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                                            placeholder="Your email subject"
-                                            {...field}
-                                        />
+                                        <Textarea className="min-h-[120px] border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none" placeholder="Write instructions for Pravis here... e.g., Announce the new product launch for next Tuesday. Mention the key features: faster speed, new UI, and better collaboration." {...field} />
                                     </FormControl>
-                                     <FormMessage className="pl-16" />
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />
-                         <Separator />
-                          <FormField
+                         <FormField
                             control={form.control}
                             name="tone"
                             render={({ field }) => (
@@ -206,7 +201,7 @@ export default function ComposeEmailPage() {
                                 <FormLabel className="text-muted-foreground w-16 text-right">Tone</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
-                                    <SelectTrigger className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0">
+                                    <SelectTrigger className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 w-[180px]">
                                         <SelectValue placeholder="Select a tone" />
                                     </SelectTrigger>
                                     </FormControl>
@@ -222,55 +217,60 @@ export default function ComposeEmailPage() {
                                 </FormItem>
                             )}
                             />
-                         <FormField
-                            control={form.control}
-                            name="instructions"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormControl>
-                                        <Textarea className="min-h-[120px] border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none" placeholder="Write instructions for Pravis here... e.g., Announce the new product launch for next Tuesday. Mention the key features: faster speed, new UI, and better collaboration." {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        
                         <Button type="button" onClick={handleDraftEmail} disabled={isDrafting}>
                             {isDrafting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PenSquare className="mr-2 h-4 w-4" />}
                             Draft with Pravis
                         </Button>
                          
-                        {(isDrafting || generatedBody) && (
-                            <div className="space-y-2 pt-4">
-                              <Label htmlFor="finalBody">Generated Email Body (Editable)</Label>
+                        {(isDrafting || generatedContent) && (
+                            <div className="space-y-4 pt-4">
                               {isDrafting ? (
-                                <div className="space-y-2 rounded-md border border-input p-4">
-                                  <Skeleton className="h-4 w-full" />
-                                  <Skeleton className="h-4 w-full" />
-                                  <Skeleton className="h-4 w-3/4" />
+                                <div className="space-y-4">
+                                  <Skeleton className="h-10 w-full" />
+                                  <Skeleton className="h-40 w-full" />
                                 </div>
                               ) : (
-                                <FormField
+                                <>
+                                  <FormField
                                     control={form.control}
-                                    name="finalBody"
+                                    name="subject"
                                     render={({ field }) => (
-                                        <FormItem>
+                                        <FormItem className="flex items-center gap-2">
+                                            <FormLabel className="text-muted-foreground w-16 text-right">Subject</FormLabel>
                                             <FormControl>
-                                                <Textarea
-                                                    id="finalBody"
-                                                    rows={8}
-                                                    className="bg-background"
+                                                <Input
+                                                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 font-semibold"
                                                     {...field}
                                                 />
                                             </FormControl>
                                         </FormItem>
                                     )}
-                                />
+                                  />
+                                  <Separator />
+                                  <FormField
+                                      control={form.control}
+                                      name="finalBody"
+                                      render={({ field }) => (
+                                          <FormItem>
+                                              <FormControl>
+                                                  <Textarea
+                                                      id="finalBody"
+                                                      rows={10}
+                                                      className="bg-background border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                                                      {...field}
+                                                  />
+                                              </FormControl>
+                                          </FormItem>
+                                      )}
+                                  />
+                                </>
                               )}
                             </div>
                           )}
                     </div>
                     <footer className="p-4 border-t flex justify-between items-center bg-background/50">
-                        <Button type="submit" disabled={isSending || isDrafting || !finalBodyValue}>
+                        <Button type="submit" disabled={isSending || isDrafting || !finalBodyValue || !subjectValue}>
                             {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
                             Send
                         </Button>
