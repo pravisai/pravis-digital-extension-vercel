@@ -11,7 +11,7 @@ const modules: CubeFace[] = [
       href: "/dashboard/creative-partner",
       icon: BrainCircuit,
       label: "Calibrate",
-      description: "AI-powered brainstorming and productivity suite.",
+      description: "calibrate your decisions",
       face: "front",
       colorClass: "neon-purple"
     },
