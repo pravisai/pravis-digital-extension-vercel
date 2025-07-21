@@ -4,7 +4,7 @@
 import { ProductivitySuite } from "@/components/productivity-suite";
 import { FadeIn } from "@/components/animations/fade-in";
 import { useToast } from "@/hooks/use-toast";
-import { getStoredAccessToken, handleRedirectResult, signInWithGoogle } from "@/lib/firebase/auth";
+import { getStoredAccessToken, signInWithGoogle } from "@/lib/firebase/auth";
 import React, { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -16,21 +16,13 @@ export default function TasksPage() {
      useEffect(() => {
         const initializeToken = async () => {
             try {
-                // First, check if we are returning from a redirect
-                const { accessToken: redirectedToken } = await handleRedirectResult();
-                if (redirectedToken) {
-                    setAccessToken(redirectedToken);
-                    setIsLoading(false);
-                    return;
-                }
-
-                // If not, check for a stored token
+                // Check for a stored token
                 let token = getStoredAccessToken();
+
                 if (!token) {
-                    // If no token, initiate the sign-in process
+                    // If no token, initiate the sign-in process.
+                    // The page will redirect. The main sign-in page will handle the result.
                     await signInWithGoogle();
-                    // The page will redirect, so we don't need to do anything further here.
-                    // The next page load will handle the redirect result.
                     return; 
                 }
                 setAccessToken(token);

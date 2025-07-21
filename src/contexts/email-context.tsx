@@ -4,7 +4,7 @@
 import React, { createContext, useState, useContext, ReactNode, useMemo, useCallback } from 'react';
 import type { Email } from '@/types/email';
 import { fetchEmails } from '@/lib/gmail';
-import { signInWithGoogle, getStoredAccessToken, handleRedirectResult } from '@/lib/firebase/auth';
+import { signInWithGoogle, getStoredAccessToken } from '@/lib/firebase/auth';
 
 export type MailboxView = "Inbox" | "Starred" | "Sent" | "Drafts" | "Trash" | "Archived" | "Compose" | null;
 
@@ -39,22 +39,13 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
         }
 
         try {
-            // Check for redirect result first
-            const { accessToken: redirectedToken } = await handleRedirectResult();
-            if (redirectedToken) {
-                 const result = await fetchEmails(redirectedToken);
-                 if (result.error) throw new Error(result.error);
-                 setEmails(result.emails);
-                 return; // Exit early
-            }
-
             let accessToken = getStoredAccessToken();
 
             if (!accessToken) {
-                // If no token, initiate sign-in, but don't expect a result immediately
+                // If no token, initiate sign-in, which triggers a redirect.
+                // The user will be redirected back and the main sign-in page will handle the token.
+                // We show a loading state until that happens.
                 await signInWithGoogle();
-                // After this call, the app will redirect. We can show a loading state
-                // until the redirect completes on the next page load.
                 return;
             }
 
