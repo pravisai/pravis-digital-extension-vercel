@@ -37,10 +37,10 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Label } from '@/components/ui/label';
 import { draftEmailReplies } from '@/ai/flows/draft-email-replies';
+import { Separator } from '@/components/ui/separator';
 
 const composeSchema = z.object({
   recipient: z.string().email({ message: "Please enter a valid email address." }),
@@ -161,7 +161,7 @@ export default function ComposeEmailPage() {
             </header>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 flex flex-col min-h-0">
-                    <div className="p-4 space-y-4 border-b">
+                    <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
                         <FormField
                             control={form.control}
                             name="recipient"
@@ -179,11 +179,12 @@ export default function ComposeEmailPage() {
                                 </FormItem>
                             )}
                         />
+                         <Separator />
                          <FormField
                             control={form.control}
                             name="subject"
                             render={({ field }) => (
-                                <FormItem className="flex items-center gap-2 border-t pt-2">
+                                <FormItem className="flex items-center gap-2">
                                     <FormLabel className="text-muted-foreground w-16 text-right">Subject</FormLabel>
                                     <FormControl>
                                         <Input
@@ -196,57 +197,48 @@ export default function ComposeEmailPage() {
                                 </FormItem>
                             )}
                         />
-                    </div>
-                    <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
-                        <Card className="border-primary/20 bg-primary/5">
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold">Draft with Pravis</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <FormField
-                                    control={form.control}
-                                    name="tone"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                        <FormLabel>Tone of Reply</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a tone" />
-                                            </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                            <SelectItem value="Friendly">Friendly</SelectItem>
-                                            <SelectItem value="Formal">Formal</SelectItem>
-                                            <SelectItem value="Casual">Casual</SelectItem>
-                                            <SelectItem value="Professional">Professional</SelectItem>
-                                            <SelectItem value="Direct">Direct</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                        </FormItem>
-                                    )}
-                                    />
-                                </div>
-                                 <FormField
-                                    control={form.control}
-                                    name="instructions"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Textarea placeholder="e.g., Announce the new product launch for next Tuesday. Mention the key features: faster speed, new UI, and better collaboration." {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <Button type="button" onClick={handleDraftEmail} disabled={isDrafting} className="w-full">
-                                    {isDrafting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PenSquare className="mr-2 h-4 w-4" />}
-                                    Draft with Pravis
-                                </Button>
-                            </CardContent>
-                        </Card>
+                         <Separator />
+                          <FormField
+                            control={form.control}
+                            name="tone"
+                            render={({ field }) => (
+                                <FormItem className="flex items-center gap-2">
+                                <FormLabel className="text-muted-foreground w-16 text-right">Tone</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                    <SelectTrigger className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0">
+                                        <SelectValue placeholder="Select a tone" />
+                                    </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                    <SelectItem value="Friendly">Friendly</SelectItem>
+                                    <SelectItem value="Formal">Formal</SelectItem>
+                                    <SelectItem value="Casual">Casual</SelectItem>
+                                    <SelectItem value="Professional">Professional</SelectItem>
+                                    <SelectItem value="Direct">Direct</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                        <Separator />
+                         <FormField
+                            control={form.control}
+                            name="instructions"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <Textarea className="min-h-[120px] border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none" placeholder="Write instructions for Pravis here... e.g., Announce the new product launch for next Tuesday. Mention the key features: faster speed, new UI, and better collaboration." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="button" onClick={handleDraftEmail} disabled={isDrafting}>
+                            {isDrafting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PenSquare className="mr-2 h-4 w-4" />}
+                            Draft with Pravis
+                        </Button>
                          
                         {(isDrafting || generatedBody) && (
                             <div className="space-y-2 pt-4">
@@ -278,7 +270,7 @@ export default function ComposeEmailPage() {
                             </div>
                           )}
                     </div>
-                    <footer className="p-4 border-t flex justify-between items-center">
+                    <footer className="p-4 border-t flex justify-between items-center bg-background/50">
                         <Button type="submit" disabled={isSending || isDrafting || !finalBodyValue}>
                             {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
                             Send
