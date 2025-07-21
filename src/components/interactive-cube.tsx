@@ -29,6 +29,7 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [rotation, setRotation] = useState({ x: -20, y: 30 });
+    const [translateY, setTranslateY] = useState(0);
     const autoRotateRef = useRef<number | null>(null);
     const [isAutoRotating, setIsAutoRotating] = useState(true);
 
@@ -53,8 +54,9 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         const rotate = () => {
             if (!isPointerDownRef.current && isAutoRotating) {
                 frameCount++;
-                const bobbleX = Math.sin(frameCount * 0.005) * 5; // Slower, wider bobble
-                setRotation(prev => ({ x: -15 + bobbleX, y: prev.y + 0.10 }));
+                const bobbleY = Math.sin(frameCount * 0.01) * 10; // Vertical float
+                setRotation(prev => ({ x: prev.x, y: prev.y + 0.10 }));
+                setTranslateY(bobbleY);
             }
             autoRotateRef.current = requestAnimationFrame(rotate);
         };
@@ -156,7 +158,7 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
                     <div 
                         ref={cubeRef} 
                         className="cube" 
-                        style={{ transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)` }}
+                        style={{ transform: `translateY(${translateY}px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)` }}
                     >
                         {faces.map((item) => (
                             <div
