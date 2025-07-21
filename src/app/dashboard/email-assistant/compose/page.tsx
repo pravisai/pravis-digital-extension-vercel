@@ -38,7 +38,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Label } from '@/components/ui/label';
 import { draftEmailReplies } from '@/ai/flows/draft-email-replies';
 import { Separator } from '@/components/ui/separator';
 
@@ -77,10 +76,11 @@ export default function ComposeEmailPage() {
   const handleDraftEmail = async () => {
     const { recipient, instructions, tone } = form.getValues();
     if (!recipient || !instructions) {
+      form.trigger(['recipient', 'instructions']);
       toast({
         variant: 'destructive',
         title: 'Missing Fields',
-        description: 'Please fill in recipient and instructions before drafting.',
+        description: 'Please fill in the recipient and instructions before drafting.',
       });
       return;
     }
@@ -193,40 +193,43 @@ export default function ComposeEmailPage() {
                                 </FormItem>
                             )}
                         />
-                         <FormField
-                            control={form.control}
-                            name="tone"
-                            render={({ field }) => (
-                                <FormItem className="flex items-center gap-2">
-                                <FormLabel className="text-muted-foreground w-16 text-right">Tone</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                    <SelectTrigger className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 w-[180px]">
-                                        <SelectValue placeholder="Select a tone" />
-                                    </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                    <SelectItem value="Friendly">Friendly</SelectItem>
-                                    <SelectItem value="Formal">Formal</SelectItem>
-                                    <SelectItem value="Casual">Casual</SelectItem>
-                                    <SelectItem value="Professional">Professional</SelectItem>
-                                    <SelectItem value="Direct">Direct</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
-                        
-                        <Button type="button" onClick={handleDraftEmail} disabled={isDrafting}>
-                            {isDrafting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PenSquare className="mr-2 h-4 w-4" />}
-                            Draft with Pravis
-                        </Button>
+                        <div className="flex items-center gap-4">
+                             <FormField
+                                control={form.control}
+                                name="tone"
+                                render={({ field }) => (
+                                    <FormItem className="flex items-center gap-2">
+                                    <FormLabel className="text-muted-foreground w-16 text-right">Tone</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                        <SelectTrigger className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 w-[180px]">
+                                            <SelectValue placeholder="Select a tone" />
+                                        </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                        <SelectItem value="Friendly">Friendly</SelectItem>
+                                        <SelectItem value="Formal">Formal</SelectItem>
+                                        <SelectItem value="Casual">Casual</SelectItem>
+                                        <SelectItem value="Professional">Professional</SelectItem>
+                                        <SelectItem value="Direct">Direct</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                                />
+                            
+                            <Button type="button" onClick={handleDraftEmail} disabled={isDrafting}>
+                                {isDrafting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PenSquare className="mr-2 h-4 w-4" />}
+                                Draft with Pravis
+                            </Button>
+                        </div>
                          
                         {(isDrafting || generatedContent) && (
                             <div className="space-y-4 pt-4">
+                              <Separator />
                               {isDrafting ? (
-                                <div className="space-y-4">
+                                <div className="space-y-4 pt-4">
                                   <Skeleton className="h-10 w-full" />
                                   <Skeleton className="h-40 w-full" />
                                 </div>
