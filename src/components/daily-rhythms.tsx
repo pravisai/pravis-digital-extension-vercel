@@ -47,7 +47,7 @@ const modules: CubeFace[] = [
       href: "/dashboard",
       icon: Cpu,
       label: "Pravis Core",
-      description: "System Hub",
+      description: "design your digital mind, your legacy",
       face: "top",
       colorClass: "neon-purple"
     },
