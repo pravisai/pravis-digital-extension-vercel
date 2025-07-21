@@ -62,6 +62,7 @@ const textToSpeechFlow = ai.defineFlow(
   async (query) => {
     const { media } = await ai.generate({
       model: googleAI.model('gemini-2.5-flash-preview-tts'),
+      prompt: query,
       config: {
         responseModalities: ['AUDIO'],
         speechConfig: {
@@ -70,15 +71,12 @@ const textToSpeechFlow = ai.defineFlow(
           },
         },
       },
-      prompt: query,
     });
     
     if (!media) {
       throw new Error('No audio media was returned from the TTS service.');
     }
     
-    // The audio data is returned as a base64 string within a data URI.
-    // We need to extract the base64 part to convert it to a Buffer.
     const audioBuffer = Buffer.from(
       media.url.substring(media.url.indexOf(',') + 1),
       'base64'
