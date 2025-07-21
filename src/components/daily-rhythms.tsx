@@ -2,7 +2,7 @@
 "use client"
 
 import React from "react";
-import { BrainCircuit, Calendar, Share2, Mail, Cpu, Settings } from "lucide-react";
+import { BrainCircuit, Calendar, Share2, Mail, Cpu, Link } from "lucide-react";
 import { InteractiveCube, type CubeFace } from "./interactive-cube";
 
 const modules: CubeFace[] = [
@@ -54,8 +54,8 @@ const modules: CubeFace[] = [
     {
       id: "settings",
       href: "/dashboard",
-      icon: Settings,
-      label: "Settings",
+      icon: Link,
+      label: "Connect",
       description: "Configure your experience",
       face: "bottom",
       colorClass: "electric-blue"
