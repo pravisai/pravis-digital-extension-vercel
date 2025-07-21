@@ -37,7 +37,7 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const isDraggingRef = useRef(false);
     const isPointerDownRef = useRef(false);
     const dragStartPos = useRef({ x: 0, y: 0 });
-    const currentMousePos = useRef({ x: 0, y: 0 });
+    const lastMousePos = useRef({ x: 0, y: 0 }); // Changed from currentMousePos
     const releasedFaceRef = useRef<CubeFace | null>(null);
 
 
@@ -84,7 +84,7 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         isPointerDownRef.current = true;
         isDraggingRef.current = false;
         dragStartPos.current = { x: clientX, y: clientY };
-        currentMousePos.current = { x: clientX, y: clientY };
+        lastMousePos.current = { x: clientX, y: clientY };
         releasedFaceRef.current = null;
         if (containerRef.current) containerRef.current.style.cursor = 'grabbing';
     };
@@ -92,9 +92,6 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const handlePointerMove = (clientX: number, clientY: number) => {
         if (!isPointerDownRef.current) return;
 
-        const deltaX = clientX - currentMousePos.current.x;
-        const deltaY = clientY - currentMousePos.current.y;
-        
         const dragDistance = Math.sqrt(
             Math.pow(clientX - dragStartPos.current.x, 2) + 
             Math.pow(clientY - dragStartPos.current.y, 2)
@@ -105,16 +102,20 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         }
         
         if (isDraggingRef.current) {
+             const deltaX = clientX - lastMousePos.current.x;
+             const deltaY = clientY - lastMousePos.current.y;
              setRotation(prev => ({
-                x: prev.x - deltaY * 0.6,
-                y: prev.y + deltaX * 0.6
+                x: prev.x - deltaY * 0.5,
+                y: prev.y + deltaX * 0.5
             }));
         }
        
-        currentMousePos.current = { x: clientX, y: clientY };
+        lastMousePos.current = { x: clientX, y: clientY };
     };
 
     const handlePointerUp = () => {
+        if (!isPointerDownRef.current) return;
+
         isPointerDownRef.current = false;
         if (containerRef.current) containerRef.current.style.cursor = 'grab';
         
@@ -126,6 +127,7 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
             startAutoRotation();
         }
         releasedFaceRef.current = null;
+        // Reset isDraggingRef after pointer up
         isDraggingRef.current = false;
     };
 
