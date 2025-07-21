@@ -20,7 +20,7 @@ interface InteractiveCubeProps {
   faces: CubeFace[];
 }
 
-const AUTO_ROTATE_SPEED = 0.1;
+const AUTO_ROTATE_SPEED = 0.15;
 
 export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const router = useRouter();
@@ -47,30 +47,21 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         const animate = () => {
             if (!isInteracting) {
                 // Apply velocity for inertia
-                setRotation(r => ({
-                    x: r.x + velocityRef.current.y,
-                    y: r.y + velocityRef.current.x,
-                }));
+                let newRotationX = rotation.x + velocityRef.current.y;
+                let newRotationY = rotation.y + velocityRef.current.x;
+
                 // Apply auto-rotation
-                setRotation(r => ({
-                    x: r.x + AUTO_ROTATE_SPEED,
-                    y: r.y + AUTO_ROTATE_SPEED,
-                }));
+                newRotationX += AUTO_ROTATE_SPEED;
+                newRotationY += AUTO_ROTATE_SPEED;
+
+                setRotation({
+                    x: newRotationX,
+                    y: newRotationY,
+                });
 
                 // Dampen velocity
                 velocityRef.current.x *= 0.95;
                 velocityRef.current.y *= 0.95;
-
-                // Add vertical bobbing
-                if (cubeRef.current) {
-                    const time = Date.now() * 0.0005;
-                    const bobbleY = Math.sin(time) * 10;
-                    cubeRef.current.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) translateY(${bobbleY}px)`;
-                }
-            } else {
-                 if (cubeRef.current) {
-                    cubeRef.current.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`;
-                }
             }
             animationFrameRef.current = requestAnimationFrame(animate);
         };
@@ -80,7 +71,25 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
                 cancelAnimationFrame(animationFrameRef.current);
             }
         };
-    }, [isInteracting, rotation]);
+    }, [isInteracting, rotation.x, rotation.y]);
+
+     useEffect(() => {
+        const cube = cubeRef.current;
+        if (cube) {
+            const bobbleY = isInteracting ? 0 : Math.sin(Date.now() * 0.0005) * 10;
+            cube.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) translateY(${bobbleY}px)`;
+            
+            // Counter-rotate children
+            const children = cube.childNodes;
+            children.forEach(childNode => {
+                const child = childNode as HTMLDivElement;
+                const content = child.querySelector('.cube-face-content') as HTMLDivElement;
+                if (content) {
+                    content.style.transform = `rotateY(${-rotation.y}deg) rotateX(${-rotation.x}deg)`;
+                }
+            });
+        }
+    }, [rotation, isInteracting]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -89,17 +98,18 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         let clickTimeout: NodeJS.Timeout;
 
         const handlePointerDown = (e: PointerEvent) => {
-            e.preventDefault();
-            setIsInteracting(true);
-            isDraggingRef.current = false;
-            lastPositionRef.current = { x: e.clientX, y: e.clientY };
-            velocityRef.current = { x: 0, y: 0 };
-            container.style.cursor = 'grabbing';
+            if ((e.target as HTMLElement).closest('.cube-face')) {
+                e.preventDefault();
+                setIsInteracting(true);
+                isDraggingRef.current = false;
+                lastPositionRef.current = { x: e.clientX, y: e.clientY };
+                velocityRef.current = { x: 0, y: 0 };
+                container.style.cursor = 'grabbing';
 
-            // Differentiate click from drag
-            clickTimeout = setTimeout(() => {
-                isDraggingRef.current = true;
-            }, 150);
+                clickTimeout = setTimeout(() => {
+                    isDraggingRef.current = true;
+                }, 150);
+            }
         };
 
         const handlePointerMove = (e: PointerEvent) => {
@@ -109,45 +119,44 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
                 const dy = e.clientY - lastPositionRef.current.y;
                 
                 if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
-                  isDraggingRef.current = true;
                   clearTimeout(clickTimeout);
+                  isDraggingRef.current = true;
                 }
 
                 setRotation(r => ({
-                    x: r.x - dy * 0.25,
-                    y: r.y + dx * 0.25
+                    x: r.x - dy * 0.5,
+                    y: r.y + dx * 0.5
                 }));
                 
-                velocityRef.current = { x: dx * 0.2, y: -dy * 0.2 };
+                velocityRef.current = { x: dx * 0.25, y: -dy * 0.25 };
                 lastPositionRef.current = { x: e.clientX, y: e.clientY };
             }
         };
 
         const handlePointerUp = (e: PointerEvent) => {
-            e.preventDefault();
-            setIsInteracting(false);
-            container.style.cursor = 'grab';
-
-            clearTimeout(clickTimeout);
-            if (!isDraggingRef.current) {
-                const targetFace = (e.target as HTMLElement).closest<HTMLElement>('.cube-face');
-                if (targetFace) {
-                    const faceId = targetFace.dataset.faceId;
-                    const face = faces.find(f => f.id === faceId);
-                    if (face) {
-                        handleFaceClick(face);
-                    }
-                }
-            }
-            isDraggingRef.current = false;
-        };
-        
-        const handlePointerLeave = () => {
-            if(isInteracting) {
+            if (isInteracting) {
+                e.preventDefault();
                 setIsInteracting(false);
                 container.style.cursor = 'grab';
-                isDraggingRef.current = false;
+
                 clearTimeout(clickTimeout);
+                if (!isDraggingRef.current) {
+                    const targetFaceEl = (e.target as HTMLElement).closest('.cube-face');
+                    if (targetFaceEl) {
+                        const faceId = targetFaceEl.getAttribute('data-face-id');
+                        const face = faces.find(f => f.id === faceId);
+                        if (face) {
+                            handleFaceClick(face);
+                        }
+                    }
+                }
+                isDraggingRef.current = false;
+            }
+        };
+        
+        const handlePointerLeave = (e: PointerEvent) => {
+            if(isInteracting) {
+                handlePointerUp(e);
             }
         };
 
@@ -182,7 +191,6 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
                     <div 
                         ref={cubeRef} 
                         className="cube"
-                        style={{transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`}}
                     >
                         {faces.map((item) => (
                             <div
@@ -190,12 +198,14 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
                                 data-face-id={item.id}
                                 className={cn("cube-face", item.face)}
                             >
-                                <div className={cn("module-icon", item.colorClass)}>
-                                    <item.icon className={cn("w-7 h-7")} />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-lg mb-1">{item.label}</h3>
-                                    <p className="text-sm text-muted-foreground">{item.description}</p>
+                                <div className="cube-face-content">
+                                    <div className={cn("module-icon", item.colorClass)}>
+                                        <item.icon className={cn("w-7 h-7")} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-lg mb-1">{item.label}</h3>
+                                        <p className="text-sm text-muted-foreground">{item.description}</p>
+                                    </div>
                                 </div>
                             </div>
                         ))}
