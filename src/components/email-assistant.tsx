@@ -22,7 +22,7 @@ const emailCubeFaces: CubeFace[] = [
     { id: "Sent", href: "/dashboard/email-assistant/inbox", icon: Send, label: "Sent", description: "View your sent mail", face: "back", colorClass: "bright-pink" },
     { id: "Drafts", href: "/dashboard/email-assistant/inbox", icon: FileText, label: "Drafts", description: "View your drafts", face: "left", colorClass: "acid-green" },
     { id: "Trash", href: "/dashboard/email-assistant/inbox", icon: Trash2, label: "Trash", description: "View trashed messages", face: "top", colorClass: "neon-purple" },
-    { id: "Compose", href: "/dashboard/email-assistant/inbox", icon: PenSquare, label: "Compose", description: "Write a new email", face: "bottom", colorClass: "electric-blue" },
+    { id: "Compose", href: "/dashboard/email-assistant/compose", icon: PenSquare, label: "Compose", description: "Write a new email", face: "bottom", colorClass: "electric-blue" },
 ];
 
 

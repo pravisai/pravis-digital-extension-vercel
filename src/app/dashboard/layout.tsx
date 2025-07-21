@@ -201,16 +201,13 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
     
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                // If the user is not logged in, redirect them to the sign-in page.
-                // This prevents getting stuck on inner pages without a valid session.
+            if (!user && !pathname.startsWith('/')) {
                 router.push('/');
             } else {
                 setIsLoading(false);
             }
         });
 
-        // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').then(
                 (registration) => {
@@ -222,7 +219,6 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
             );
         }
         
-        // Notification Permission Request
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission().then(permission => {
                 if (permission === 'granted') {
@@ -234,7 +230,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
         }
         
         return () => unsubscribe();
-    }, [router, toast]);
+    }, [router, toast, pathname]);
 
 
     if (isLoading) {
@@ -254,7 +250,6 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
                     "p-4 md:p-8": !isFullHeightPage,
                     "h-[calc(100vh-4rem)]": isFullHeightPage,
                 },
-                 // Add padding to the bottom to avoid content being hidden by the chat input on mobile
                  (pathname === '/dashboard' && !isFullHeightPage) && "pb-24 md:pb-0"
             )}>
                 {children}
