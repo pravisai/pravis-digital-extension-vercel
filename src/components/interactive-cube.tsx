@@ -106,8 +106,8 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         
         if (isDraggingRef.current) {
              setRotation(prev => ({
-                x: prev.x - deltaY * 0.5,
-                y: prev.y + deltaX * 0.5
+                x: prev.x - deltaY * 0.6,
+                y: prev.y + deltaX * 0.6
             }));
         }
        
@@ -122,10 +122,11 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
             handleFaceClick(releasedFaceRef.current);
         }
         
-        if (!autoRotateRef.current && isAutoRotating) {
+        if (isAutoRotating) {
             startAutoRotation();
         }
         releasedFaceRef.current = null;
+        isDraggingRef.current = false;
     };
 
     const handleFacePointerUp = (face: CubeFace) => {
