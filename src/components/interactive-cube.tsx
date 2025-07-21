@@ -20,7 +20,7 @@ interface InteractiveCubeProps {
   faces: CubeFace[];
 }
 
-const AUTO_ROTATE_SPEED = 0.15;
+const AUTO_ROTATE_SPEED = 0.2;
 
 export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const router = useRouter();
@@ -34,7 +34,8 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const lastPositionRef = useRef({ x: 0, y: 0 });
     const velocityRef = useRef({ x: 0, y: 0 });
     const animationFrameRef = useRef<number>();
-    const clickTimeoutRef = useRef<NodeJS.Timeout>();
+
+    const autoRotateRef = useRef(true);
 
     const handleFaceClick = useCallback((face: CubeFace) => {
         if (face.href && face.href !== '#') {
@@ -43,27 +44,23 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         }
     }, [router]);
     
-    const startInteraction = (clientX: number, clientY: number) => {
+    const startInteraction = useCallback((clientX: number, clientY: number) => {
         isInteractingRef.current = true;
         isDraggingRef.current = false;
         lastPositionRef.current = { x: clientX, y: clientY };
         velocityRef.current = { x: 0, y: 0 };
+        autoRotateRef.current = false;
         if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-        
-        clickTimeoutRef.current = setTimeout(() => {
-            isDraggingRef.current = true;
-        }, 150);
-    };
+    }, []);
 
-    const moveInteraction = (clientX: number, clientY: number) => {
+    const moveInteraction = useCallback((clientX: number, clientY: number) => {
         if (!isInteractingRef.current) return;
 
         const dx = clientX - lastPositionRef.current.x;
         const dy = clientY - lastPositionRef.current.y;
 
-        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
            isDraggingRef.current = true;
-           if(clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
         }
 
         if (isDraggingRef.current) {
@@ -75,11 +72,10 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
             velocityRef.current = { x: dx, y: -dy };
             lastPositionRef.current = { x: clientX, y: clientY };
         }
-    };
+    }, []);
     
-    const endInteraction = (target: EventTarget | null) => {
+    const endInteraction = useCallback((target: EventTarget | null) => {
         isInteractingRef.current = false;
-        if(clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
 
         if (!isDraggingRef.current) {
             const targetFaceEl = (target as HTMLElement)?.closest('.cube-face');
@@ -92,14 +88,15 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
             }
         }
         
+        autoRotateRef.current = true;
         startAnimation();
-    };
+    }, [faces, handleFaceClick]);
 
     const startAnimation = useCallback(() => {
         const animate = () => {
-            if (!isInteractingRef.current) {
+            if (autoRotateRef.current) {
                 setRotation(r => ({
-                    x: r.x + velocityRef.current.y * 0.05 + AUTO_ROTATE_SPEED,
+                    x: r.x + velocityRef.current.y * 0.05 + AUTO_ROTATE_SPEED * 0.5,
                     y: r.y + velocityRef.current.x * 0.05 + AUTO_ROTATE_SPEED,
                 }));
                 velocityRef.current.x *= 0.95;
@@ -112,32 +109,32 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
 
     useEffect(() => {
         startAnimation();
+        
+        const currentContainer = containerRef.current;
+        const handlePointerMove = (e: PointerEvent) => moveInteraction(e.clientX, e.clientY);
+        const handlePointerUp = (e: PointerEvent) => endInteraction(e.target);
+
+        currentContainer?.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerup', handlePointerUp);
+        window.addEventListener('pointercancel', handlePointerUp);
+
         return () => {
             if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-            if(clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+            currentContainer?.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('pointerup', handlePointerUp);
+            window.removeEventListener('pointercancel', handlePointerUp);
         };
-    }, [startAnimation]);
+    }, [startAnimation, moveInteraction, endInteraction]);
 
      useEffect(() => {
         const cube = cubeRef.current;
         if (cube) {
-            const bobbleY = isInteractingRef.current ? 0 : Math.sin(Date.now() * 0.0005) * 10;
-            cube.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) translateY(${bobbleY}px)`;
+            cube.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`;
         }
     }, [rotation]);
 
     const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
         startInteraction(e.clientX, e.clientY);
-        (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    };
-
-    const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-        moveInteraction(e.clientX, e.clientY);
-    };
-
-    const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-        endInteraction(e.target);
-        (e.target as HTMLElement).releasePointerCapture(e.pointerId);
     };
 
     return (
@@ -147,9 +144,6 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
                 ref={containerRef}
                 style={{ cursor: isInteractingRef.current ? 'grabbing' : 'grab', touchAction: 'none' }}
                 onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerUp}
             >
                 {isLoading && (
                   <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-20 rounded-lg">
