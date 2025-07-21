@@ -11,7 +11,7 @@ const modules: CubeFace[] = [
       href: "/dashboard/creative-partner",
       icon: BrainCircuit,
       label: "Calibrate",
-      description: "calibrate your decisions",
+      description: "your inner guide to making precise decisions",
       face: "front",
       colorClass: "neon-purple"
     },
