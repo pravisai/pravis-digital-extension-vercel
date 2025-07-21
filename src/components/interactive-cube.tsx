@@ -21,7 +21,7 @@ interface InteractiveCubeProps {
   faces: CubeFace[];
 }
 
-const DRAG_SENSITIVITY = 0.5;
+const DRAG_SENSITIVITY = 0.4;
 
 export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const router = useRouter();
@@ -30,25 +30,25 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [rotation, setRotation] = useState({ x: -20, y: 30 });
     const [translateY, setTranslateY] = useState(0);
-    const autoRotateRef = useRef<number | null>(null);
     const [isAutoRotating, setIsAutoRotating] = useState(true);
 
-    const isDraggingRef = useRef(false);
     const isPointerDownRef = useRef(false);
+    const hasDraggedRef = useRef(false);
     const lastPointerPos = useRef({ x: 0, y: 0 });
+    const autoRotateRef = useRef<number | null>(null);
 
-    const handleFaceClick = (face: CubeFace) => {
+    const handleFaceClick = useCallback((face: CubeFace) => {
         if (face.href && face.href !== '#') {
             setIsLoading(true);
             router.push(face.href);
         }
-    };
-    
+    }, [router]);
+
     const startAutoRotation = useCallback(() => {
         if (autoRotateRef.current) cancelAnimationFrame(autoRotateRef.current);
         let frameCount = 0;
         const rotate = () => {
-            if (!isPointerDownRef.current && isAutoRotating) {
+            if (!isPointerDownRef.current) {
                 frameCount++;
                 const bobbleY = Math.sin(frameCount * 0.01) * 10;
                 setRotation(prev => ({ x: prev.x, y: prev.y + 0.10 }));
@@ -56,7 +56,9 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
             }
             autoRotateRef.current = requestAnimationFrame(rotate);
         };
-        autoRotateRef.current = requestAnimationFrame(rotate);
+        if (isAutoRotating) {
+            autoRotateRef.current = requestAnimationFrame(rotate);
+        }
     }, [isAutoRotating]);
 
     const stopAutoRotation = useCallback(() => {
@@ -65,6 +67,70 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
             autoRotateRef.current = null;
         }
     }, []);
+
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+        
+        const handlePointerDown = (e: PointerEvent) => {
+            if ((e.target as HTMLElement).closest('[data-sidebar="trigger"]')) return;
+            e.preventDefault();
+            stopAutoRotation();
+            isPointerDownRef.current = true;
+            hasDraggedRef.current = false;
+            lastPointerPos.current = { x: e.clientX, y: e.clientY };
+            container.style.cursor = 'grabbing';
+        };
+
+        const handlePointerMove = (e: PointerEvent) => {
+            if (!isPointerDownRef.current) return;
+            e.preventDefault();
+            hasDraggedRef.current = true;
+            
+            const deltaX = e.clientX - lastPointerPos.current.x;
+            const deltaY = e.clientY - lastPointerPos.current.y;
+            
+            setRotation(prev => ({
+                x: prev.x - deltaY * DRAG_SENSITIVITY,
+                y: prev.y + deltaX * DRAG_SENSITIVITY
+            }));
+            
+            lastPointerPos.current = { x: e.clientX, y: e.clientY };
+        };
+
+        const handlePointerUp = (e: PointerEvent) => {
+            if (!isPointerDownRef.current) return;
+            e.preventDefault();
+
+            const targetFace = (e.target as HTMLElement).closest<HTMLElement>('.cube-face');
+            if (targetFace && !hasDraggedRef.current) {
+                const faceId = targetFace.dataset.faceId;
+                const face = faces.find(f => f.id === faceId);
+                if (face) {
+                    handleFaceClick(face);
+                }
+            }
+            
+            isPointerDownRef.current = false;
+            container.style.cursor = 'grab';
+            
+            if (isAutoRotating) {
+                startAutoRotation();
+            }
+        };
+
+        container.addEventListener('pointerdown', handlePointerDown);
+        window.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerup', handlePointerUp);
+        window.addEventListener('pointerleave', handlePointerUp);
+
+        return () => {
+            container.removeEventListener('pointerdown', handlePointerDown);
+            window.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('pointerup', handlePointerUp);
+            window.removeEventListener('pointerleave', handlePointerUp);
+        };
+    }, [faces, handleFaceClick, startAutoRotation, stopAutoRotation, isAutoRotating]);
     
     useEffect(() => {
         if (isAutoRotating) {
@@ -75,64 +141,12 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         return () => stopAutoRotation();
     }, [isAutoRotating, startAutoRotation, stopAutoRotation]);
 
-    const handlePointerDown = (clientX: number, clientY: number) => {
-        stopAutoRotation();
-        isPointerDownRef.current = true;
-        isDraggingRef.current = false;
-        lastPointerPos.current = { x: clientX, y: clientY };
-        if (containerRef.current) containerRef.current.style.cursor = 'grabbing';
-    };
-
-    const handlePointerMove = (clientX: number, clientY: number) => {
-        if (!isPointerDownRef.current) return;
-
-        isDraggingRef.current = true;
-        const deltaX = clientX - lastPointerPos.current.x;
-        const deltaY = clientY - lastPointerPos.current.y;
-        
-        setRotation(prev => ({
-            x: prev.x - deltaY * DRAG_SENSITIVITY,
-            y: prev.y + deltaX * DRAG_SENSITIVITY
-        }));
-       
-        lastPointerPos.current = { x: clientX, y: clientY };
-    };
-
-    const handlePointerUp = () => {
-        if (!isPointerDownRef.current) return;
-
-        isPointerDownRef.current = false;
-        if (containerRef.current) containerRef.current.style.cursor = 'grab';
-        
-        if (isAutoRotating) {
-            startAutoRotation();
-        }
-        
-        // Reset dragging state after a short delay to distinguish from a click
-        setTimeout(() => {
-            isDraggingRef.current = false;
-        }, 50);
-    };
-
-    const handleFacePointerUp = (face: CubeFace) => {
-        if (!isDraggingRef.current) {
-            handleFaceClick(face);
-        }
-    };
-
     return (
         <section className="relative">
             <div 
                 className="cube-wrapper"
                 ref={containerRef}
-                onMouseDown={(e) => handlePointerDown(e.clientX, e.clientY)}
-                onMouseMove={(e) => handlePointerMove(e.clientX, e.clientY)}
-                onMouseUp={handlePointerUp}
-                onMouseLeave={handlePointerUp}
-                onTouchStart={(e) => handlePointerDown(e.touches[0].clientX, e.touches[0].clientY)}
-                onTouchMove={(e) => handlePointerMove(e.touches[0].clientX, e.touches[0].clientY)}
-                onTouchEnd={handlePointerUp}
-                style={{ cursor: 'grab' }}
+                style={{ cursor: 'grab', touchAction: 'none' }}
             >
                 {isLoading && (
                   <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-20 rounded-lg">
@@ -148,12 +162,8 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
                         {faces.map((item) => (
                             <div
                                 key={item.id}
+                                data-face-id={item.id}
                                 className={cn("cube-face", item.face)}
-                                onMouseUp={() => handleFacePointerUp(item)}
-                                onTouchEnd={(e) => {
-                                    e.preventDefault();
-                                    handleFacePointerUp(item);
-                                }}
                             >
                                 <div className={cn("module-icon", item.colorClass)}>
                                     <item.icon className={cn("w-7 h-7")} />
@@ -171,7 +181,10 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
                 <Button 
                     variant="outline" 
                     size="icon" 
-                    onClick={() => setIsAutoRotating(!isAutoRotating)}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsAutoRotating(!isAutoRotating);
+                    }}
                     aria-label={isAutoRotating ? "Pause animation" : "Play animation"}
                 >
                     {isAutoRotating ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
