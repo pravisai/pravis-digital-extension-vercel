@@ -222,7 +222,6 @@ export default function ComposeEmailPage() {
                                 </FormItem>
                             )}
                             />
-                        <Separator />
                          <FormField
                             control={form.control}
                             name="instructions"
