@@ -4,8 +4,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Loader2, Pause, Play } from "lucide-react";
-import { Button } from "./ui/button";
+import { Loader2 } from "lucide-react";
 
 export interface CubeFace {
   id: string;
@@ -22,7 +21,7 @@ interface InteractiveCubeProps {
 }
 
 const DRAG_SENSITIVITY = 0.4;
-const AUTO_ROTATE_SPEED = 0.05;
+const AUTO_ROTATE_SPEED = 0.1; // Increased speed
 
 export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const router = useRouter();
@@ -30,7 +29,6 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     
     const [isLoading, setIsLoading] = useState(false);
-    const [isPaused, setIsPaused] = useState(false);
     const [isInteracting, setIsInteracting] = useState(false);
     
     const [rotation, setRotation] = useState({ x: -20, y: 30 });
@@ -50,15 +48,11 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     // Animation loop
     useEffect(() => {
       const animate = (time: number) => {
-        if (!isPaused && !isInteracting && cubeRef.current) {
+        if (!isInteracting && cubeRef.current) {
           setRotation(prev => ({
             x: prev.x + AUTO_ROTATE_SPEED,
             y: prev.y + AUTO_ROTATE_SPEED,
           }));
-
-          // Vertical float effect
-          const translateY = Math.sin(time / 1000) * 10; // 10px up/down
-          cubeRef.current.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) translateY(${translateY}px)`;
         }
         animationFrameRef.current = requestAnimationFrame(animate);
       };
@@ -68,8 +62,7 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
           cancelAnimationFrame(animationFrameRef.current);
         }
       };
-    }, [isPaused, isInteracting, rotation.x, rotation.y]);
-
+    }, [isInteracting]);
 
     // Event listeners for manual dragging
     useEffect(() => {
@@ -77,8 +70,6 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         if (!container) return;
 
         const handlePointerDown = (e: PointerEvent) => {
-            if ((e.target as HTMLElement).closest('[data-role="pause-play-button"]')) return;
-            e.preventDefault();
             isPointerDownRef.current = true;
             hasDraggedRef.current = false;
             setIsInteracting(true);
@@ -88,7 +79,6 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
 
         const handlePointerMove = (e: PointerEvent) => {
             if (!isPointerDownRef.current) return;
-            e.preventDefault();
             hasDraggedRef.current = true;
             
             const deltaX = e.clientX - lastPointerPos.current.x;
@@ -104,7 +94,6 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
 
         const handlePointerUp = (e: PointerEvent) => {
             if (!isPointerDownRef.current) return;
-            e.preventDefault();
 
             if (!hasDraggedRef.current) {
                 const targetFace = (e.target as HTMLElement).closest<HTMLElement>('.cube-face');
@@ -122,32 +111,29 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
             container.style.cursor = 'grab';
         };
 
-        container.addEventListener('pointerdown', handlePointerDown, { passive: false });
-        window.addEventListener('pointermove', handlePointerMove, { passive: false });
-        window.addEventListener('pointerup', handlePointerUp, { passive: false });
-        window.addEventListener('pointerleave', handlePointerUp, { passive: false });
+        const handlePointerLeave = () => {
+            if(isPointerDownRef.current) {
+                isPointerDownRef.current = false;
+                setIsInteracting(false);
+                container.style.cursor = 'grab';
+            }
+        };
+
+        container.addEventListener('pointerdown', handlePointerDown);
+        window.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerup', handlePointerUp);
+        container.addEventListener('pointerleave', handlePointerLeave);
 
         return () => {
             container.removeEventListener('pointerdown', handlePointerDown);
             window.removeEventListener('pointermove', handlePointerMove);
             window.removeEventListener('pointerup', handlePointerUp);
-            window.removeEventListener('pointerleave', handlePointerUp);
+            container.removeEventListener('pointerleave', handlePointerLeave);
         };
     }, [faces, handleFaceClick]);
 
     return (
         <section className="relative">
-             <div className="absolute top-0 right-0 z-20">
-                <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => setIsPaused(!isPaused)} 
-                    data-role="pause-play-button"
-                    aria-label={isPaused ? "Play animation" : "Pause animation"}
-                >
-                    {isPaused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
-                </Button>
-            </div>
             <div 
                 className="cube-wrapper"
                 ref={containerRef}
