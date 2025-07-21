@@ -21,6 +21,7 @@ interface InteractiveCubeProps {
 }
 
 const AUTO_ROTATE_SPEED = 0.2;
+const DRAG_SENSITIVITY = 0.625; // Was 0.5
 
 export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const router = useRouter();
@@ -65,8 +66,8 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
 
         if (isDraggingRef.current) {
             setRotation(r => ({
-                x: r.x - dy * 0.5,
-                y: r.y + dx * 0.5
+                x: r.x - dy * DRAG_SENSITIVITY,
+                y: r.y + dx * DRAG_SENSITIVITY
             }));
             
             velocityRef.current = { x: dx, y: -dy };
