@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import React, { useState } from 'react';
@@ -233,7 +234,6 @@ export default function ComposeEmailPage() {
                                     name="instructions"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Specific Instructions for Body</FormLabel>
                                             <FormControl>
                                                 <Textarea placeholder="e.g., Announce the new product launch for next Tuesday. Mention the key features: faster speed, new UI, and better collaboration." {...field} />
                                             </FormControl>
@@ -314,5 +314,3 @@ export default function ComposeEmailPage() {
     </FadeIn>
   );
 }
-
-  
