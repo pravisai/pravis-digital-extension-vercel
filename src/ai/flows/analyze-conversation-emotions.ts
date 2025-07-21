@@ -45,15 +45,9 @@ const prompt = ai.definePrompt({
 
   Analyze the following conversation:
 
-  {{conversation}}
+  "{{{conversation}}}"
 
-  Based on your analysis, determine if the conversation needs a more empathetic touch and provide a short summary of the emotional content of the conversation.
-
-  Return the results in JSON format:
-  {
-    "needsEmpatheticTouch": boolean,
-    "summary": string
-  }`,
+  Based on your analysis, determine if the conversation needs a more empathetic touch and provide a short summary of the emotional content of the conversation.`,
 });
 
 const analyzeConversationEmotionsFlow = ai.defineFlow(
