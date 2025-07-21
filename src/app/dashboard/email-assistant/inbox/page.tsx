@@ -102,9 +102,8 @@ function EmailView() {
 
     try {
       const result = await draftEmailReplies({
-        emailContent: selectedEmail.body,
+        instructions: `Original email: """${selectedEmail.body}"""\n\nInstructions for reply: """${values.parameters}"""`,
         tone: values.tone,
-        parameters: values.parameters,
       });
       setDraftedReply(result.reply);
     } catch (error) {

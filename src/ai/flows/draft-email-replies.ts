@@ -37,7 +37,7 @@ const prompt = ai.definePrompt({
   Instructions: {{{instructions}}}
   Tone: {{{tone}}}
   
-  Generate a suitable subject line and a reply body.`, 
+  Generate a suitable subject line and a reply body.`,
 });
 
 const draftEmailRepliesFlow = ai.defineFlow(
