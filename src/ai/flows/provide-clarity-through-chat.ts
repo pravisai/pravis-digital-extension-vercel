@@ -47,7 +47,11 @@ const provideClarityThroughChatFlow = ai.defineFlow(
     const {output} = await prompt(input);
     if (!output?.pravisResponse) {
       // This can happen due to safety filters or if the model fails to generate a valid response.
-      throw new Error("503::The AI model returned an empty response. This might be due to high demand or content filters.");
+      // Return a friendly message instead of throwing an error.
+      return {
+        pravisResponse:
+          "I'm sorry, but I cannot respond to that. The content may have been blocked by safety filters. Please try a different topic.",
+      };
     }
     return output;
   }
