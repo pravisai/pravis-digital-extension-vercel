@@ -27,7 +27,6 @@ const DRAG_SENSITIVITY = 0.625;
 export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const cubeRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const router = useRouter();
     
     const [isLoading, setIsLoading] = useState(false);
     const [rotation, setRotation] = useState({ x: -20, y: 30 });
@@ -46,9 +45,10 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         }
         if (face.href && face.href !== '#') {
             setIsLoading(true);
+            const router = useRouter();
             router.push(face.href);
         }
-    }, [router, faces]);
+    }, [faces]);
     
     const startInteraction = useCallback((clientX: number, clientY: number) => {
         isInteractingRef.current = true;
@@ -80,6 +80,21 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         }
     }, []);
     
+    const startAnimation = useCallback(() => {
+        const animate = () => {
+            if (autoRotateRef.current) {
+                setRotation(r => ({
+                    x: r.x + velocityRef.current.y * 0.05 + AUTO_ROTATE_SPEED * 0.5,
+                    y: r.y + velocityRef.current.x * 0.05 + AUTO_ROTATE_SPEED,
+                }));
+                velocityRef.current.x *= 0.95;
+                velocityRef.current.y *= 0.95;
+            }
+            animationFrameRef.current = requestAnimationFrame(animate);
+        };
+        animationFrameRef.current = requestAnimationFrame(animate);
+    }, []);
+
     const endInteraction = useCallback((target: EventTarget | null) => {
         isInteractingRef.current = false;
 
@@ -97,21 +112,6 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         autoRotateRef.current = true;
         startAnimation();
     }, [faces, handleFaceClick, startAnimation]);
-
-    const startAnimation = useCallback(() => {
-        const animate = () => {
-            if (autoRotateRef.current) {
-                setRotation(r => ({
-                    x: r.x + velocityRef.current.y * 0.05 + AUTO_ROTATE_SPEED * 0.5,
-                    y: r.y + velocityRef.current.x * 0.05 + AUTO_ROTATE_SPEED,
-                }));
-                velocityRef.current.x *= 0.95;
-                velocityRef.current.y *= 0.95;
-            }
-            animationFrameRef.current = requestAnimationFrame(animate);
-        };
-        animationFrameRef.current = requestAnimationFrame(animate);
-    }, []);
 
     useEffect(() => {
         startAnimation();
