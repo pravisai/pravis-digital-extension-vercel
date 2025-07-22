@@ -1,9 +1,9 @@
-
 "use client";
 
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
-import { provideClarityThroughChat } from "@/ai/flows/provide-clarity-through-chat";
-import { textToSpeech } from "@/ai/flows/text-to-speech";
+import { provideClarityThroughChat } from "@/lib/gemini";
+// Remove or comment out the text-to-speech import for now
+// import { textToSpeech } from "@/ai/flows/text-to-speech";
 
 interface Message {
   role: "user" | "pravis";
@@ -64,16 +64,18 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(true);
 
         try {
-            const result = await provideClarityThroughChat({ userMessage: currentInput });
+            // Updated to use the simple Gemini function
+            const result = await provideClarityThroughChat(currentInput);
             const pravisResponse = result.pravisResponse;
             
             const pravisMessage: Message = { role: "pravis", content: pravisResponse };
             setMessages((prev) => [...prev, pravisMessage]);
             
-            if (isVoiceInput) {
-                const audioResult = await textToSpeech(pravisResponse);
-                setAudioDataUri(audioResult.media);
-            }
+            // Temporarily disable text-to-speech until we fix that too
+            // if (isVoiceInput) {
+            //     const audioResult = await textToSpeech(pravisResponse);
+            //     setAudioDataUri(audioResult.media);
+            // }
 
         } catch (error: any) {
             console.error("Pravis chatbot Gemini error:", error);

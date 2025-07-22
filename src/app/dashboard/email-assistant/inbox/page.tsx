@@ -25,7 +25,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { format } from 'date-fns'
 
-import { draftEmailReplies } from '@/ai/flows/draft-email-replies'
+import { draftEmailReply } from '@/ai/flows/draft-email-reply'
 import { useToast } from '@/hooks/use-toast'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -101,7 +101,7 @@ function EmailView() {
     setDraftedReply("");
 
     try {
-      const result = await draftEmailReplies({
+      const result = await draftEmailReply({
         instructions: `Original email: """${selectedEmail.body}"""\n\nInstructions for reply: """${values.parameters}"""`,
         tone: values.tone,
       });

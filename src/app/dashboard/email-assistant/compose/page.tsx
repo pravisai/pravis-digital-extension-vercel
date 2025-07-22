@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { draftEmailReplies } from '@/ai/flows/draft-email-replies';
+import { draftEmailReply } from '@/ai/flows/draft-email-reply';
 import { Separator } from '@/components/ui/separator';
 
 const composeSchema = z.object({
@@ -88,7 +88,7 @@ export default function ComposeEmailPage() {
     setIsDrafting(true);
     setGeneratedContent(null);
     try {
-      const result = await draftEmailReplies({
+      const result = await draftEmailReply({
         instructions: instructions,
         tone: tone,
       });
