@@ -1,8 +1,9 @@
-import {genkit} from 'genkit';
+import {genkit, GenkitOptions} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
 import {Plugin} from '@genkit-ai/core';
 
 const plugins: Plugin<any>[] = [];
+let model: string | undefined = undefined;
 
 if (process.env.GEMINI_API_KEY) {
   plugins.push(
@@ -10,6 +11,7 @@ if (process.env.GEMINI_API_KEY) {
       apiKey: process.env.GEMINI_API_KEY,
     })
   );
+  model = 'googleai/gemini-2.0-flash';
 } else {
   console.warn(
     '\n********************************************************************\n' +
@@ -20,7 +22,12 @@ if (process.env.GEMINI_API_KEY) {
   );
 }
 
-export const ai = genkit({
+const genkitOptions: GenkitOptions = {
   plugins: plugins,
-  model: 'googleai/gemini-2.0-flash',
-});
+};
+
+if (model) {
+  genkitOptions.model = model;
+}
+
+export const ai = genkit(genkitOptions);
