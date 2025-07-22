@@ -14,6 +14,7 @@ export interface CubeFace {
   face: "front" | "right" | "back" | "left" | "top" | "bottom";
   colorClass: "neon-purple" | "electric-blue" | "bright-pink" | "acid-green";
   href?: string;
+  onClick?: (id: string) => void;
 }
 
 interface InteractiveCubeProps {
@@ -21,12 +22,12 @@ interface InteractiveCubeProps {
 }
 
 const AUTO_ROTATE_SPEED = 0.1;
-const DRAG_SENSITIVITY = 0.625; // Was 0.5
+const DRAG_SENSITIVITY = 0.625;
 
 export function InteractiveCube({ faces }: InteractiveCubeProps) {
-    const router = useRouter();
     const cubeRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const router = useRouter();
     
     const [isLoading, setIsLoading] = useState(false);
     const [rotation, setRotation] = useState({ x: -20, y: 30 });
@@ -39,11 +40,15 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     const autoRotateRef = useRef(true);
 
     const handleFaceClick = useCallback((face: CubeFace) => {
+        if (face.onClick) {
+            face.onClick(face.id);
+            return;
+        }
         if (face.href && face.href !== '#') {
             setIsLoading(true);
             router.push(face.href);
         }
-    }, [router]);
+    }, [router, faces]);
     
     const startInteraction = useCallback((clientX: number, clientY: number) => {
         isInteractingRef.current = true;
@@ -91,7 +96,7 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
         
         autoRotateRef.current = true;
         startAnimation();
-    }, [faces, handleFaceClick]);
+    }, [faces, handleFaceClick, startAnimation]);
 
     const startAnimation = useCallback(() => {
         const animate = () => {
