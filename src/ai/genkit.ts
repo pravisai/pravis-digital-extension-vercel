@@ -1,4 +1,4 @@
-import {genkit, GenkitOptions} from 'genkit';
+import {genkit, type GenkitOptions} from '@genkit-ai/core';
 import {googleAI} from '@genkit-ai/googleai';
 import {Plugin} from '@genkit-ai/core';
 
