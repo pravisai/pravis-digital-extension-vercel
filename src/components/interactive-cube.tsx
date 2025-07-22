@@ -20,7 +20,7 @@ interface InteractiveCubeProps {
   faces: CubeFace[];
 }
 
-const AUTO_ROTATE_SPEED = 0.2;
+const AUTO_ROTATE_SPEED = 0.1;
 const DRAG_SENSITIVITY = 0.625; // Was 0.5
 
 export function InteractiveCube({ faces }: InteractiveCubeProps) {
