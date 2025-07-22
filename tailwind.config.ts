@@ -62,10 +62,6 @@ export default {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
-        'neon-purple': '#9D00FF',
-        'electric-blue': '#00FFFF',
-        'bright-pink': '#FF007F',
-        'acid-green': '#39FF14',
       },
       borderRadius: {
         lg: 'var(--radius)',
