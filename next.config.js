@@ -3,6 +3,9 @@ const nextConfig = {
   output: 'standalone',
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
+  env: {
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+  },
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,

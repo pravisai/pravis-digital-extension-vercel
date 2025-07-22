@@ -4,7 +4,6 @@ import {googleAI} from '@genkit-ai/googleai';
 import {Plugin} from '@genkit-ai/core';
 
 const plugins: Plugin<any>[] = [];
-let model: string | undefined = undefined;
 
 if (process.env.GEMINI_API_KEY) {
   plugins.push(
@@ -12,7 +11,6 @@ if (process.env.GEMINI_API_KEY) {
       apiKey: process.env.GEMINI_API_KEY,
     })
   );
-  model = 'gemini-1.5-flash-latest';
 } else {
   console.warn(
     '\n********************************************************************\n' +
@@ -23,12 +21,7 @@ if (process.env.GEMINI_API_KEY) {
   );
 }
 
-const genkitOptions: GenkitOptions = {
+export const ai = genkit({
   plugins: plugins,
-};
-
-if (model) {
-  genkitOptions.model = model;
-}
-
-export const ai = genkit(genkitOptions);
+  model: 'gemini-1.5-flash-latest',
+});
