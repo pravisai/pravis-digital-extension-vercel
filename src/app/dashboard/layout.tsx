@@ -122,7 +122,7 @@ function DashboardHeader() {
   
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          {(pathname === '/dashboard/email-assistant' || pathname.startsWith('/dashboard/email-assistant/')) && <EmailFetchButton />}
+          {(pathname.startsWith('/dashboard/email-assistant')) && <EmailFetchButton />}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="shrink-0">
@@ -267,21 +267,12 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const pathname = usePathname()
-
-  if (pathname === '/dashboard/email-assistant' || pathname.startsWith('/dashboard/email-assistant/')) {
-    return (
-      <EmailProvider>
-        <ChatProvider>
-          <LayoutWrapper>{children}</LayoutWrapper>
-        </ChatProvider>
-      </EmailProvider>
-    )
-  }
 
   return (
     <ChatProvider>
-      <LayoutWrapper>{children}</LayoutWrapper>
+      <EmailProvider>
+        <LayoutWrapper>{children}</LayoutWrapper>
+      </EmailProvider>
     </ChatProvider>
   )
 }
