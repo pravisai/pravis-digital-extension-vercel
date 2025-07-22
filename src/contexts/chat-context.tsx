@@ -67,17 +67,12 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
             const result = await provideClarityThroughChat({ userMessage: currentInput });
             const pravisResponse = result.pravisResponse;
             
-            // This check is redundant now due to the flow change, but good for defense-in-depth
-            if (pravisResponse) { 
-                const pravisMessage: Message = { role: "pravis", content: pravisResponse };
-                setMessages((prev) => [...prev, pravisMessage]);
-                
-                if (isVoiceInput) {
-                    const audioResult = await textToSpeech(pravisResponse);
-                    setAudioDataUri(audioResult.media);
-                }
-            } else {
-                 throw new Error("Received an empty response from the AI.");
+            const pravisMessage: Message = { role: "pravis", content: pravisResponse };
+            setMessages((prev) => [...prev, pravisMessage]);
+            
+            if (isVoiceInput) {
+                const audioResult = await textToSpeech(pravisResponse);
+                setAudioDataUri(audioResult.media);
             }
 
         } catch (error: any) {

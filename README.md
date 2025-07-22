@@ -1,3 +1,4 @@
+
 console.log(typeof templateOrFn); // Should be 'function'
 npm run build# Firebase Studio
 

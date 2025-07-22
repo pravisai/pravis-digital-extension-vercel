@@ -13,12 +13,12 @@ import {ai} from '@/ai/genkit';
 import { z } from 'zod';
 
 const ProvideClarityThroughChatInputSchema = z.object({
-  userMessage: z.string().describe('The user\u0027s message to Pravis.'),
+  userMessage: z.string().describe('The user\'s message to Pravis.'),
 });
 export type ProvideClarityThroughChatInput = z.infer<typeof ProvideClarityThroughChatInputSchema>;
 
 const ProvideClarityThroughChatOutputSchema = z.object({
-  pravisResponse: z.string().describe('Pravis\u0027s response to the user message, providing insights based on neuroscience, psychology, and medicine.'),
+  pravisResponse: z.string().describe('Pravis\'s response to the user message, providing insights based on neuroscience, psychology, and medicine.'),
 });
 export type ProvideClarityThroughChatOutput = z.infer<typeof ProvideClarityThroughChatOutputSchema>;
 
@@ -50,7 +50,7 @@ const provideClarityThroughChatFlow = ai.defineFlow(
       // Return a friendly message instead of throwing an error.
       return {
         pravisResponse:
-          "I'm sorry, but I cannot respond to that. The content may have been blocked by safety filters. Please try a different topic.",
+          "I'm sorry, I cannot provide a response to that. This may be due to my safety filters. Please try rephrasing your request or asking about a different topic.",
       };
     }
     return output;
