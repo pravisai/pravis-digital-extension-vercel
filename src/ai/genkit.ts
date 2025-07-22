@@ -1,27 +1,13 @@
 'use server';
-import {genkit, type GenkitOptions} from '@genkit-ai/core';
-import {googleAI} from '@genkit-ai/googleai';
-import {Plugin} from '@genkit-ai/core';
 
-const plugins: Plugin<any>[] = [];
+import { genkit } from '@genkit-ai/core';
+import { googleAI } from '@genkit-ai/googleai';
 
-if (process.env.GEMINI_API_KEY) {
-  plugins.push(
-    googleAI({
-      apiKey: process.env.GEMINI_API_KEY,
-    })
-  );
-} else {
-  console.warn(
-    '\n********************************************************************\n' +
-      'WARNING: GEMINI_API_KEY is not set.\n' +
-      'The application will run, but AI features will be disabled.\n' +
-      'Please get a key from Google AI Studio and add it to your .env file.\n' +
-      '********************************************************************\n'
-  );
-}
-
+// Configure Genkit with Google AI
 export const ai = genkit({
-  plugins: plugins,
-  model: 'gemini-1.5-flash-latest',
+  plugins: [
+    googleAI({
+      apiKey: process.env.GEMINI_API_KEY!,
+    }),
+  ],
 });

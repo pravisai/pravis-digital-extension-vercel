@@ -77,14 +77,12 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
         } catch (error: any) {
             console.error("Pravis chatbot Gemini error:", error);
-            let messageContent = "I'm sorry, an unexpected error occurred. Please try again.";
+            let messageContent = "AI is currently unavailable. Please check your network or try again shortly.";
             if (error?.message) {
                  if (/429|503|overloaded|high demand|resource exhausted/i.test(error.message)) {
                     messageContent = "The AI is currently experiencing high demand. Please try your request again in a moment.";
                 } else if (/safety/i.test(error.message)) {
                     messageContent = "I cannot provide a response to that. This may be due to my safety filters. Please try rephrasing your request.";
-                } else {
-                    messageContent = "AI is currently unavailable. Please check your network or try again shortly.";
                 }
             }
             const errorMessage: Message = { role: "pravis", content: messageContent };
