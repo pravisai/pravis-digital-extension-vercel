@@ -77,12 +77,13 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
         } catch (error: any) {
             console.error("Error fetching response from Pravis:", error);
-            let messageContent = "I'm having trouble connecting right now. Please try again later.";
-            // Check for the custom error message from the flow, or other common overload indicators
-            if (error?.message && /503|overloaded|high demand/i.test(error.message)) {
-                messageContent = "The AI is currently experiencing high demand. Please try your request again in a moment.";
-            } else if (error?.message) {
-                messageContent = "I'm sorry, an unexpected error occurred. Please try again."
+            let messageContent = "I'm sorry, an unexpected error occurred. Please try again.";
+            if (error?.message) {
+                if (/429|503|overloaded|high demand/i.test(error.message)) {
+                    messageContent = "The AI is currently experiencing high demand. Please try your request again in a moment.";
+                } else if (/safety/i.test(error.message)) {
+                    messageContent = "I cannot provide a response to that. This may be due to my safety filters. Please try rephrasing your request.";
+                }
             }
             const errorMessage: Message = { role: "pravis", content: messageContent };
             setMessages((prev) => [...prev, errorMessage]);
