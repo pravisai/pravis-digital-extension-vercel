@@ -46,10 +46,8 @@ const provideClarityThroughChatFlow = ai.defineFlow(
   async (input) => {
     const { output } = await prompt(input);
     if (!output?.pravisResponse) {
-      return {
-        pravisResponse:
-          "I'm sorry, I cannot provide a response to that. This may be due to my safety filters. Please try rephrasing your request or asking about a different topic.",
-      };
+      // This will be caught by the client and displayed as a specific error message.
+      throw new Error("I'm sorry, I cannot provide a response to that. This may be due to my safety filters. Please try rephrasing your request or asking about a different topic.");
     }
     return output;
   }
