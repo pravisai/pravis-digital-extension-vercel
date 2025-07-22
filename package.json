@@ -1,5 +1,6 @@
 {
   "name": "pravis-digital-extension",
+  "description": "Pravis is your personal restorative alignment virtual intelligence system.",
   "version": "1.0.0",
   "private": true,
   "scripts": {
