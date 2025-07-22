@@ -6,17 +6,17 @@ import {Plugin} from '@genkit-ai/core';
 const plugins: Plugin<any>[] = [];
 let model: string | undefined = undefined;
 
-if (process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
+if (process.env.GEMINI_API_KEY) {
   plugins.push(
     googleAI({
-      apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
+      apiKey: process.env.GEMINI_API_KEY,
     })
   );
   model = 'gemini-1.5-flash-latest';
 } else {
   console.warn(
     '\n********************************************************************\n' +
-      'WARNING: NEXT_PUBLIC_GEMINI_API_KEY is not set.\n' +
+      'WARNING: GEMINI_API_KEY is not set.\n' +
       'The application will run, but AI features will be disabled.\n' +
       'Please get a key from Google AI Studio and add it to your .env file.\n' +
       '********************************************************************\n'
