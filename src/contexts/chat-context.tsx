@@ -67,6 +67,10 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
             const result = await provideClarityThroughChat({ userMessage: currentInput });
             const pravisResponse = result.pravisResponse;
             
+            if (!pravisResponse) {
+                throw new Error("Received an empty response from the AI.");
+            }
+
             const pravisMessage: Message = { role: "pravis", content: pravisResponse };
             setMessages((prev) => [...prev, pravisMessage]);
             
@@ -81,7 +85,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
             if (error?.message) {
                  if (/429|503|overloaded|high demand|resource exhausted/i.test(error.message)) {
                     messageContent = "The AI is currently experiencing high demand. Please try your request again in a moment.";
-                } else if (/safety/i.test(error.message)) {
+                } else if (/safety/i.test(error.message) || /empty response/i.test(error.message)) {
                     messageContent = "I cannot provide a response to that. This may be due to my safety filters. Please try rephrasing your request.";
                 }
             }
