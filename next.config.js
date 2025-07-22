@@ -24,7 +24,7 @@ const nextConfig = {
               "script-src-elem 'self' 'unsafe-inline' https://apis.google.com https://accounts.google.com https://www.gstatic.com https://www.googleapis.com https://*.firebaseapp.com https://*.firebaseio.com; " +
               "style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; " +
               "font-src 'self' https://fonts.gstatic.com; " +
-              "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://accounts.google.com https://*.firebaseapp.com https://*.firebaseio.com https://www.googleapis.com https://generativelanguage.googleapis.com; " +
+              "connect-src 'self' https://*.google.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://accounts.google.com https://*.firebaseapp.com https://*.firebaseio.com https://www.googleapis.com https://generativelanguage.googleapis.com; " +
               "frame-src 'self' https://accounts.google.com https://pravis-your-digital-extension.firebaseapp.com; " +
               "img-src 'self' data: https:;"
           },
