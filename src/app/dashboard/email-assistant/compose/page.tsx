@@ -4,9 +4,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Loader2, Send, ArrowLeft, BrainCircuit, User, Mic, Waves } from 'lucide-react';
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
@@ -29,11 +26,6 @@ interface Message {
   content: string | React.ReactNode;
 }
 
-const chatSchema = z.object({
-  prompt: z.string().min(1, { message: "Prompt cannot be empty." }),
-});
-type ChatFormValues = z.infer<typeof chatSchema>;
-
 export default function ComposeEmailPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -41,27 +33,23 @@ export default function ComposeEmailPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [isDrafting, setIsDrafting] = useState(false);
+  const [input, setInput] = useState('');
   const [generatedDraft, setGeneratedDraft] = useState<DraftEmailReplyOutput | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   
-  const form = useForm<ChatFormValues>({
-    resolver: zodResolver(chatSchema),
-    defaultValues: { prompt: '' },
-  });
-
   const { isRecording, transcript, startRecording, stopRecording } = useSpeechToText({
     onTranscriptReady: (text) => {
-        form.setValue("prompt", text);
+        setInput(text);
         setTimeout(() => formRef.current?.requestSubmit(), 100);
     }
   });
 
   useEffect(() => {
     if (transcript) {
-        form.setValue("prompt", transcript);
+        setInput(transcript);
     }
-  }, [transcript, form]);
+  }, [transcript]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => setUser(currentUser));
@@ -70,7 +58,7 @@ export default function ComposeEmailPage() {
 
   useEffect(() => {
     if (messages.length === 0) {
-      setMessages([{ role: 'pravis', content: "I'm ready to draft your email. Please provide the recipient, subject, and message content." }]);
+      setMessages([{ role: 'pravis', content: "I'm ready to draft your email. Please provide the recipient, subject, and message content. For example: 'Send email to test@example.com about our meeting tomorrow, in a formal tone.'" }]);
     }
   }, [messages.length]);
 
@@ -82,14 +70,19 @@ export default function ComposeEmailPage() {
   }, [messages, isDrafting]);
 
 
-  const handleDraftEmail = async ({ prompt }: ChatFormValues) => {
-    const userMessage: Message = { role: "user", content: prompt };
+  const handleDraftEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    const userMessage: Message = { role: "user", content: input };
     setMessages(prev => [...prev, userMessage]);
-    form.reset();
+    
+    const currentInput = input;
+    setInput('');
+    
     setIsDrafting(true);
     setGeneratedDraft(null);
 
-    // Filter out React nodes and only include string content for the API call.
     const historyForApi = messages
         .map(msg => ({
             role: msg.role === 'pravis' ? 'model' : 'user',
@@ -97,7 +90,7 @@ export default function ComposeEmailPage() {
         }));
 
     try {
-      const result = await draftEmailReply({ prompt, history: historyForApi });
+      const result = await draftEmailReply({ prompt: currentInput, history: historyForApi });
       setGeneratedDraft(result);
       
       const pravisResponse: Message = { 
@@ -107,7 +100,7 @@ export default function ComposeEmailPage() {
                 <p>I've created a draft for you. You can revise it below or ask me for changes.</p>
                 <div className="p-4 rounded-lg bg-background/50 border border-border/50">
                     <p className="font-semibold">To: <span className="font-normal">{result.to}</span></p>
-                    <p className="font-semibold">Subject: <Typewriter text={result.subject} className="font-normal inline-flex" speed={0.01} /></p>
+                    <p className="font-semibold">Subject: <span className="font-normal">{result.subject}</span></p>
                     <p className="font-semibold">Tone: <span className="font-normal">{result.tone}</span></p>
                     <hr className="my-2 border-border/50" />
                     <p className="whitespace-pre-wrap">{result.body}</p>
@@ -198,16 +191,17 @@ export default function ComposeEmailPage() {
              </div>
            </ScrollArea>
            <footer className="p-2 border-t">
-             <form ref={formRef} onSubmit={form.handleSubmit(handleDraftEmail)} className="flex items-center gap-2">
+             <form ref={formRef} onSubmit={handleDraftEmail} className="flex items-center gap-2">
                <div className="flex-1 flex items-center bg-secondary rounded-full px-4">
                  <Input
-                   {...form.register("prompt")}
+                   value={input}
+                   onChange={(e) => setInput(e.target.value)}
                    placeholder={isRecording ? "Listening..." : "Send email to..."}
                    className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 h-12"
                    disabled={isDrafting || isRecording}
                  />
                </div>
-               {form.watch('prompt') ? (
+               {input ? (
                  <Button type="submit" size="icon" className="rounded-full w-12 h-12" disabled={isDrafting}><Send className="h-6 w-6" /></Button>
                ) : (
                  <Button type="button" size="icon" onClick={handleMicClick} className={cn("rounded-full w-12 h-12", isRecording && "bg-destructive")} disabled={isDrafting}>

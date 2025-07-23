@@ -10,7 +10,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { googleAI } from '@genkit-ai/googleai';
 
 const MessageSchema = z.object({
   role: z.enum(['user', 'model']),
@@ -46,7 +45,6 @@ const prompt = ai.definePrompt({
   name: 'draftEmailReplyPrompt',
   input: {schema: DraftEmailReplyInputSchema},
   output: {schema: DraftEmailReplyOutputSchema},
-  model: googleAI.model('gemini-1.5-pro-latest'),
   prompt: `You are Pravis, an intelligent email composition assistant. Users will interact with you to create emails. Parse their input and generate complete, professional emails based on their requirements.
 
 **Input Processing:**
