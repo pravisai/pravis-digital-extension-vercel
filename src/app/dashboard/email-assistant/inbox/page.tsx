@@ -24,6 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { format } from 'date-fns'
+import { useRouter } from 'next/navigation'
 
 import { draftEmailReply } from '@/ai/flows/draft-email-reply'
 import { useToast } from '@/hooks/use-toast'
@@ -46,11 +47,11 @@ import { FadeIn, StaggeredListItem } from '@/components/animations/fade-in'
 import { useEmail, type MailboxView } from '@/contexts/email-context'
 
 const replyFormSchema = z.object({
-  tone: z.string().min(1, { message: "Please select a tone." }),
-  parameters: z.string(),
+  instructions: z.string().min(1, { message: "Please provide instructions." }),
 });
 
 function EmailView() {
+  const router = useRouter();
   const { 
     filteredEmails, 
     isFetchingEmails, 
@@ -71,8 +72,7 @@ function EmailView() {
   const form = useForm<z.infer<typeof replyFormSchema>>({
     resolver: zodResolver(replyFormSchema),
     defaultValues: {
-      tone: "Friendly",
-      parameters: "Reply to the main points of the email.",
+      instructions: "Reply to the main points of the email.",
     },
   });
 
@@ -99,13 +99,25 @@ function EmailView() {
 
     setIsDrafting(true);
     setDraftedReply("");
+    
+    const prompt = `Draft a reply to the following email from ${selectedEmail.sender}:
+"""
+${selectedEmail.body}
+"""
+
+My instructions for the reply are:
+"""
+${values.instructions}
+"""
+Please address the reply to ${selectedEmail.email}.
+`;
 
     try {
       const result = await draftEmailReply({
-        instructions: `Original email: """${selectedEmail.body}"""\n\nInstructions for reply: """${values.parameters}"""`,
-        tone: values.tone,
+        prompt: prompt,
+        history: [],
       });
-      setDraftedReply(result.reply);
+      setDraftedReply(result.body);
     } catch (error) {
       console.error("Failed to draft reply:", error);
       toast({
@@ -240,13 +252,7 @@ function EmailView() {
                    <div className="p-6 border-t border-border/50 bg-background space-y-4">
                     <FadeIn stagger className="flex items-center gap-2">
                       <StaggeredListItem>
-                        <Button variant="outline"><Reply className="mr-2 h-4 w-4" /> Reply</Button>
-                      </StaggeredListItem>
-                      <StaggeredListItem>
-                        <Button variant="outline"><ReplyAll className="mr-2 h-4 w-4" /> Reply All</Button>
-                      </StaggeredListItem>
-                      <StaggeredListItem>
-                        <Button variant="outline"><Forward className="mr-2 h-4 w-4" /> Forward</Button>
+                        <Button variant="outline" onClick={() => router.push('/dashboard/email-assistant/compose')}><Reply className="mr-2 h-4 w-4" /> Reply</Button>
                       </StaggeredListItem>
                     </FadeIn>
                     <FadeIn delay={0.4}>
@@ -257,34 +263,9 @@ function EmailView() {
                         <CardContent className="space-y-4">
                           <Form {...form}>
                             <form onSubmit={form.handleSubmit(onDraftReply)} className="space-y-4">
-                              <div className="grid md:grid-cols-2 gap-4">
                                 <FormField
                                   control={form.control}
-                                  name="tone"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Tone of Reply</FormLabel>
-                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl>
-                                          <SelectTrigger>
-                                            <SelectValue placeholder="Select a tone" />
-                                          </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                          <SelectItem value="Friendly">Friendly</SelectItem>
-                                          <SelectItem value="Formal">Formal</SelectItem>
-                                          <SelectItem value="Casual">Casual</SelectItem>
-                                          <SelectItem value="Professional">Professional</SelectItem>
-                                          <SelectItem value="Direct">Direct</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                <FormField
-                                  control={form.control}
-                                  name="parameters"
+                                  name="instructions"
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel>Specific Instructions</FormLabel>
@@ -295,7 +276,6 @@ function EmailView() {
                                     </FormItem>
                                   )}
                                 />
-                              </div>
                               <Button type="submit" disabled={isDrafting} className="w-full">
                                 {isDrafting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PenSquare className="mr-2 h-4 w-4" />}
                                 Draft Reply
@@ -322,7 +302,7 @@ function EmailView() {
                               {draftedReply && !isDrafting && (
                                 <div className="flex justify-end gap-2 pt-2">
                                   <Button variant="ghost" onClick={() => setDraftedReply('')}>Discard</Button>
-                                  <Button><Send className="mr-2 h-4 w-4" /> Send</Button>
+                                  <Button onClick={() => router.push('/dashboard/email-assistant/compose')}><Send className="mr-2 h-4 w-4" /> Send</Button>
                                 </div>
                               )}
                             </div>
@@ -349,3 +329,4 @@ function EmailView() {
 export default function InboxPage() {
     return <EmailView />;
 }
+
