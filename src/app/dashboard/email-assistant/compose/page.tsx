@@ -4,7 +4,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Send, ArrowLeft, BrainCircuit, User, Mic, Waves } from 'lucide-react';
+import { Loader2, Send, ArrowLeft, BrainCircuit, User, Mic, Waves, ChevronsUpDown } from 'lucide-react';
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 
@@ -19,14 +19,16 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { draftEmailReply, type DraftEmailReplyOutput } from '@/ai/flows/draft-email-reply';
 import { useSpeechToText } from '@/hooks/use-speech-to-text';
 import { cn } from '@/lib/utils';
-import { Typewriter } from '@/components/animations/typewriter';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Message {
   role: "user" | "pravis";
   content: string | React.ReactNode;
 }
 
-const initialMessage: Message = { role: 'pravis', content: "I'm ready to draft your email. Please provide the recipient, subject, and message content. For example: 'Send email to test@example.com about our meeting tomorrow, in a formal tone.'" };
+const emailTones = ["Professional", "Formal", "Casual", "Urgent", "Diplomatic", "Follow-up"];
+
+const initialMessage: Message = { role: 'pravis', content: "I'm ready to draft your email. Please provide the recipient, subject, and message content. You can also select a tone." };
 
 export default function ComposeEmailPage() {
   const router = useRouter();
@@ -36,6 +38,7 @@ export default function ComposeEmailPage() {
   const [isSending, setIsSending] = useState(false);
   const [isDrafting, setIsDrafting] = useState(false);
   const [input, setInput] = useState('');
+  const [selectedTone, setSelectedTone] = useState("Professional");
   const [generatedDraft, setGeneratedDraft] = useState<DraftEmailReplyOutput | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -69,7 +72,8 @@ export default function ComposeEmailPage() {
   const handleDraftEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-
+    
+    const promptWithTone = `${input} (Tone: ${selectedTone})`;
     const userMessage: Message = { role: "user", content: input };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
@@ -88,7 +92,7 @@ export default function ComposeEmailPage() {
         }));
 
     try {
-      const result = await draftEmailReply({ prompt: currentInput, history: historyForApi.slice(0, -1) });
+      const result = await draftEmailReply({ prompt: promptWithTone, history: historyForApi.slice(0, -1) });
       setGeneratedDraft(result);
       
       const pravisResponse: Message = { 
@@ -103,7 +107,6 @@ export default function ComposeEmailPage() {
                     <hr className="my-2 border-border/50" />
                     <p className="whitespace-pre-wrap">{result.body}</p>
                 </div>
-                <p className="text-xs text-muted-foreground">*Type "send" to dispatch this email or "revise" with your changes.*</p>
             </div>
         )
       };
@@ -190,6 +193,16 @@ export default function ComposeEmailPage() {
            </ScrollArea>
            <footer className="p-2 border-t">
              <form ref={formRef} onSubmit={handleDraftEmail} className="flex items-center gap-2">
+                <Select value={selectedTone} onValueChange={setSelectedTone}>
+                    <SelectTrigger className="w-[150px] rounded-full h-12 bg-secondary border-none">
+                        <SelectValue placeholder="Select tone" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {emailTones.map((tone) => (
+                            <SelectItem key={tone} value={tone}>{tone}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
                <div className="flex-1 flex items-center bg-secondary rounded-full px-4">
                  <Input
                    value={input}
