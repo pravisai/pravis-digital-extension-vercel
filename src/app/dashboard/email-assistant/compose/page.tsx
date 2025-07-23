@@ -136,7 +136,7 @@ export default function ComposeEmailPage() {
         title: 'Email Sent!',
         description: `Your message to ${data.recipient} has been sent.`,
       });
-      router.push('/dashboard/email-assistant/inbox');
+      router.push('/dashboard/email-assistant');
     } catch (error: any) {
       console.error('Failed to send email:', error);
       toast({

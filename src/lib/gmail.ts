@@ -176,7 +176,7 @@ export const sendEmail = async (
   if (!response.ok) {
     const errorData = await response.json();
     console.error('Failed to send email:', errorData);
-    throw new Error('Failed to send email');
+    throw new Error(errorData?.error?.message || 'Failed to send email');
   }
 
   return await response.json();

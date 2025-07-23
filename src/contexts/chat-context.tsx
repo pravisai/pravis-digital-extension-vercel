@@ -4,6 +4,7 @@
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
 import { clarityChat } from '@/ai/flows/clarity-chat';
 import { textToSpeech } from "@/ai/flows/text-to-speech";
+import { useToast } from '@/hooks/use-toast';
 
 interface Message {
   role: "user" | "pravis";
@@ -32,6 +33,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     const [isPanelOpen, setPanelOpen] = useState(false);
     const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
     const [isSpeaking, setIsSpeaking] = useState(false);
+    const { toast } = useToast();
 
     useEffect(() => {
         if (messages.length === 0) {
@@ -77,13 +79,17 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
         } catch (error: any) {
             console.error("Pravis chatbot error:", error);
-            let messageContent = "I'm sorry, I cannot provide a response to that. Please try again.";
-            const errorMessage: Message = { role: "pravis", content: messageContent };
+            const errorMessage: Message = { role: "pravis", content: "I'm sorry, an error occurred. Please try again." };
             setMessages((prev) => [...prev, errorMessage]);
+            toast({
+              variant: 'destructive',
+              title: 'Chat Error',
+              description: 'Could not get a response. Please check your connection and try again.'
+            })
         } finally {
             setIsLoading(false);
         }
-    }, [input]);
+    }, [input, toast]);
 
     const value = {
         messages,
