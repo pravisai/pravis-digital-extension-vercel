@@ -66,7 +66,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(true);
 
         try {
-            const result = await clarityChat(currentInput);
+            const result = await clarityChat({ prompt: currentInput });
             const pravisResponse = result.reply;
             
             const pravisMessage: Message = { role: "pravis", content: pravisResponse };
