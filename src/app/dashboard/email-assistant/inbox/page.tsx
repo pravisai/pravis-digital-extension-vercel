@@ -329,4 +329,3 @@ Please address the reply to ${selectedEmail.email}.
 export default function InboxPage() {
     return <EmailView />;
 }
-
