@@ -81,6 +81,7 @@ export default function ComposeEmailPage() {
     setGeneratedDraft(null);
 
     const historyForApi = newMessages
+        .slice(1) // Remove initial system message
         .map(msg => ({
             role: msg.role === 'pravis' ? 'model' : 'user',
             content: typeof msg.content === 'string' ? msg.content : "Okay, I've drafted that for you. What's next?",
