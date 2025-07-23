@@ -17,12 +17,12 @@ import { useToast } from '@/hooks/use-toast';
 import { getStoredAccessToken } from '@/lib/firebase/auth';
 import { sendEmail } from '@/lib/gmail';
 import { FadeIn } from '@/components/animations/fade-in';
-import { Typewriter } from '@/components/animations/typewriter';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { draftEmailReply, type DraftEmailReplyOutput } from '@/ai/flows/draft-email-reply';
 import { useSpeechToText } from '@/hooks/use-speech-to-text';
 import { cn } from '@/lib/utils';
+import { Typewriter } from '../..//../components/animations/typewriter';
 
 interface Message {
   role: "user" | "pravis";
@@ -101,8 +101,16 @@ export default function ComposeEmailPage() {
       const pravisResponse: Message = { 
         role: "pravis", 
         content: (
-            <div className="space-y-2 text-sm">
+            <div className="space-y-4 text-sm">
                 <p>I've created a draft for you. You can revise it below or ask me for changes.</p>
+                <div className="p-4 rounded-lg bg-background/50 border border-border/50">
+                    <p className="font-semibold">To: <span className="font-normal">{result.to}</span></p>
+                    <p className="font-semibold">Subject: <span className="font-normal">{result.subject}</span></p>
+                    <p className="font-semibold">Tone: <span className="font-normal">{result.tone}</span></p>
+                    <hr className="my-2 border-border/50" />
+                    <p className="whitespace-pre-wrap">{result.body}</p>
+                </div>
+                <p className="text-xs text-muted-foreground">*Type "send" to dispatch this email or "revise" with your changes.*</p>
             </div>
         )
       };
@@ -146,13 +154,7 @@ export default function ComposeEmailPage() {
       setIsSending(false);
     }
   };
-
-  const handleRevise = () => {
-    if (!generatedDraft) return;
-    const revisionPrompt = `Revise the last draft. Recipient: ${generatedDraft.to}, Subject: ${generatedDraft.subject}, Body: ${generatedDraft.body}`;
-    form.setValue("prompt", revisionPrompt);
-  }
-
+  
   const handleMicClick = () => {
     if (isRecording) stopRecording();
     else startRecording();
@@ -160,10 +162,7 @@ export default function ComposeEmailPage() {
   
   return (
     <FadeIn className="h-full flex flex-col p-4 md:p-6 bg-background">
-      <div className="flex-1 flex flex-col md:grid md:grid-cols-12 gap-6 min-h-0">
-        
-        {/* Chat Section */}
-        <div className="md:col-span-5 lg:col-span-4 flex flex-col bg-card border rounded-lg shadow-lg">
+        <div className="flex-1 flex flex-col bg-card border rounded-lg shadow-lg min-h-0">
           <header className="p-4 border-b flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" onClick={() => router.back()}>
@@ -171,13 +170,18 @@ export default function ComposeEmailPage() {
               </Button>
               <h1 className="text-xl font-bold tracking-tight">Compose with Pravis</h1>
             </div>
+            <div className="flex gap-2">
+                <Button onClick={handleSendEmail} disabled={!generatedDraft || isDrafting || isSending}>
+                    {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />} Send
+                </Button>
+            </div>
           </header>
            <ScrollArea className="flex-1 w-full" ref={scrollAreaRef}>
              <div className="space-y-6 p-4">
                 {messages.map((message, index) => (
                     <div key={index} className={`flex items-start gap-3 ${message.role === "user" ? "justify-end" : ""}`}>
                         {message.role === "pravis" && <Avatar><AvatarFallback><BrainCircuit /></AvatarFallback></Avatar>}
-                        <div className={`rounded-lg p-3 max-w-sm text-sm ${message.role === "user" ? "bg-primary text-primary-foreground" : "bg-secondary"}`}>
+                        <div className={`rounded-lg p-3 max-w-2xl text-sm ${message.role === "user" ? "bg-primary text-primary-foreground" : "bg-secondary"}`}>
                             {typeof message.content === 'string' ? <p className="whitespace-pre-wrap">{message.content}</p> : message.content}
                         </div>
                         {message.role === "user" && <Avatar>{user?.photoURL ? <AvatarImage src={user.photoURL} /> : <AvatarFallback><User /></AvatarFallback>}</Avatar>}
@@ -211,59 +215,6 @@ export default function ComposeEmailPage() {
              </form>
            </footer>
         </div>
-
-        {/* Email Preview Section */}
-        <div className="md:col-span-7 lg:col-span-8 flex flex-col bg-card border rounded-lg shadow-lg overflow-hidden">
-          <header className="p-4 border-b flex items-center justify-between">
-            <h2 className="text-xl font-bold tracking-tight">Email Preview</h2>
-            <div className="flex gap-2">
-                <Button variant="outline" onClick={handleRevise} disabled={!generatedDraft || isDrafting || isSending}>
-                    <RefreshCw className="mr-2 h-4 w-4" /> Revise
-                </Button>
-                <Button onClick={handleSendEmail} disabled={!generatedDraft || isDrafting || isSending}>
-                    {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />} Send
-                </Button>
-            </div>
-          </header>
-          <div className="flex-1 p-4 overflow-y-auto space-y-4">
-            {isDrafting && !generatedDraft ? (
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2"><span className="text-muted-foreground w-16 text-right">To:</span> <div className="h-6 w-1/2 bg-muted rounded animate-pulse" /></div>
-                    <div className="flex items-center gap-2"><span className="text-muted-foreground w-16 text-right">Subject:</span> <div className="h-6 w-3/4 bg-muted rounded animate-pulse" /></div>
-                    <div className="flex items-center gap-2"><span className="text-muted-foreground w-16 text-right">Tone:</span> <div className="h-6 w-1/4 bg-muted rounded animate-pulse" /></div>
-                    <div className="mt-4 pt-4 border-t h-48 bg-muted rounded animate-pulse" />
-                </div>
-            ) : generatedDraft ? (
-                <div>
-                    <div className="flex items-baseline gap-2 mb-2">
-                        <span className="text-muted-foreground w-16 text-right font-semibold">To:</span>
-                        <p>{generatedDraft.to}</p>
-                    </div>
-                     <div className="flex items-baseline gap-2 mb-2">
-                        <span className="text-muted-foreground w-16 text-right font-semibold">Subject:</span>
-                        <p className="font-semibold">{generatedDraft.subject}</p>
-                    </div>
-                     <div className="flex items-baseline gap-2 mb-4">
-                        <span className="text-muted-foreground w-16 text-right font-semibold">Tone:</span>
-                        <p className="px-2 py-0.5 bg-secondary text-secondary-foreground rounded-full text-xs">{generatedDraft.tone}</p>
-                    </div>
-                    <div className="mt-4 pt-4 border-t">
-                        <p className="whitespace-pre-wrap">{generatedDraft.body}</p>
-                    </div>
-                </div>
-            ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground text-center">
-                    <div>
-                        <PenSquare className="h-12 w-12 mx-auto" />
-                        <p className="mt-4">Your generated email will appear here.</p>
-                    </div>
-                </div>
-            )}
-          </div>
-        </div>
-
-      </div>
     </FadeIn>
   );
 }
-
