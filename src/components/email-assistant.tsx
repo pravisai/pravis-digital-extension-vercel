@@ -10,6 +10,7 @@ import {
   Star,
   Trash2,
   FileText,
+  Mail,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { InteractiveCube, type CubeFace } from './interactive-cube'
@@ -18,10 +19,10 @@ import { Typewriter } from './animations/typewriter'
 
 const emailCubeFaces: CubeFace[] = [
     { id: "Inbox", href: "/dashboard/email-assistant/inbox", icon: Inbox, label: "Inbox", description: "View your incoming mail", face: "front", colorClass: "neon-purple" },
-    { id: "Starred", href: "/dashboard/email-assistant/inbox", icon: Star, label: "Starred", description: "View starred messages", face: "right", colorClass: "electric-blue" },
+    { id: "All Mail", href: "/dashboard/email-assistant/inbox", icon: Mail, label: "All Mail", description: "View all fetched mail", face: "right", colorClass: "electric-blue" },
     { id: "Sent", href: "/dashboard/email-assistant/inbox", icon: Send, label: "Sent", description: "View your sent mail", face: "back", colorClass: "bright-pink" },
     { id: "Drafts", href: "/dashboard/email-assistant/inbox", icon: FileText, label: "Drafts", description: "View your drafts", face: "left", colorClass: "acid-green" },
-    { id: "Trash", href: "/dashboard/email-assistant/inbox", icon: Trash2, label: "Trash", description: "View trashed messages", face: "top", colorClass: "neon-purple" },
+    { id: "Starred", href: "/dashboard/email-assistant/inbox", icon: Star, label: "Starred", description: "View starred messages", face: "top", colorClass: "neon-purple" },
     { id: "Compose", href: "/dashboard/email-assistant/compose", icon: PenSquare, label: "Compose", description: "Write a new email", face: "bottom", colorClass: "electric-blue" },
 ];
 

@@ -9,7 +9,7 @@ import type { Email } from '@/types/email';
  */
 export const fetchEmails = async (accessToken: string): Promise<{ emails: Email[], error: string | null }> => {
   const response = await fetch(
-    'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=25',
+    'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100',
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,

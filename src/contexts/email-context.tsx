@@ -6,7 +6,7 @@ import type { Email } from '@/types/email';
 import { fetchEmails } from '@/lib/gmail';
 import { getStoredAccessToken } from '@/lib/firebase/auth';
 
-export type MailboxView = "Inbox" | "Starred" | "Sent" | "Drafts" | "Trash" | "Archived" | "Compose" | null;
+export type MailboxView = "Inbox" | "Starred" | "Sent" | "Drafts" | "Trash" | "Archived" | "Compose" | "All Mail" | null;
 
 interface EmailContextType {
     emails: Email[];
@@ -26,7 +26,7 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
     const [emails, setEmails] = useState<Email[]>([]);
     const [isFetchingEmails, setIsFetchingEmails] = useState(false);
     const [fetchError, setFetchError] = useState<string | null>(null);
-    const [activeMailbox, setActiveMailbox] = useState<MailboxView>(null);
+    const [activeMailbox, setActiveMailbox] = useState<MailboxView>("All Mail");
     const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
 
     const handleFetchEmails = useCallback(async () => {
@@ -34,9 +34,7 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
         setFetchError(null);
         setEmails([]);
         setSelectedEmail(null);
-        if (!activeMailbox) {
-            setActiveMailbox("Inbox");
-        }
+        setActiveMailbox("All Mail"); // Default to "All Mail" after fetching
 
         try {
             let accessToken = getStoredAccessToken();
@@ -62,24 +60,29 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
         } finally {
             setIsFetchingEmails(false);
         }
-    }, [activeMailbox]);
+    }, []);
 
-    const filteredEmails = useMemo(() => emails.filter(email => {
-        switch(activeMailbox) {
-            case 'Inbox':
-                return !email.labelIds?.includes('TRASH') && !email.labelIds?.includes('SENT');
-            case 'Starred':
-                return email.labelIds?.includes('STARRED');
-            case 'Sent':
-                return email.labelIds?.includes('SENT');
-            case 'Trash':
-                return email.labelIds?.includes('TRASH');
-            case 'Drafts':
-                return email.labelIds?.includes('DRAFT');
-            default:
-                return true;
+    const filteredEmails = useMemo(() => {
+        if (activeMailbox === "All Mail") {
+            return emails;
         }
-    }), [emails, activeMailbox]);
+        return emails.filter(email => {
+            switch(activeMailbox) {
+                case 'Inbox':
+                    return !email.labelIds?.includes('TRASH') && !email.labelIds?.includes('SENT');
+                case 'Starred':
+                    return email.labelIds?.includes('STARRED');
+                case 'Sent':
+                    return email.labelIds?.includes('SENT');
+                case 'Trash':
+                    return email.labelIds?.includes('TRASH');
+                case 'Drafts':
+                    return email.labelIds?.includes('DRAFT');
+                default:
+                    return true;
+            }
+        });
+    }, [emails, activeMailbox]);
 
     const value = {
         emails,
