@@ -24,7 +24,11 @@ function RootLayoutClient({
 }) {
   const pathname = usePathname();
   const { isPanelOpen } = useChat();
-  const showPersistentChat = !isPanelOpen;
+  
+  // The chat input should be shown if the panel is closed,
+  // and we are not on a page that is a dedicated chat interface.
+  const isChatPage = pathname === '/dashboard/clarity-chat';
+  const showPersistentChat = !isPanelOpen && !isChatPage;
 
   return (
     <html lang="en" suppressHydrationWarning>
