@@ -1,3 +1,4 @@
+
 import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 
@@ -19,6 +20,11 @@ function isConfigValid(config: typeof firebaseConfig): boolean {
 let app: FirebaseApp;
 let auth: Auth;
 
+if (!isConfigValid(firebaseConfig)) {
+    console.error('Firebase configuration is invalid. Please check your environment variables.');
+    // In a real app, you might want to throw an error or handle this state differently
+}
+
 try {
     // Check if Firebase is already initialized
     if (getApps().length === 0) {
@@ -31,7 +37,7 @@ try {
     auth = getAuth(app);
 } catch (error) {
     console.error('Firebase initialization error:', error);
-    // Fallback initialization
+    // Fallback initialization for safety, though it might fail if config is bad
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
 }
