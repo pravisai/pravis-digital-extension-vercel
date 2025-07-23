@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import type { Metadata } from 'next';
@@ -23,6 +24,7 @@ function RootLayoutClient({
 }) {
   const pathname = usePathname();
   const { isPanelOpen } = useChat();
+  const showPersistentChat = pathname !== '/dashboard'
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -47,7 +49,7 @@ function RootLayoutClient({
           {children}
           <Toaster />
           <div className="md:hidden">
-            {isPanelOpen ? <ChatPanel /> : (pathname !== '/dashboard' && <PersistentChatInput />)}
+            {isPanelOpen ? <ChatPanel /> : (showPersistentChat && <PersistentChatInput />)}
           </div>
         </ThemeProvider>
       </body>
