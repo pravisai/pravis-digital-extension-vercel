@@ -26,11 +26,13 @@ interface Message {
   content: string | React.ReactNode;
 }
 
+const initialMessage: Message = { role: 'pravis', content: "I'm ready to draft your email. Please provide the recipient, subject, and message content. For example: 'Send email to test@example.com about our meeting tomorrow, in a formal tone.'" };
+
 export default function ComposeEmailPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([initialMessage]);
   const [isSending, setIsSending] = useState(false);
   const [isDrafting, setIsDrafting] = useState(false);
   const [input, setInput] = useState('');
@@ -57,12 +59,6 @@ export default function ComposeEmailPage() {
   }, []);
 
   useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([{ role: 'pravis', content: "I'm ready to draft your email. Please provide the recipient, subject, and message content. For example: 'Send email to test@example.com about our meeting tomorrow, in a formal tone.'" }]);
-    }
-  }, [messages.length]);
-
-  useEffect(() => {
     if (scrollAreaRef.current) {
         const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
         if(viewport) viewport.scrollTop = viewport.scrollHeight;
@@ -75,7 +71,8 @@ export default function ComposeEmailPage() {
     if (!input.trim()) return;
 
     const userMessage: Message = { role: "user", content: input };
-    setMessages(prev => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     
     const currentInput = input;
     setInput('');
@@ -83,14 +80,14 @@ export default function ComposeEmailPage() {
     setIsDrafting(true);
     setGeneratedDraft(null);
 
-    const historyForApi = messages
+    const historyForApi = newMessages
         .map(msg => ({
             role: msg.role === 'pravis' ? 'model' : 'user',
             content: typeof msg.content === 'string' ? msg.content : "Okay, I've drafted that for you. What's next?",
         }));
 
     try {
-      const result = await draftEmailReply({ prompt: currentInput, history: historyForApi });
+      const result = await draftEmailReply({ prompt: currentInput, history: historyForApi.slice(0, -1) });
       setGeneratedDraft(result);
       
       const pravisResponse: Message = { 
