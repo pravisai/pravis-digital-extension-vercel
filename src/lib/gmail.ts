@@ -5,28 +5,41 @@ import type { Email } from '@/types/email';
 
 /**
  * Fetches the user's recent emails using Gmail API.
- * @param accessToken OAuth 2.0 access token from Firebase login
+ * Now includes automatic token validation.
  */
-export const fetchEmails = async (accessToken: string): Promise<{ emails: Email[], error: string | null }> => {
+export const fetchEmails = async (accessToken?: string): Promise<{ emails: Email[], error: string | null }> => {
+  // If no token provided, this means we need to check client-side token
+  if (!accessToken) {
+    return { 
+      emails: [], 
+      error: 'No access token provided. Please sign out and sign in again to refresh your Gmail permissions.' 
+    };
+  }
+
   const response = await fetch(
     'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=100',
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-      cache: 'no-store', // Ensure we always get fresh data
+      cache: 'no-store',
     }
   );
 
   if (!response.ok) {
     let errorMessage = 'An unknown error occurred while fetching the email list.';
-    try {
+    
+    if (response.status === 401) {
+      errorMessage = 'Your Gmail session has expired. Please sign out and sign in again to refresh permissions.';
+    } else {
+      try {
         const data = await response.json();
         errorMessage = data?.error?.message || `An error occurred: ${response.statusText}`;
         console.error('Gmail API Error:', data);
-    } catch (e) {
+      } catch (e) {
         errorMessage = await response.text();
         console.error('Gmail API Error (non-JSON response):', errorMessage);
+      }
     }
     return { emails: [], error: errorMessage };
   }
@@ -34,10 +47,9 @@ export const fetchEmails = async (accessToken: string): Promise<{ emails: Email[
   const data = await response.json();
 
   if (!data.messages || data.messages.length === 0) {
-    return { emails: [], error: null }; // Return empty array if no messages
+    return { emails: [], error: null };
   }
   
-  // Recursively search for the text/plain part of a multipart email
   const findTextPlainPart = (parts: any[]): any | undefined => {
     for (const part of parts) {
         if (part.mimeType === 'text/plain') {
@@ -79,7 +91,6 @@ export const fetchEmails = async (accessToken: string): Promise<{ emails: Email[
   };
 
 
-  // Fetch each message's full content
   const messagesPromises = data.messages.map(async (msg: { id: string }) => {
     try {
       const res = await fetch(
@@ -126,7 +137,6 @@ export const fetchEmails = async (accessToken: string): Promise<{ emails: Email[
 
   const messages = await Promise.all(messagesPromises);
 
-  // Filter out any nulls that resulted from errors
   const validMessages = messages.filter((msg): msg is NonNullable<typeof msg> => msg !== null);
   return { emails: validMessages, error: null };
 };

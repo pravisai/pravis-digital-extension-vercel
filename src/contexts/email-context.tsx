@@ -4,7 +4,7 @@
 import React, { createContext, useState, useContext, ReactNode, useMemo, useCallback } from 'react';
 import type { Email } from '@/types/email';
 import { fetchEmails } from '@/lib/gmail';
-import { getStoredAccessToken } from '@/lib/firebase/auth';
+import { getValidAccessToken } from '@/lib/firebase/auth';
 
 export type MailboxView = "Inbox" | "Starred" | "Sent" | "Drafts" | "Trash" | "Archived" | "Compose" | "All Mail" | null;
 
@@ -36,22 +36,22 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
         setSelectedEmail(null);
         
         try {
-            let accessToken = getStoredAccessToken();
-
-            if (!accessToken) {
-                setFetchError("Authentication token not found. Please log in again.");
-                setIsFetchingEmails(false);
-                return;
+            const validToken = getValidAccessToken();
+            
+            if (!validToken) {
+              setFetchError('Your Gmail session has expired. Please sign out and sign in again.');
+              setIsFetchingEmails(false);
+              return;
             }
-
-            const result = await fetchEmails(accessToken);
+            
+            const result = await fetchEmails(validToken);
 
             if (result.error) {
-                console.warn('Gmail token error:', result.error);
-                setFetchError(`Failed to fetch emails. Your session may have expired. Please try signing out and back in. (Details: ${result.error})`);
+                console.warn('Gmail fetch error:', result.error);
+                setFetchError(result.error);
             } else {
                 setEmails(result.emails);
-                setActiveMailbox("All Mail"); // Default to "All Mail" only on success
+                setActiveMailbox("All Mail");
             }
         } catch (err: any) {
             console.error('Error in email fetching process:', err);
@@ -73,6 +73,7 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
                 case 'Starred':
                     return email.labelIds?.includes('STARRED');
                 case 'Sent':
+       
                     return email.labelIds?.includes('SENT');
                 case 'Trash':
                     return email.labelIds?.includes('TRASH');

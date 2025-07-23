@@ -21,6 +21,12 @@ googleProvider.addScope('https://www.googleapis.com/auth/gmail.modify');
 googleProvider.addScope('https://www.googleapis.com/auth/calendar.events');
 googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly');
 
+// Force fresh consent to get refresh tokens
+googleProvider.setCustomParameters({
+  'access_type': 'offline',
+  'prompt': 'consent'
+});
+
 export const signInWithGoogle = async (): Promise<{
   userCredential: UserCredential | null;
   accessToken: string | null;
@@ -32,6 +38,8 @@ export const signInWithGoogle = async (): Promise<{
     
     if (accessToken && typeof window !== 'undefined') {
       sessionStorage.setItem('gmail_access_token', accessToken);
+      // Store timestamp for token age tracking  
+      sessionStorage.setItem('gmail_token_time', Date.now().toString());
     }
     
     return { userCredential: result, accessToken };
@@ -64,6 +72,7 @@ export const signOutUser = async (): Promise<void> => {
     await signOut(auth);
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('gmail_access_token');
+      sessionStorage.removeItem('gmail_token_time');
     }
   } catch (error: any) {
     console.error('Error signing out:', error);
@@ -76,6 +85,34 @@ export const getStoredAccessToken = (): string | null => {
     return null;
   }
   return sessionStorage.getItem('gmail_access_token');
+};
+
+// Check if token is likely expired (older than 50 minutes)
+export const isTokenLikelyExpired = (): boolean => {
+  if (typeof window === 'undefined') return true;
+  
+  const tokenTime = sessionStorage.getItem('gmail_token_time');
+  if (!tokenTime) return true;
+  
+  const tokenAge = Date.now() - parseInt(tokenTime);
+  return tokenAge > (50 * 60 * 1000); // 50 minutes
+};
+
+export const getValidAccessToken = (): string | null => {
+  const token = getStoredAccessToken();
+  if (!token) return null;
+
+  // If token is older than 50 minutes, consider it expired
+  if (isTokenLikelyExpired()) {
+    // Clear expired token
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('gmail_access_token');
+      sessionStorage.removeItem('gmail_token_time');
+    }
+    return null;
+  }
+
+  return token;
 };
 
 export { onAuthStateChanged, auth };
