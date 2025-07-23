@@ -57,9 +57,8 @@ function EmailView() {
     isFetchingEmails, 
     fetchError, 
     activeMailbox, 
-    setActiveMailbox, 
-    selectedEmail, 
     setSelectedEmail,
+    selectedEmail, 
     emails,
     handleFetchEmails
   } = useEmail();
@@ -77,15 +76,11 @@ function EmailView() {
   });
 
   useEffect(() => {
-    // Set the active mailbox to Inbox when this page loads, if not already set.
-    if (activeMailbox !== "Inbox") {
-      setActiveMailbox("Inbox");
-    }
     // Fetch emails if they haven't been fetched yet
-    if (emails.length === 0 && !isFetchingEmails) {
+    if (emails.length === 0 && !isFetchingEmails && !fetchError) {
         handleFetchEmails();
     }
-  }, [activeMailbox, emails.length, handleFetchEmails, setActiveMailbox, isFetchingEmails]);
+  }, [emails.length, handleFetchEmails, isFetchingEmails, fetchError]);
 
   useEffect(() => {
     if (selectedEmail) {
@@ -163,7 +158,7 @@ Please address the reply to ${selectedEmail.email}.
                     <div className="text-center p-10 text-muted-foreground">
                       <Inbox className="mx-auto h-12 w-12" />
                       <p className="mt-4">
-                        {emails.length === 0 ? "Your inbox is empty or you haven't fetched it yet." : `No emails in ${activeMailbox}.`}
+                        {emails.length === 0 ? "Your inbox seems empty. Try fetching your mail." : `No emails in ${activeMailbox}.`}
                       </p>
                     </div>
                 ) : (

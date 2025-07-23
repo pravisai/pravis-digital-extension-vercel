@@ -34,13 +34,12 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
         setFetchError(null);
         setEmails([]);
         setSelectedEmail(null);
-        setActiveMailbox("All Mail"); // Default to "All Mail" after fetching
-
+        
         try {
             let accessToken = getStoredAccessToken();
 
             if (!accessToken) {
-                setFetchError("Authentication token not found. Please log in.");
+                setFetchError("Authentication token not found. Please log in again.");
                 setIsFetchingEmails(false);
                 return;
             }
@@ -49,9 +48,10 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
 
             if (result.error) {
                 console.warn('Gmail token error:', result.error);
-                setFetchError("Your session may have expired. Please try signing out and back in.");
+                setFetchError(`Failed to fetch emails. Your session may have expired. Please try signing out and back in. (Details: ${result.error})`);
             } else {
                 setEmails(result.emails);
+                setActiveMailbox("All Mail"); // Default to "All Mail" only on success
             }
         } catch (err: any) {
             console.error('Error in email fetching process:', err);
@@ -69,7 +69,7 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
         return emails.filter(email => {
             switch(activeMailbox) {
                 case 'Inbox':
-                    return !email.labelIds?.includes('TRASH') && !email.labelIds?.includes('SENT');
+                    return !email.labelIds?.includes('TRASH') && !email.labelIds?.includes('SENT') && !email.labelIds?.includes('DRAFT');
                 case 'Starred':
                     return email.labelIds?.includes('STARRED');
                 case 'Sent':
