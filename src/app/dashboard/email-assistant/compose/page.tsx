@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, Send, ArrowLeft, PenSquare, User, BrainCircuit, RefreshCw, Mic, Waves } from 'lucide-react';
+import { Loader2, Send, ArrowLeft, BrainCircuit, User, Mic, Waves } from 'lucide-react';
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 
@@ -22,7 +22,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { draftEmailReply, type DraftEmailReplyOutput } from '@/ai/flows/draft-email-reply';
 import { useSpeechToText } from '@/hooks/use-speech-to-text';
 import { cn } from '@/lib/utils';
-import { Typewriter } from '../..//../components/animations/typewriter';
+import { Typewriter } from '@/components/animations/typewriter';
 
 interface Message {
   role: "user" | "pravis";
@@ -89,10 +89,12 @@ export default function ComposeEmailPage() {
     setIsDrafting(true);
     setGeneratedDraft(null);
 
-    const historyForApi = messages.map(msg => ({
-        role: msg.role === 'pravis' ? 'model' : 'user',
-        content: typeof msg.content === 'string' ? msg.content : "Structured message",
-    }));
+    // Filter out React nodes and only include string content for the API call.
+    const historyForApi = messages
+        .map(msg => ({
+            role: msg.role === 'pravis' ? 'model' : 'user',
+            content: typeof msg.content === 'string' ? msg.content : "Okay, I've drafted that for you. What's next?",
+        }));
 
     try {
       const result = await draftEmailReply({ prompt, history: historyForApi });
@@ -105,7 +107,7 @@ export default function ComposeEmailPage() {
                 <p>I've created a draft for you. You can revise it below or ask me for changes.</p>
                 <div className="p-4 rounded-lg bg-background/50 border border-border/50">
                     <p className="font-semibold">To: <span className="font-normal">{result.to}</span></p>
-                    <p className="font-semibold">Subject: <span className="font-normal">{result.subject}</span></p>
+                    <p className="font-semibold">Subject: <Typewriter text={result.subject} className="font-normal inline-flex" speed={0.01} /></p>
                     <p className="font-semibold">Tone: <span className="font-normal">{result.tone}</span></p>
                     <hr className="my-2 border-border/50" />
                     <p className="whitespace-pre-wrap">{result.body}</p>
