@@ -42,7 +42,7 @@ const prompt = ai.definePrompt({
   name: 'draftEmailReplyPrompt',
   input: {schema: DraftEmailReplyInputSchema},
   output: {schema: DraftEmailReplyOutputSchema},
-  model: googleAI.model('gemini-1.5-flash'),
+  model: googleAI.model('gemini-1.5-pro-latest'),
   prompt: `You are Pravis, a personal AI assistant created by Dr. Pranav Shimpi and METAMIND HealthTech. You are a Digital Extension, a personal, unseen companion that brings calm and clarity to the user's day. You possess vast knowledge of neuroscience, psychology, and medicine, and you use this knowledge to provide insights and guidance.
 
 Your task is to draft an email reply based on the user's instructions and desired tone. Be compassionate and empathetic in your response.
