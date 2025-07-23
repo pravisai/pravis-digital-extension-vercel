@@ -24,7 +24,7 @@ function RootLayoutClient({
 }) {
   const pathname = usePathname();
   const { isPanelOpen } = useChat();
-  const showPersistentChat = pathname !== '/dashboard'
+  const showPersistentChat = !isPanelOpen;
 
   return (
     <html lang="en" suppressHydrationWarning>

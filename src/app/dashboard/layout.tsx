@@ -246,7 +246,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
                     "p-4 md:p-8": !isFullHeightPage,
                     "h-[calc(100vh-4rem)]": isFullHeightPage,
                 },
-                 pathname === '/dashboard' && "pb-0 md:pb-0"
+                 pathname === '/dashboard' && "p-0 md:p-0"
             )}>
                 {children}
             </main>
