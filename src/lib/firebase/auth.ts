@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -36,9 +37,9 @@ export const signInWithGoogle = async (): Promise<{
     const credential = GoogleAuthProvider.credentialFromResult(result);
     const accessToken = credential?.accessToken ?? null;
     
+    // CRITICAL FIX: Ensure token and timestamp are stored in sessionStorage
     if (accessToken && typeof window !== 'undefined') {
       sessionStorage.setItem('gmail_access_token', accessToken);
-      // Store timestamp for token age tracking  
       sessionStorage.setItem('gmail_token_time', Date.now().toString());
     }
     
@@ -94,24 +95,19 @@ export const isTokenLikelyExpired = (): boolean => {
   const tokenTime = sessionStorage.getItem('gmail_token_time');
   if (!tokenTime) return true;
   
-  const tokenAge = Date.now() - parseInt(tokenTime);
+  const tokenAge = Date.now() - parseInt(tokenTime, 10);
   return tokenAge > (50 * 60 * 1000); // 50 minutes
 };
 
 export const getValidAccessToken = (): string | null => {
   const token = getStoredAccessToken();
-  if (!token) return null;
-
-  // If token is older than 50 minutes, consider it expired
-  if (isTokenLikelyExpired()) {
-    // Clear expired token
+  if (!token || isTokenLikelyExpired()) {
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('gmail_access_token');
       sessionStorage.removeItem('gmail_token_time');
     }
     return null;
   }
-
   return token;
 };
 
