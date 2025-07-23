@@ -19,6 +19,7 @@ import {
   AlertCircle,
   Mail,
   Clock,
+  RefreshCw,
 } from 'lucide-react'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -60,7 +61,8 @@ function EmailView() {
     setSelectedEmail,
     selectedEmail, 
     emails,
-    handleFetchEmails
+    handleFetchEmails,
+    refreshGmailAccess,
   } = useEmail();
 
   const [isDrafting, setIsDrafting] = useState(false);
@@ -76,7 +78,7 @@ function EmailView() {
   });
 
   useEffect(() => {
-    // Fetch emails if they haven't been fetched yet
+    // Fetch emails if they haven't been fetched yet and there's no error
     if (emails.length === 0 && !isFetchingEmails && !fetchError) {
         handleFetchEmails();
     }
@@ -125,6 +127,8 @@ Please address the reply to ${selectedEmail.email}.
     }
   }
 
+  const isAuthError = fetchError && fetchError.toLowerCase().includes('expired');
+
   return (
     <TooltipProvider delayDuration={0}>
         <FadeIn className="flex-1 flex flex-col min-h-0 bg-card border border-border rounded-lg shadow-lg">
@@ -148,6 +152,18 @@ Please address the reply to ${selectedEmail.email}.
                       <Typewriter text="Accessing Email Datastream..." className="text-lg font-headline text-primary" speed={0.08} />
                       <p className="text-muted-foreground mt-1 text-sm">Please stand by.</p>
                   </div>
+                ) : isAuthError ? (
+                    <div className="p-6 text-center">
+                        <Alert variant="destructive" className="mb-4">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle>Gmail Access Expired</AlertTitle>
+                            <AlertDescription>Your Gmail permissions need to be refreshed.</AlertDescription>
+                        </Alert>
+                        <Button onClick={refreshGmailAccess} disabled={isFetchingEmails}>
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                            Refresh Gmail Access
+                        </Button>
+                    </div>
                 ) : fetchError ? (
                     <Alert variant="destructive" className="m-4">
                       <AlertCircle className="h-4 w-4" />

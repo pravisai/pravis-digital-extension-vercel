@@ -4,7 +4,7 @@
 import React, { createContext, useState, useContext, ReactNode, useMemo, useCallback } from 'react';
 import type { Email } from '@/types/email';
 import { fetchEmails } from '@/lib/gmail';
-import { getValidAccessToken } from '@/lib/firebase/auth';
+import { getValidAccessToken, signOutUser, signInWithGoogle } from '@/lib/firebase/auth';
 
 export type MailboxView = "Inbox" | "Starred" | "Sent" | "Drafts" | "Trash" | "Archived" | "Compose" | "All Mail" | null;
 
@@ -18,6 +18,7 @@ interface EmailContextType {
     handleFetchEmails: () => Promise<void>;
     setActiveMailbox: (mailbox: MailboxView) => void;
     setSelectedEmail: (email: Email | null) => void;
+    refreshGmailAccess: () => Promise<void>;
 }
 
 const EmailContext = createContext<EmailContextType | undefined>(undefined);
@@ -32,7 +33,6 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
     const handleFetchEmails = useCallback(async () => {
         setIsFetchingEmails(true);
         setFetchError(null);
-        setEmails([]);
         setSelectedEmail(null);
         
         try {
@@ -41,6 +41,7 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
             if (!validToken) {
               setFetchError('Your Gmail session has expired. Please sign out and sign in again.');
               setIsFetchingEmails(false);
+              setEmails([]);
               return;
             }
             
@@ -48,7 +49,12 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
 
             if (result.error) {
                 console.warn('Gmail fetch error:', result.error);
-                setFetchError(result.error);
+                if (result.error.includes('expired') || result.error.includes('invalid')) {
+                     setFetchError('Your Gmail session has expired. Please sign out and sign in again.');
+                } else {
+                    setFetchError(result.error);
+                }
+                setEmails([]);
             } else {
                 setEmails(result.emails);
                 setActiveMailbox("All Mail");
@@ -57,10 +63,32 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
             console.error('Error in email fetching process:', err);
             let message = err.message || 'An unknown error occurred.';
             setFetchError(message);
+            setEmails([]);
         } finally {
             setIsFetchingEmails(false);
         }
     }, []);
+
+    const refreshGmailAccess = useCallback(async () => {
+        setIsFetchingEmails(true);
+        setFetchError(null);
+        try {
+            await signOutUser();
+            const { accessToken } = await signInWithGoogle();
+            if (accessToken) {
+                await handleFetchEmails();
+            } else {
+                setFetchError("Failed to get a new access token. Please try signing in again.");
+            }
+        } catch (error: any) {
+             if (error.code !== 'auth/popup-closed-by-user') {
+                console.error("Re-authentication failed:", error);
+                setFetchError("Re-authentication failed. Please try again.");
+            }
+        } finally {
+            setIsFetchingEmails(false);
+        }
+    }, [handleFetchEmails]);
 
     const filteredEmails = useMemo(() => {
         if (activeMailbox === "All Mail") {
@@ -95,6 +123,7 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
         handleFetchEmails,
         setActiveMailbox,
         setSelectedEmail,
+        refreshGmailAccess,
     };
 
     return <EmailContext.Provider value={value}>{children}</EmailContext.Provider>;
