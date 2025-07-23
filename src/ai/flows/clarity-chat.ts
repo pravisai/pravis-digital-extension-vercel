@@ -42,6 +42,9 @@ const clarityChatFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("The AI model returned an empty response.");
+    }
+    return output;
   }
 );
