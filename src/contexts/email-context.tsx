@@ -39,7 +39,7 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
             const validToken = getValidAccessToken();
             
             if (!validToken) {
-              setFetchError('Your Gmail session has expired. Please sign out and sign in again.');
+              setFetchError('Your Gmail session has expired. Please refresh your access.');
               setIsFetchingEmails(false);
               setEmails([]);
               return;
@@ -49,8 +49,8 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
 
             if (result.error) {
                 console.warn('Gmail fetch error:', result.error);
-                if (result.error.includes('expired') || result.error.includes('invalid')) {
-                     setFetchError('Your Gmail session has expired. Please sign out and sign in again.');
+                if (result.error.toLowerCase().includes('expired') || result.error.toLowerCase().includes('invalid')) {
+                     setFetchError('Your Gmail session has expired. Please refresh your access.');
                 } else {
                     setFetchError(result.error);
                 }
@@ -81,7 +81,7 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
                 setFetchError("Failed to get a new access token. Please try signing in again.");
             }
         } catch (error: any) {
-             if (error.code !== 'auth/popup-closed-by-user') {
+             if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
                 console.error("Re-authentication failed:", error);
                 setFetchError("Re-authentication failed. Please try again.");
             }
