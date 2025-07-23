@@ -31,10 +31,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { EmailProvider, useEmail } from "@/contexts/email-context"
-import { ChatPanel } from "@/components/chat-panel"
-import { ChatProvider, useChat } from "@/contexts/chat-context"
-import { PersistentChatInput } from "@/components/persistent-chat-input"
-
+import { useChat } from "@/contexts/chat-context"
 
 const statCards = [
   {
@@ -193,7 +190,6 @@ function DashboardHeader() {
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
-    const { isPanelOpen } = useChat();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(true);
   
@@ -254,9 +250,6 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
             )}>
                 {children}
             </main>
-            <div className="md:hidden">
-              {isPanelOpen ? <ChatPanel /> : (pathname === '/dashboard' && <PersistentChatInput />)}
-            </div>
         </div>
     )
 }
@@ -269,10 +262,8 @@ export default function DashboardLayout({
 }) {
 
   return (
-    <ChatProvider>
-      <EmailProvider>
+    <EmailProvider>
         <LayoutWrapper>{children}</LayoutWrapper>
-      </EmailProvider>
-    </ChatProvider>
+    </EmailProvider>
   )
 }
