@@ -1,9 +1,9 @@
+
 "use client";
 
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
-import { provideClarityThroughChat } from "@/lib/gemini";
-// Remove or comment out the text-to-speech import for now
-// import { textToSpeech } from "@/ai/flows/text-to-speech";
+import { clarityChat } from '@/ai/flows/clarity-chat';
+import { textToSpeech } from "@/ai/flows/text-to-speech";
 
 interface Message {
   role: "user" | "pravis";
@@ -64,22 +64,20 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(true);
 
         try {
-            // Updated to use the simple Gemini function
-            const result = await provideClarityThroughChat(currentInput);
-            const pravisResponse = result.pravisResponse;
+            const result = await clarityChat(currentInput);
+            const pravisResponse = result.reply;
             
             const pravisMessage: Message = { role: "pravis", content: pravisResponse };
             setMessages((prev) => [...prev, pravisMessage]);
             
-            // Temporarily disable text-to-speech until we fix that too
-            // if (isVoiceInput) {
-            //     const audioResult = await textToSpeech(pravisResponse);
-            //     setAudioDataUri(audioResult.media);
-            // }
+            if (isVoiceInput) {
+                const audioResult = await textToSpeech(pravisResponse);
+                setAudioDataUri(audioResult.media);
+            }
 
         } catch (error: any) {
-            console.error("Pravis chatbot Gemini error:", error);
-            let messageContent = error.message || "AI is currently unavailable. Please check your network or try again shortly.";
+            console.error("Pravis chatbot error:", error);
+            let messageContent = "I'm sorry, I cannot provide a response to that. Please try again.";
             const errorMessage: Message = { role: "pravis", content: messageContent };
             setMessages((prev) => [...prev, errorMessage]);
         } finally {
