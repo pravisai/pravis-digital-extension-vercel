@@ -12,8 +12,6 @@ import { firebase } from '@genkit-ai/firebase';
 export const ai = genkit({
   plugins: [
     firebase(),
-    googleAI({
-      apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
-    }),
+    googleAI(), // API key is automatically sourced from Firebase Functions config when deployed.
   ],
 });

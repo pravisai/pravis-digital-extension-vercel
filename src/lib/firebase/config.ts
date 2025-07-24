@@ -12,43 +12,41 @@ const firebaseConfig = {
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-function isConfigValid(config: typeof firebaseConfig): boolean {
-    return Object.values(config).every(value => !!value && typeof value === 'string' && value.length > 0);
+function isConfigValid(config: typeof firebaseConfig): config is Record<string, string> {
+    return Object.values(config).every(value => typeof value === 'string' && value.length > 0);
 }
 
-// Enhanced initialization with error handling
+// Singleton instances
 let app: FirebaseApp;
 let auth: Auth;
+const isConfigured = isConfigValid(firebaseConfig);
 
-if (!isConfigValid(firebaseConfig)) {
-    console.error('Firebase configuration is invalid. Please check your environment variables.');
-    // In a real app, you might want to throw an error or handle this state differently
+if (!isConfigured) {
+    console.error('CRITICAL: Firebase configuration is invalid or incomplete. Please check your NEXT_PUBLIC_ environment variables.');
 }
 
 try {
-    // Check if Firebase is already initialized
-    if (getApps().length === 0) {
+    if (getApps().length === 0 && isConfigured) {
         app = initializeApp(firebaseConfig);
-    } else {
+        auth = getAuth(app);
+    } else if (isConfigured) {
         app = getApp();
+        auth = getAuth(app);
+    } else {
+        // Provide dummy objects if config is invalid to prevent app from crashing on server,
+        // but functionality will be broken. The error will be logged.
+        app = {} as FirebaseApp;
+        auth = {} as Auth;
     }
-    
-    // Initialize Auth with the app instance
-    auth = getAuth(app);
 } catch (error) {
     console.error('Firebase initialization error:', error);
-    // Fallback initialization for safety, though it might fail if config is bad
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
+    // Fallback for safety
+    app = {} as FirebaseApp;
+    auth = {} as Auth;
 }
 
 export function isFirebaseConfigured(): boolean {
-    return isConfigValid(firebaseConfig);
-}
-
-// Additional helper function for debugging
-export function getFirebaseApp(): FirebaseApp {
-    return app;
+    return isConfigured;
 }
 
 export { app, auth, firebaseConfig };
