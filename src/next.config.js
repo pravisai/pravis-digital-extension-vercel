@@ -27,7 +27,7 @@ const nextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
               "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://accounts.google.com https://*.firebaseapp.com https://*.firebaseio.com https://www.googleapis.com https://generativelanguage.googleapis.com https://fonts.googleapis.com https://www.gstatic.com https://lh3.googleusercontent.com https://play.google.com https://unpkg.com",
               "frame-src 'self' https://accounts.google.com https://pravis-your-digital-extension.firebaseapp.com",
-              "img-src 'self' data: https: https://lh3.googleusercontent.com https://www.gstatic.com https://storage.googleapis.com",
+              "img-src 'self' data: https: https://lh3.googleusercontent.com https://www.gstatic.com https://storage.googleapis.com https://unpkg.com",
               "object-src 'none'",
               "base-uri 'self'"
             ].join('; ')
