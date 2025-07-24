@@ -27,9 +27,7 @@ export const ai = genkit({
   plugins: [
     firebase(),
     googleAI({ 
-      // The API key is automatically sourced from the GEMINI_API_KEY environment
-      // variable. There is no need to pass it explicitly here.
-      // For deployments, set this key in your environment's secret management.
+      apiKey: process.env.GEMINI_API_KEY
     }),
   ],
   logLevel: 'debug',
