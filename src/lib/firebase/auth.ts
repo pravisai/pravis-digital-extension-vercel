@@ -37,7 +37,6 @@ export const signInWithGoogle = async (): Promise<{
     const credential = GoogleAuthProvider.credentialFromResult(result);
     const accessToken = credential?.accessToken ?? null;
     
-    // CRITICAL FIX: Ensure token and timestamp are stored in sessionStorage
     if (accessToken && typeof window !== 'undefined') {
       sessionStorage.setItem('gmail_access_token', accessToken);
       sessionStorage.setItem('gmail_token_time', Date.now().toString());

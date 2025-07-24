@@ -23,11 +23,12 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://accounts.google.com https://www.gstatic.com https://www.googleapis.com https://*.firebaseapp.com https://*.firebaseio.com https://unpkg.com https://generativelanguage.googleapis.com blob:",
+              "script-src-elem 'self' 'unsafe-inline' https://apis.google.com https://accounts.google.com https://www.gstatic.com https://www.googleapis.com https://*.firebaseapp.com https://*.firebaseio.com https://unpkg.com https://generativelanguage.googleapis.com blob:",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://accounts.google.com https://*.firebaseapp.com https://*.firebaseio.com https://www.googleapis.com https://generativelanguage.googleapis.com https://fonts.googleapis.com https://www.gstatic.com https://lh3.googleusercontent.com https://play.google.com https://unpkg.com",
-              "frame-src 'self' https://accounts.google.com https://*.firebaseapp.com",
-              "img-src 'self' data: https: https://lh3.googleusercontent.com https://www.gstatic.com https://storage.googleapis.com https://unpkg.com",
+              "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://accounts.google.com https://*.firebaseapp.com https://*.firebaseio.com https://www.googleapis.com https://generativelanguage.googleapis.com https://fonts.googleapis.com https://www.gstatic.com https://lh3.googleusercontent.com https://play.google.com",
+              `frame-src 'self' https://accounts.google.com https://${process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}`,
+              "img-src 'self' data: https: https://lh3.googleusercontent.com https://www.gstatic.com https://storage.googleapis.com",
               "object-src 'none'",
               "base-uri 'self'"
             ].join('; ')
