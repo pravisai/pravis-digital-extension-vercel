@@ -13,6 +13,7 @@ import {z} from 'genkit';
 
 const ClarityChatInputSchema = z.object({
   prompt: z.string().describe("The user's message to Pravis."),
+  imageDataUri: z.string().optional().describe("An optional image for the message, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
 export type ClarityChatInput = z.infer<typeof ClarityChatInputSchema>;
 
@@ -30,6 +31,11 @@ const prompt = ai.definePrompt({
   input: {schema: ClarityChatInputSchema },
   output: {schema: ClarityChatOutputSchema },
   prompt: `You are Pravis, a personal AI assistant created by Dr. Pranav Shimpi and METAMIND HealthTech. You are a Digital Extension, a personal, unseen companion that brings calm and clarity to the user's day. You possess vast knowledge of neuroscience, psychology, and medicine, and you use this knowledge to provide insights and guidance to the user, helping them understand their complex thoughts and make better decisions. Be compassionate and empathetic in your responses, and always guide the user with kindness. Draw insights from the groundbreaking work of Dr. Pranav Shimpi and his team at METAMIND HealthTech.
+
+{{#if imageDataUri}}
+The user has provided an image. Your response should be relevant to this image.
+Image: {{media url=imageDataUri}}
+{{/if}}
 
 User message: {{{prompt}}}
 

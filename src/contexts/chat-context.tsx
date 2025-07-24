@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface Message {
   role: "user" | "pravis";
-  content: string;
+  content: string | React.ReactNode;
 }
 
 interface ChatContextType {
@@ -17,11 +17,14 @@ interface ChatContextType {
     input: string;
     isPanelOpen: boolean;
     audioDataUri: string | null;
+    attachment: File | null;
+    attachmentPreview: string | null;
     isSpeaking: boolean;
     setInput: (input: string) => void;
     handleSendMessage: (e: React.FormEvent, isVoiceInput?: boolean) => Promise<void>;
     setPanelOpen: (isOpen: boolean) => void;
     setAudioDataUri: (uri: string | null) => void;
+    setAttachment: (file: File | null) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -32,6 +35,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isPanelOpen, setPanelOpen] = useState(false);
     const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
+    const [attachment, setAttachment] = useState<File | null>(null);
+    const [attachmentPreview, setAttachmentPreview] = useState<string | null>(null);
     const [isSpeaking, setIsSpeaking] = useState(false);
     const { toast } = useToast();
 
@@ -54,19 +59,56 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [audioDataUri]);
 
+    useEffect(() => {
+      if (!attachment) {
+        setAttachmentPreview(null);
+        return;
+      }
+      const objectUrl = URL.createObjectURL(attachment);
+      setAttachmentPreview(objectUrl);
+
+      return () => URL.revokeObjectURL(objectUrl);
+    }, [attachment]);
+
     const handleSendMessage = useCallback(async (e: React.FormEvent, isVoiceInput = false) => {
         e.preventDefault();
-        if (!input.trim()) return;
+        if (!input.trim() && !attachment) return;
 
         setPanelOpen(true);
-        const userMessage: Message = { role: "user", content: input };
         const currentInput = input;
+        const currentAttachment = attachment;
+
+        let userMessageContent: React.ReactNode = currentInput;
+        if (currentAttachment && attachmentPreview) {
+          userMessageContent = (
+            <div>
+              <img src={attachmentPreview} alt={currentAttachment.name} className="max-w-xs rounded-md mb-2" />
+              {currentInput}
+            </div>
+          )
+        }
+
+        const userMessage: Message = { role: "user", content: userMessageContent };
+        
         setMessages((prev) => [...prev, userMessage]);
         setInput("");
+        setAttachment(null);
         setIsLoading(true);
 
+        let imageDataUri: string | undefined;
+        if (currentAttachment?.type.startsWith('image/')) {
+            const reader = new FileReader();
+            imageDataUri = await new Promise(resolve => {
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.readAsDataURL(currentAttachment);
+            });
+        }
+
         try {
-            const result = await clarityChat({ prompt: currentInput });
+            const result = await clarityChat({ 
+              prompt: currentInput, 
+              imageDataUri 
+            });
             const pravisResponse = result.reply;
             
             const pravisMessage: Message = { role: "pravis", content: pravisResponse };
@@ -89,7 +131,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         } finally {
             setIsLoading(false);
         }
-    }, [input, toast]);
+    }, [input, toast, attachment, attachmentPreview]);
 
     const value = {
         messages,
@@ -97,11 +139,14 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         input,
         isPanelOpen,
         audioDataUri,
+        attachment,
+        attachmentPreview,
         isSpeaking,
         setInput,
         handleSendMessage,
         setPanelOpen,
         setAudioDataUri,
+        setAttachment,
     };
 
     return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

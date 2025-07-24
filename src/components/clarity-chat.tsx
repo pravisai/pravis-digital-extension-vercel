@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { BrainCircuit, Send, User, Paperclip, Mic, Smile, Camera, Waves } from "lucide-react"
+import { BrainCircuit, Send, User, Paperclip, Mic, Smile, Camera, Waves, X } from "lucide-react"
 import React, { useRef, useState, useEffect } from "react"
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
@@ -14,11 +14,12 @@ import { useSpeechToText } from "@/hooks/use-speech-to-text"
 import { cn } from "@/lib/utils"
 
 export function ClarityChat() {
-  const { messages, isLoading, input, setInput, handleSendMessage, audioDataUri, setAudioDataUri } = useChat();
+  const { messages, isLoading, input, setInput, handleSendMessage, audioDataUri, setAudioDataUri, attachmentPreview, setAttachment } = useChat();
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { isRecording, transcript, startRecording, stopRecording } = useSpeechToText({
     onTranscriptReady: (text) => {
@@ -50,7 +51,7 @@ export function ClarityChat() {
         const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
         if(viewport) viewport.scrollTop = viewport.scrollHeight;
     }
-  }, [messages, isLoading]);
+  }, [messages, isLoading, attachmentPreview]);
   
   useEffect(() => {
       if (audioDataUri && audioRef.current) {
@@ -74,6 +75,17 @@ export function ClarityChat() {
   const handleVoiceSubmit = (e: React.FormEvent) => {
       handleSendMessage(e, true);
   }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setAttachment(file);
+    }
+  };
+
+  const handleAttachmentClick = () => {
+    fileInputRef.current?.click();
+  };
 
   useEffect(() => {
     const form = formRef.current;
@@ -120,7 +132,7 @@ export function ClarityChat() {
                         : "bg-secondary"
                     }`}
                 >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    {typeof message.content === 'string' ? <p className="text-sm whitespace-pre-wrap">{message.content}</p> : message.content}
                 </div>
                 {message.role === "user" && (
                     <Avatar>
@@ -146,6 +158,19 @@ export function ClarityChat() {
             </div>
       </ScrollArea>
       <footer className="p-2 border-t">
+        {attachmentPreview && (
+          <div className="p-2 relative w-fit">
+            <img src={attachmentPreview} alt="attachment preview" className="h-20 w-20 object-cover rounded-md" />
+            <Button 
+              size="icon" 
+              variant="destructive" 
+              className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+              onClick={() => setAttachment(null)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
         <form onSubmit={handleFormSubmit} ref={formRef} className="flex items-center gap-2">
             <div className="flex-1 flex items-center bg-secondary rounded-full px-2">
                 <Button variant="ghost" size="icon" type="button" className="shrink-0 rounded-full">
@@ -158,7 +183,14 @@ export function ClarityChat() {
                     className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 h-12"
                     disabled={isLoading || isRecording}
                 />
-                <Button variant="ghost" size="icon" type="button" className="shrink-0 rounded-full">
+                 <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    className="hidden"
+                    accept="image/*"
+                />
+                <Button variant="ghost" size="icon" type="button" className="shrink-0 rounded-full" onClick={handleAttachmentClick}>
                     <Paperclip className="h-6 w-6 text-muted-foreground" />
                 </Button>
                 <Button variant="ghost" size="icon" type="button" className="shrink-0 rounded-full">
@@ -166,7 +198,7 @@ export function ClarityChat() {
                 </Button>
             </div>
             
-            {input.trim() ? (
+            {(input.trim() || attachmentPreview) ? (
               <Button 
                 type="submit" 
                 size="icon" 
