@@ -1,15 +1,12 @@
 
-
 "use client"
 
 import { BrainCircuit, Mail, ListChecks, Bot, User, Settings, LogOut, ArrowLeft, LineChart, CheckCircle2, MessageSquare, Timer, Sun, Moon, RefreshCw, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { signOutUser } from "@/lib/firebase/auth"
+import { signOutUser, onAuthStateChanged, auth, type User as FirebaseUser } from "@/lib/firebase/auth"
 import { useToast } from "@/hooks/use-toast"
 import React, { useState, useEffect } from "react"
-import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth"
-import { auth } from "@/lib/firebase/config"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -31,7 +28,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { EmailProvider, useEmail } from "@/contexts/email-context"
-import { useChat } from "@/contexts/chat-context"
 
 const statCards = [
   {
@@ -197,36 +193,38 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
     
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (!user && !pathname.startsWith('/')) {
+            if (!user) {
                 router.push('/');
             } else {
                 setIsLoading(false);
             }
         });
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').then(
-                (registration) => {
-                    console.log('Service Worker registration successful with scope: ', registration.scope);
-                },
-                (err) => {
-                    console.log('Service Worker registration failed: ', err);
-                }
-            );
-        }
         
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    toast({ title: "Notifications Enabled", description: "You will now receive updates from Pravis." });
-                } else {
-                    toast({ title: "Notifications Blocked", description: "You can enable notifications in your browser settings." });
-                }
-            });
+        if (typeof window !== 'undefined') {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').then(
+                    (registration) => {
+                        console.log('Service Worker registration successful with scope: ', registration.scope);
+                    },
+                    (err) => {
+                        console.log('Service Worker registration failed: ', err);
+                    }
+                );
+            }
+            
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        toast({ title: "Notifications Enabled", description: "You will now receive updates from Pravis." });
+                    } else {
+                        toast({ title: "Notifications Blocked", description: "You can enable notifications in your browser settings." });
+                    }
+                });
+            }
         }
         
         return () => unsubscribe();
-    }, [router, toast, pathname]);
+    }, [router, toast]);
 
 
     if (isLoading) {

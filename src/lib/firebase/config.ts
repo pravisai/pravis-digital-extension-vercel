@@ -12,15 +12,16 @@ const firebaseConfig = {
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-// Validate environment variables
-const isConfigValid = Object.values(firebaseConfig).every(value => Boolean(value));
-
-if (!isConfigValid) {
-    throw new Error('Firebase configuration is missing or invalid. Please check your .env.local file and ensure all NEXT_PUBLIC_FIREBASE_ variables are set.');
+// Validate environment variables on the client side
+if (typeof window !== 'undefined') {
+    const isConfigValid = Object.values(firebaseConfig).every(value => Boolean(value));
+    if (!isConfigValid) {
+        throw new Error('Firebase configuration is missing or invalid. Please check your .env.local file and ensure all NEXT_PUBLIC_FIREBASE_ variables are set.');
+    }
 }
 
-// Initialize Firebase
+// Initialize Firebase as a singleton
 const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth: Auth = getAuth(app);
 
-export { app, auth, firebaseConfig };
+export { app, auth };

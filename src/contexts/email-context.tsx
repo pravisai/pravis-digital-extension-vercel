@@ -57,7 +57,7 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
                 setEmails([]);
             } else {
                 setEmails(result.emails);
-                setActiveMailbox("All Mail");
+                setActiveMailbox("All Mail"); // Correctly set view after fetching
             }
         } catch (err: any) {
             console.error('Error in email fetching process:', err);
@@ -76,7 +76,11 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
             await signOutUser();
             const { accessToken } = await signInWithGoogle();
             if (accessToken) {
-                await handleFetchEmails();
+                // After getting a new token, refetch emails
+                const result = await fetchEmails(accessToken);
+                if (result.error) throw new Error(result.error);
+                setEmails(result.emails);
+                setActiveMailbox("All Mail");
             } else {
                 setFetchError("Failed to get a new access token. Please try signing in again.");
             }
@@ -88,7 +92,7 @@ export const EmailProvider = ({ children }: { children: ReactNode }) => {
         } finally {
             setIsFetchingEmails(false);
         }
-    }, [handleFetchEmails]);
+    }, []);
 
     const filteredEmails = useMemo(() => {
         if (activeMailbox === "All Mail") {

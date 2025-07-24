@@ -64,7 +64,9 @@ export const signUpWithEmail = async (
   displayName: string
 ): Promise<void> => {
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  await updateProfile(userCredential.user, { displayName });
+  if (userCredential.user) {
+    await updateProfile(userCredential.user, { displayName });
+  }
 };
 
 export const signOutUser = async (): Promise<void> => {
