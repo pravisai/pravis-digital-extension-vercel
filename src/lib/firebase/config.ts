@@ -12,41 +12,25 @@ const firebaseConfig = {
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-function isConfigValid(config: typeof firebaseConfig): config is Record<string, string> {
-    return Object.values(config).every(value => typeof value === 'string' && value.length > 0);
-}
-
-// Singleton instances
-let app: FirebaseApp;
-let auth: Auth;
-const isConfigured = isConfigValid(firebaseConfig);
-
-if (!isConfigured) {
-    console.error('CRITICAL: Firebase configuration is invalid or incomplete. Please check your NEXT_PUBLIC_ environment variables.');
-}
-
-try {
-    if (getApps().length === 0 && isConfigured) {
-        app = initializeApp(firebaseConfig);
-        auth = getAuth(app);
-    } else if (isConfigured) {
-        app = getApp();
-        auth = getAuth(app);
-    } else {
-        // Provide dummy objects if config is invalid to prevent app from crashing on server,
-        // but functionality will be broken. The error will be logged.
-        app = {} as FirebaseApp;
-        auth = {} as Auth;
+function createFirebaseApp(config: object): FirebaseApp {
+    if (!getApps().length) {
+        return initializeApp(config);
     }
-} catch (error) {
-    console.error('Firebase initialization error:', error);
-    // Fallback for safety
-    app = {} as FirebaseApp;
-    auth = {} as Auth;
+    return getApp();
 }
+
+const isConfigValid = Object.values(firebaseConfig).every(value => typeof value === 'string' && value.length > 0);
+
+if (!isConfigValid) {
+    console.error('CRITICAL: Firebase configuration is invalid. Please check your NEXT_PUBLIC_ environment variables.');
+}
+
+const app = isConfigValid ? createFirebaseApp(firebaseConfig) : ({} as FirebaseApp);
+const auth = isConfigValid ? getAuth(app) : ({} as Auth);
+
 
 export function isFirebaseConfigured(): boolean {
-    return isConfigured;
+    return isConfigValid;
 }
 
 export { app, auth, firebaseConfig };
