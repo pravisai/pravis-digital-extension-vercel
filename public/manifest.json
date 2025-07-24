@@ -1,9 +1,21 @@
 {
   "name": "Pravis: Your Digital Extension",
   "short_name": "Pravis",
-  "start_url": "/dashboard",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#222222",
   "theme_color": "#BF5FFF",
-  "description": "Pravis is your personal restorative alignment virtual intelligence system, designed to bring calm and clarity to your day."
+  "description": "Pravis is your personal restorative alignment virtual intelligence system, designed to bring calm and clarity to your day.",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
