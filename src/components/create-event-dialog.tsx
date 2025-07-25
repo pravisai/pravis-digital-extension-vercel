@@ -64,38 +64,43 @@ interface CreateEventDialogProps {
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
     onEventCreated: () => void;
-    eventToEdit?: CalendarEvent | null;
+    eventToEdit?: Partial<CalendarEvent> | null;
 }
 
 export function CreateEventDialog({ accessToken, isOpen, onOpenChange, onEventCreated, eventToEdit }: CreateEventDialogProps) {
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
 
-    const isEditing = !!eventToEdit;
+    const isEditing = !!eventToEdit?.id;
 
-    const getDefaultValues = () => {
-        if (isEditing && eventToEdit) {
-            const isAllDayEvent = !!eventToEdit.start.date;
+    const getDefaultValues = useCallback(() => {
+        if (eventToEdit) {
+             const isAllDayEvent = !eventToEdit.start?.dateTime;
+             const startDate = eventToEdit.start?.date ? parseISO(eventToEdit.start.date) : eventToEdit.start?.dateTime ? parseISO(eventToEdit.start.dateTime) : new Date();
+             const endDate = eventToEdit.end?.date ? parseISO(eventToEdit.end.date) : eventToEdit.end?.dateTime ? parseISO(eventToEdit.end.dateTime) : startDate;
+
             return {
                 summary: eventToEdit.summary || "",
                 description: eventToEdit.description || "",
                 isAllDay: isAllDayEvent,
-                startDate: parseISO(eventToEdit.start.date || eventToEdit.start.dateTime!),
-                endDate: parseISO(eventToEdit.end.date || eventToEdit.end.dateTime!),
-                startTime: isAllDayEvent ? "" : format(parseISO(eventToEdit.start.dateTime!), "HH:mm"),
-                endTime: isAllDayEvent ? "" : format(parseISO(eventToEdit.end.dateTime!), "HH:mm"),
+                startDate: startDate,
+                endDate: endDate,
+                startTime: isAllDayEvent ? "" : format(startDate, "HH:mm"),
+                endTime: isAllDayEvent ? "" : format(endDate, "HH:mm"),
             }
         }
+        // Default for new event
+        const now = new Date();
         return {
             summary: "",
             description: "",
             isAllDay: false,
-            startDate: new Date(),
-            endDate: new Date(),
-            startTime: format(new Date(), "HH:mm"),
-            endTime: format(new Date(new Date().getTime() + 60 * 60 * 1000), "HH:mm")
+            startDate: now,
+            endDate: now,
+            startTime: format(now, "HH:mm"),
+            endTime: format(new Date(now.getTime() + 60 * 60 * 1000), "HH:mm")
         }
-    };
+    }, [eventToEdit]);
 
     const {
         control,
@@ -111,7 +116,7 @@ export function CreateEventDialog({ accessToken, isOpen, onOpenChange, onEventCr
 
     useEffect(() => {
         reset(getDefaultValues());
-    }, [eventToEdit, reset]);
+    }, [eventToEdit, reset, getDefaultValues]);
 
     const isAllDay = watch("isAllDay");
     const startDate = watch("startDate");
@@ -130,7 +135,7 @@ export function CreateEventDialog({ accessToken, isOpen, onOpenChange, onEventCr
 
         try {
             let result;
-            if (isEditing && eventToEdit) {
+            if (isEditing && eventToEdit?.id) {
                 result = await updateCalendarEvent(accessToken, eventToEdit.id, details);
             } else {
                 result = await createCalendarEvent(accessToken, details);
@@ -275,3 +280,5 @@ export function CreateEventDialog({ accessToken, isOpen, onOpenChange, onEventCr
         </Dialog>
     );
 }
+
+    

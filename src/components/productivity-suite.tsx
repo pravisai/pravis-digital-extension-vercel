@@ -78,7 +78,7 @@ export function ProductivitySuite({ accessToken }: { accessToken: string }) {
     const { intent, clearIntent } = useIntent();
     
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-    const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+    const [editingEvent, setEditingEvent] = useState<Partial<CalendarEvent> | null>(null);
 
     // Handle intent to create an event
     useEffect(() => {
@@ -86,21 +86,23 @@ export function ProductivitySuite({ accessToken }: { accessToken: string }) {
             const { date: dateStr, summary, startTime } = intent.params;
             
             // Set the calendar to the specified date
-            if (dateStr) {
-                setDate(parseISO(dateStr));
+            const targetDate = dateStr ? parseISO(dateStr) : new Date();
+            setDate(targetDate);
+            
+            const newEvent: Partial<CalendarEvent> = {};
+            if (summary) newEvent.summary = summary;
+            
+            if (dateStr && startTime) {
+                const startDateTime = `${dateStr}T${startTime}`;
+                newEvent.start = { dateTime: startDateTime };
+                newEvent.end = { dateTime: startDateTime }; // Default end to start
+            } else if (dateStr) {
+                newEvent.start = { date: dateStr };
+                newEvent.end = { date: dateStr };
             }
 
-            // If there's enough info, open the creation dialog
-            if (summary) {
-                const newEvent: Partial<CalendarEvent> = {
-                    summary: summary,
-                    start: { dateTime: startTime ? `${dateStr}T${startTime}` : undefined, date: !startTime ? dateStr : undefined },
-                    end: { dateTime: startTime ? `${dateStr}T${startTime}` : undefined, date: !startTime ? dateStr : undefined }
-                };
-                
-                // This is a bit of a hack to fit into the existing edit flow
-                // A more robust solution might separate "new from intent"
-                setEditingEvent(newEvent as CalendarEvent);
+            if (Object.keys(newEvent).length > 0) {
+                setEditingEvent(newEvent);
                 setIsCreateDialogOpen(true);
             }
             
@@ -231,7 +233,7 @@ export function ProductivitySuite({ accessToken }: { accessToken: string }) {
                 </ScrollArea>
             </main>
              <CreateEventDialog 
-                key={editingEvent?.id || 'new'}
+                key={editingEvent?.id || 'new-from-intent'}
                 accessToken={accessToken}
                 isOpen={isCreateDialogOpen}
                 onOpenChange={handleDialogClose}
@@ -241,3 +243,5 @@ export function ProductivitySuite({ accessToken }: { accessToken: string }) {
         </div>
     );
 }
+
+    
