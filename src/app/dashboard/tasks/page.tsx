@@ -4,7 +4,7 @@
 import { ProductivitySuite } from "@/components/productivity-suite";
 import { FadeIn } from "@/components/animations/fade-in";
 import { useToast } from "@/hooks/use-toast";
-import { getStoredAccessToken } from "@/lib/firebase/auth";
+import { getValidAccessToken } from "@/lib/firebase/auth";
 import React, { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -16,8 +16,8 @@ export default function TasksPage() {
      useEffect(() => {
         const initializeToken = () => {
             try {
-                // Check for a stored token, but do not trigger sign-in from here.
-                const token = getStoredAccessToken();
+                // Use getValidAccessToken to ensure the token is not expired.
+                const token = getValidAccessToken();
                 setAccessToken(token);
             } catch (error: any) {
                 console.error("Token retrieval error:", error);
