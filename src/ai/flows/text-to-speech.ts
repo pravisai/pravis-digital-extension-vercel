@@ -7,10 +7,9 @@
  * - TextToSpeechOutput - The return type for the textToSpeech function.
  */
 
-import '@/ai/genkit';
+import { ai } from '@/ai/gemini';
 import { z } from 'zod';
 import wav from 'wav';
-import { defineFlow, generate } from '@genkit-ai/core';
 
 const TextToSpeechInputSchema = z.string();
 export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
@@ -52,14 +51,14 @@ async function toWav(
 }
 
 // Genkit v1 text-to-speech flow using a string model name
-export const textToSpeechFlow = defineFlow(
+export const textToSpeechFlow = ai.defineFlow(
   {
     name: 'textToSpeechFlow',
     inputSchema: TextToSpeechInputSchema,
     outputSchema: TextToSpeechOutputSchema,
   },
   async (query) => {
-    const { media } = await generate({
+    const { media } = await ai.generate({
       model: 'googleai/gemini-2.5-flash-preview-tts', // Use the model name as a string
       prompt: query,
       config: {

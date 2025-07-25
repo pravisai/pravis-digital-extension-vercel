@@ -7,9 +7,8 @@
  * - AnalyzeConversationEmotionsOutput - The return type for the analyzeConversationEmotions function.
  */
 
-import '@/ai/genkit';
+import { ai } from '@/ai/gemini';
 import { z } from 'zod';
-import { defineFlow, definePrompt } from '@genkit-ai/core';
 
 const AnalyzeConversationEmotionsInputSchema = z.object({
   conversation: z
@@ -36,7 +35,7 @@ export async function analyzeConversationEmotions(
   return analyzeConversationEmotionsFlow(input);
 }
 
-const prompt = definePrompt({
+const prompt = ai.definePrompt({
   name: 'analyzeConversationEmotionsPrompt',
   input: {schema: AnalyzeConversationEmotionsInputSchema},
   output: {schema: AnalyzeConversationEmotionsOutputSchema},
@@ -51,7 +50,7 @@ const prompt = definePrompt({
   Based on your analysis, determine if the conversation needs a more empathetic touch and provide a short summary of the emotional content of the conversation.`,
 });
 
-const analyzeConversationEmotionsFlow = defineFlow(
+const analyzeConversationEmotionsFlow = ai.defineFlow(
   {
     name: 'analyzeConversationEmotionsFlow',
     inputSchema: AnalyzeConversationEmotionsInputSchema,

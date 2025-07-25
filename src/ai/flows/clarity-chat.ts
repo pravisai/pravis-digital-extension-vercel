@@ -5,13 +5,11 @@
  * - ClarityChatInput - The input type for the clarityChat function.
  * - ClarityChatOutput - The return type for the clarityChat function.
  */
-
-import '@/ai/genkit'; // Only for side-effect config!
-
-import { defineFlow, definePrompt, z, generate, defineTool } from '@genkit-ai/core';
+import { ai } from '@/ai/gemini';
+import { z } from 'zod';
 
 // Tool Schemas
-const navigateToEmailComposeTool = defineTool(
+const navigateToEmailComposeTool = ai.defineTool(
   {
     name: 'navigateToEmailCompose',
     description: 'Navigates the user to the email composition screen to start a new draft.',
@@ -25,7 +23,7 @@ const navigateToEmailComposeTool = defineTool(
   async () => "Okay, I'll open the email composer for you."
 );
 
-const navigateToCalendarTool = defineTool(
+const navigateToCalendarTool = ai.defineTool(
   {
     name: 'navigateToCalendar',
     description: 'Navigates the user to their calendar/tasks page to view events or create a new one.',
@@ -71,14 +69,14 @@ User message: {{{prompt}}}`;
 
 
 // Use defineFlow directly
-export const clarityChatFlow = defineFlow(
+export const clarityChatFlow = ai.defineFlow(
   {
     name: 'clarityChatFlow',
     inputSchema: ClarityChatInputSchema,
     outputSchema: ClarityChatOutputSchema,
   },
   async (input) => {
-    const response = await generate({
+    const response = await ai.generate({
       model: 'googleai/gemini-pro',
       tools: [navigateToEmailComposeTool, navigateToCalendarTool],
       prompt: prompt,
@@ -88,7 +86,7 @@ export const clarityChatFlow = defineFlow(
       input,
     });
     
-    const output = response.output();
+    const output = response.output;
     if (!output) {
       throw new Error("The AI model returned an empty or invalid response.");
     }
@@ -98,7 +96,7 @@ export const clarityChatFlow = defineFlow(
       return { toolRequest: output.content.find(part => part.toolRequest)!.toolRequest };
     } else {
       // It's a text reply
-      return { reply: response.text() };
+      return { reply: response.text };
     }
   }
 );

@@ -7,10 +7,8 @@
  * - SocialMediaChatOutput - The return type for the socialMediaChat function.
  */
 
-import '@/ai/genkit'; // Only for config side effect!
-import { defineFlow, definePrompt, z } from '@genkit-ai/core';
-
-
+import { ai } from '@/ai/gemini';
+import { z } from 'zod';
 
 const SocialMediaChatInputSchema = z.object({
   platform: z.string().describe('The social media platform for the post (e.g., Twitter, LinkedIn).'),
@@ -29,7 +27,7 @@ export async function socialMediaChat(input: SocialMediaChatInput): Promise<Soci
   return await socialMediaChatFlow(input);
 }
 
-const prompt = definePrompt({
+const prompt = ai.definePrompt({
   name: 'socialMediaChatPrompt',
   input: { schema: SocialMediaChatInputSchema },
   output: { schema: SocialMediaChatOutputSchema },
@@ -50,7 +48,7 @@ User's Instructions: {{{instructions}}}
 Your generated post:`,
 });
 
-export const socialMediaChatFlow = defineFlow(
+export const socialMediaChatFlow = ai.defineFlow(
   {
     name: 'socialMediaChatFlow',
     inputSchema: SocialMediaChatInputSchema,

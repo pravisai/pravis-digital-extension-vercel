@@ -6,8 +6,8 @@
  * - DraftEmailReplyOutput - The return type for the draftEmailReply function.
  */
 
-import '@/ai/genkit'; // Only for side-effect config!
-import { defineFlow, definePrompt, z } from '@genkit-ai/core';
+import { ai } from '@/ai/gemini';
+import { z } from 'zod';
 
 const MessageSchema = z.object({
   role: z.enum(['user', 'model']),
@@ -35,7 +35,7 @@ export async function draftEmailReply(
   return await draftEmailReplyFlow(input);
 }
 
-const prompt = definePrompt({
+const prompt = ai.definePrompt({
   name: 'draftEmailReplyPrompt',
   input: { schema: DraftEmailReplyInputSchema },
   output: { schema: DraftEmailReplyOutputSchema },
@@ -64,7 +64,7 @@ Based on the request and history, generate the email draft.
 `,
 });
 
-export const draftEmailReplyFlow = defineFlow(
+export const draftEmailReplyFlow = ai.defineFlow(
   {
     name: 'draftEmailReplyFlow',
     inputSchema: DraftEmailReplyInputSchema,

@@ -6,10 +6,8 @@
  * - FacilitateCreativeBrainstormingInput - The input type for the facilitateCreativeBrainstorming function.
  * - FacilitateCreativeBrainstormingOutput - The return type for the facilitateCreativeBrainstorming function.
  */
-import '@/ai/genkit';
+import { ai } from '@/ai/gemini';
 import { z } from 'zod';
-import { defineFlow, definePrompt } from '@genkit-ai/core';
-
 
 const FacilitateCreativeBrainstormingInputSchema = z.object({
   topic: z.string().describe('The topic for the brainstorming session.'),
@@ -52,7 +50,7 @@ export async function facilitateCreativeBrainstorming(
   return facilitateCreativeBrainstormingFlow(input);
 }
 
-const prompt = definePrompt({
+const prompt = ai.definePrompt({
   name: 'facilitateCreativeBrainstormingPrompt',
   input: {schema: FacilitateCreativeBrainstormingInputSchema},
   output: {schema: FacilitateCreativeBrainstormingOutputSchema},
@@ -72,7 +70,7 @@ const prompt = definePrompt({
   `,
 });
 
-const facilitateCreativeBrainstormingFlow = defineFlow(
+const facilitateCreativeBrainstormingFlow = ai.defineFlow(
   {
     name: 'facilitateCreativeBrainstormingFlow',
     inputSchema: FacilitateCreativeBrainstormingInputSchema,
