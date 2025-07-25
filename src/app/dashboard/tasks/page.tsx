@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { ProductivitySuite } from "@/components/productivity-suite";
@@ -7,11 +8,13 @@ import { useToast } from "@/hooks/use-toast";
 import { getValidAccessToken } from "@/lib/firebase/auth";
 import React, { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useIntent } from "@/contexts/intent-context";
 
 export default function TasksPage() {
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
+    const { intent } = useIntent();
 
      useEffect(() => {
         const initializeToken = () => {

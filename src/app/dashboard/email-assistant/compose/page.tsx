@@ -20,6 +20,7 @@ import { draftEmailReply, type DraftEmailReplyOutput } from '@/ai/flows/draft-em
 import { useSpeechToText } from '@/hooks/use-speech-to-text';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useIntent } from '@/contexts/intent-context';
 
 interface Message {
   role: "user" | "pravis";
@@ -42,6 +43,8 @@ export default function ComposeEmailPage() {
   const [generatedDraft, setGeneratedDraft] = useState<DraftEmailReplyOutput | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const { intent, clearIntent } = useIntent();
+
   
   const { isRecording, transcript, startRecording, stopRecording } = useSpeechToText({
     onTranscriptReady: (text) => {
@@ -49,6 +52,28 @@ export default function ComposeEmailPage() {
         setTimeout(() => formRef.current?.requestSubmit(), 100);
     }
   });
+
+  // Handle pre-filling from intent
+  useEffect(() => {
+    if (intent?.action === 'navigateToEmailCompose') {
+      const { to, subject, body } = intent.params;
+      let promptParts = [];
+      if (to) promptParts.push(`to ${to}`);
+      if (subject) promptParts.push(`with the subject "${subject}"`);
+      if (body) promptParts.push(`and the message: ${body}`);
+      
+      const constructedInput = `Compose an email ${promptParts.join(' ')}`;
+      setInput(constructedInput);
+
+      // Auto-submit the form with the constructed prompt
+      setTimeout(() => {
+          const mockEvent = new Event('submit', { bubbles: true, cancelable: true });
+          formRef.current?.dispatchEvent(mockEvent);
+      }, 100);
+
+      clearIntent(); // Clear the intent after it has been used
+    }
+  }, [intent, clearIntent]);
 
   useEffect(() => {
     if (transcript) {

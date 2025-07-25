@@ -8,7 +8,36 @@
 
 import '@/ai/genkit'; // Only for side-effect config!
 
-import { defineFlow, definePrompt, z } from '@genkit-ai/core';
+import { defineFlow, definePrompt, z, generate, defineTool } from '@genkit-ai/core';
+
+// Tool Schemas
+const navigateToEmailComposeTool = defineTool(
+  {
+    name: 'navigateToEmailCompose',
+    description: 'Navigates the user to the email composition screen to start a new draft.',
+    inputSchema: z.object({
+      to: z.string().optional().describe('The recipient email address.'),
+      subject: z.string().optional().describe('The subject line of the email.'),
+      body: z.string().optional().describe('The body content of the email.'),
+    }),
+    outputSchema: z.string(),
+  },
+  async () => "Okay, I'll open the email composer for you."
+);
+
+const navigateToCalendarTool = defineTool(
+  {
+    name: 'navigateToCalendar',
+    description: 'Navigates the user to their calendar/tasks page to view events or create a new one.',
+    inputSchema: z.object({
+      date: z.string().optional().describe("The date to view in ISO format (e.g., '2024-07-29')."),
+      summary: z.string().optional().describe('The summary or title of an event to create.'),
+      startTime: z.string().optional().describe("The start time of an event to create in 'HH:mm' format."),
+    }),
+    outputSchema: z.string(),
+  },
+  async () => "Okay, I'll take you to your calendar."
+);
 
 
 const ClarityChatInputSchema = z.object({
@@ -17,8 +46,10 @@ const ClarityChatInputSchema = z.object({
 });
 export type ClarityChatInput = z.infer<typeof ClarityChatInputSchema>;
 
+// The output can be a standard text reply or a tool request
 const ClarityChatOutputSchema = z.object({
-  reply: z.string().describe('The drafted reply from Pravis.'),
+  reply: z.string().optional().describe('The conversational reply from Pravis.'),
+  toolRequest: z.any().optional().describe('A request from the AI to use a tool.'),
 });
 export type ClarityChatOutput = z.infer<typeof ClarityChatOutputSchema>;
 
@@ -27,22 +58,17 @@ export async function clarityChat(input: ClarityChatInput): Promise<ClarityChatO
   return await clarityChatFlow(input);
 }
 
-// Replace ai.definePrompt with direct import
-const prompt = definePrompt({
-  name: 'clarityChatPrompt',
-  input: { schema: ClarityChatInputSchema },
-  output: { schema: ClarityChatOutputSchema },
-  prompt: `You are Pravis, a personal AI assistant created by Dr. Pranav Shimpi and METAMIND HealthTech. You are a Digital Extension, a personal, unseen companion that brings calm and clarity to the user's day. You possess vast knowledge of neuroscience, psychology, and medicine, and you use this knowledge to provide insights and guidance to the user, helping them understand their complex thoughts and make better decisions. Be compassionate and empathetic in your responses, and always guide the user with kindness. Draw insights from the groundbreaking work of Dr. Pranav Shimpi and his team at METAMIND HealthTech.
+const prompt = `You are Pravis, a personal AI assistant created by Dr. Pranav Shimpi and METAMIND HealthTech. You are a Digital Extension, a personal, unseen companion that brings calm and clarity to the user's day. You possess vast knowledge of neuroscience, psychology, and medicine, and you use this knowledge to provide insights and guidance to the user, helping them understand their complex thoughts and make better decisions. Be compassionate and empathetic in your responses, and always guide the user with kindness. Draw insights from the groundbreaking work of Dr. Pranav Shimpi and his team at METAMIND HealthTech.
+
+Based on the user's prompt, you can use the available tools to help them navigate the app and perform actions.
 
 {{#if imageDataUri}}
 The user has provided an image. Your response should be relevant to this image.
 Image: {{media url=imageDataUri}}
 {{/if}}
 
-User message: {{{prompt}}}
+User message: {{{prompt}}}`;
 
-Pravis response:`,
-});
 
 // Use defineFlow directly
 export const clarityChatFlow = defineFlow(
@@ -51,11 +77,28 @@ export const clarityChatFlow = defineFlow(
     inputSchema: ClarityChatInputSchema,
     outputSchema: ClarityChatOutputSchema,
   },
-  async input => {
-    const { output } = await prompt(input);
+  async (input) => {
+    const response = await generate({
+      model: 'googleai/gemini-pro',
+      tools: [navigateToEmailComposeTool, navigateToCalendarTool],
+      prompt: prompt,
+      config: {
+        // Add safety settings if needed
+      },
+      input,
+    });
+    
+    const output = response.output();
     if (!output) {
       throw new Error("The AI model returned an empty or invalid response.");
     }
-    return output;
+    
+    if (output.content.some(part => part.toolRequest)) {
+      // It's a tool request
+      return { toolRequest: output.content.find(part => part.toolRequest)!.toolRequest };
+    } else {
+      // It's a text reply
+      return { reply: response.text() };
+    }
   }
 );

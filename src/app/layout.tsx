@@ -11,6 +11,7 @@ import { ChatPanel } from '@/components/chat-panel';
 import { PersistentChatInput } from '@/components/persistent-chat-input';
 import { usePathname } from 'next/navigation';
 import React from 'react';
+import { IntentProvider } from '@/contexts/intent-context';
 
 // Metadata can be defined in a Server Component, but since we are making this a client component, 
 // we will handle the title in a different way if needed, or move this to a parent layout if one existed.
@@ -68,8 +69,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ChatProvider>
-      <RootLayoutClient>{children}</RootLayoutClient>
-    </ChatProvider>
+    <IntentProvider>
+      <ChatProvider>
+        <RootLayoutClient>{children}</RootLayoutClient>
+      </ChatProvider>
+    </IntentProvider>
   );
 }

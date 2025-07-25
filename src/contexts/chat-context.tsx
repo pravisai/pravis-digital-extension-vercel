@@ -5,6 +5,7 @@ import React, { createContext, useState, useContext, ReactNode, useCallback, use
 import { clarityChat } from '@/ai/flows/clarity-chat';
 import { textToSpeech } from "@/ai/flows/text-to-speech";
 import { useToast } from '@/hooks/use-toast';
+import { useIntent } from './intent-context';
 
 interface Message {
   role: "user" | "pravis";
@@ -39,6 +40,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     const [attachmentPreview, setAttachmentPreview] = useState<string | null>(null);
     const [isSpeaking, setIsSpeaking] = useState(false);
     const { toast } = useToast();
+    const { handleIntent } = useIntent();
 
     useEffect(() => {
         if (messages.length === 0) {
@@ -109,15 +111,24 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
               prompt: currentInput, 
               imageDataUri 
             });
-            const pravisResponse = result.reply;
             
-            const pravisMessage: Message = { role: "pravis", content: pravisResponse };
-            setMessages((prev) => [...prev, pravisMessage]);
-            
-            if (isVoiceInput) {
-                const audioResult = await textToSpeech(pravisResponse);
-                setAudioDataUri(audioResult.media);
+            if (result.toolRequest) {
+              const { name, input: toolInput } = result.toolRequest;
+              handleIntent({ action: name, params: toolInput });
+              // Optionally add a message to the chat confirming the action
+              const confirmationMessage: Message = { role: "pravis", content: `Understood. Navigating to the appropriate module to handle your request.` };
+              setMessages((prev) => [...prev, confirmationMessage]);
+            } else if (result.reply) {
+              const pravisResponse = result.reply;
+              const pravisMessage: Message = { role: "pravis", content: pravisResponse };
+              setMessages((prev) => [...prev, pravisMessage]);
+              
+              if (isVoiceInput) {
+                  const audioResult = await textToSpeech(pravisResponse);
+                  setAudioDataUri(audioResult.media);
+              }
             }
+
 
         } catch (error: any) {
             console.error("Pravis chatbot error:", error);
@@ -131,7 +142,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         } finally {
             setIsLoading(false);
         }
-    }, [input, toast, attachment, attachmentPreview]);
+    }, [input, toast, attachment, attachmentPreview, handleIntent]);
 
     const value = {
         messages,

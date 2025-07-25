@@ -2,7 +2,7 @@
 
 "use client"
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
   Inbox,
   PenSquare,
@@ -15,6 +15,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { InteractiveCube, type CubeFace } from './interactive-cube'
 import { Typewriter } from './animations/typewriter'
+import { useIntent } from '@/contexts/intent-context'
 
 
 const emailCubeFaces: CubeFace[] = [
@@ -29,6 +30,15 @@ const emailCubeFaces: CubeFace[] = [
 
 export function EmailAssistantContent() {
   const router = useRouter();
+  const { intent, clearIntent } = useIntent();
+
+  // Handle intent-based navigation
+  useEffect(() => {
+    if (intent?.action === 'navigateToEmailCompose') {
+      router.push('/dashboard/email-assistant/compose');
+      // The intent is cleared in the compose page after it's used
+    }
+  }, [intent, router]);
 
   const handleFaceClick = (id: string) => {
     const face = emailCubeFaces.find(f => f.id === id);

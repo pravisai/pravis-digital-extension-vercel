@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -16,6 +17,7 @@ import { Typewriter } from './animations/typewriter';
 import { CreateEventDialog } from './create-event-dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useIntent } from '@/contexts/intent-context';
 
 const EventItem = ({ event, onDelete, onEdit }: { event: CalendarEvent, onDelete: (id: string) => void, onEdit: (event: CalendarEvent) => void }) => {
     const startTime = event.start.dateTime ? format(parseISO(event.start.dateTime), 'h:mm a') : 'All day';
@@ -73,9 +75,38 @@ export function ProductivitySuite({ accessToken }: { accessToken: string }) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
+    const { intent, clearIntent } = useIntent();
     
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+
+    // Handle intent to create an event
+    useEffect(() => {
+        if (intent?.action === 'navigateToCalendar') {
+            const { date: dateStr, summary, startTime } = intent.params;
+            
+            // Set the calendar to the specified date
+            if (dateStr) {
+                setDate(parseISO(dateStr));
+            }
+
+            // If there's enough info, open the creation dialog
+            if (summary) {
+                const newEvent: Partial<CalendarEvent> = {
+                    summary: summary,
+                    start: { dateTime: startTime ? `${dateStr}T${startTime}` : undefined, date: !startTime ? dateStr : undefined },
+                    end: { dateTime: startTime ? `${dateStr}T${startTime}` : undefined, date: !startTime ? dateStr : undefined }
+                };
+                
+                // This is a bit of a hack to fit into the existing edit flow
+                // A more robust solution might separate "new from intent"
+                setEditingEvent(newEvent as CalendarEvent);
+                setIsCreateDialogOpen(true);
+            }
+            
+            clearIntent();
+        }
+    }, [intent, clearIntent]);
 
     const fetchEvents = useCallback(async () => {
         setIsLoading(true);
@@ -150,7 +181,7 @@ export function ProductivitySuite({ accessToken }: { accessToken: string }) {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 h-full gap-6">
             <aside className="lg:col-span-1 flex flex-col gap-6">
-                <Button size="lg" className="w-full text-lg" onClick={() => setIsCreateDialogOpen(true)}>
+                <Button size="lg" className="w-full text-lg" onClick={() => { setEditingEvent(null); setIsCreateDialogOpen(true); }}>
                     <Plus className="mr-2 h-5 w-5"/> Create Event or Task
                 </Button>
                 <Card>
