@@ -1,14 +1,13 @@
 'use server';
 /**
- * @fileOverview This file defines a Genkit flow for analyzing the emotional content of a conversation and flagging it if it needs a more empathetic touch.
- *
+ * @fileOverview This file analyzes the emotional content of a conversation and flags it if it needs a more empathetic touch.
  * - analyzeConversationEmotions - A function that analyzes the emotional content of a conversation.
- * - AnalyzeConversationEmotionsInput - The input type for the analyzeConversationEmotions function.
- * - AnalyzeConversationEmotionsOutput - The return type for the analyzeConversationEmotions function.
+ * - AnalyzeConversationEmotionsInput - The input type for the function.
+ * - AnalyzeConversationEmotionsOutput - The return type for the function.
  */
 
-import { ai } from '@/ai/gemini';
 import { z } from 'zod';
+import { generateText } from '@/ai/gemini';  // <-- The Gemini helper you just created
 
 const AnalyzeConversationEmotionsInputSchema = z.object({
   conversation: z
@@ -32,35 +31,35 @@ export type AnalyzeConversationEmotionsOutput = z.infer<typeof AnalyzeConversati
 export async function analyzeConversationEmotions(
   input: AnalyzeConversationEmotionsInput
 ): Promise<AnalyzeConversationEmotionsOutput> {
-  return analyzeConversationEmotionsFlow(input);
+  // Craft the prompt exactly
+  const prompt = `You are an AI assistant designed to analyze conversations and determine if they need a more empathetic touch.
+
+A conversation needs a more empathetic touch if it contains negative emotions, conflict, or misunderstanding.
+
+Analyze the following conversation:
+
+"${input.conversation}"
+
+Based on your analysis, respond with a JSON object:
+{
+  "needsEmpatheticTouch": true|false, // True if needs more empathy
+  "summary": "Short summary of the emotional content"
 }
+`;
 
-const prompt = ai.definePrompt({
-  name: 'analyzeConversationEmotionsPrompt',
-  input: {schema: AnalyzeConversationEmotionsInputSchema},
-  output: {schema: AnalyzeConversationEmotionsOutputSchema},
-  prompt: `You are an AI assistant designed to analyze conversations and determine if they need a more empathetic touch.
+  const responseText = await generateText(prompt);
 
-  A conversation needs a more empathetic touch if it contains negative emotions, conflict, or misunderstanding.
+  // Attempt to parse the result as JSON
+  try {
+    // Find the JSON in the model's response (in case it adds extra text)
+    const jsonStart = responseText.indexOf('{');
+    const jsonEnd = responseText.lastIndexOf('}');
+    const jsonString = responseText.substring(jsonStart, jsonEnd + 1);
+    const parsed = JSON.parse(jsonString);
 
-  Analyze the following conversation:
-
-  "{{{conversation}}}"
-
-  Based on your analysis, determine if the conversation needs a more empathetic touch and provide a short summary of the emotional content of the conversation.`,
-});
-
-const analyzeConversationEmotionsFlow = ai.defineFlow(
-  {
-    name: 'analyzeConversationEmotionsFlow',
-    inputSchema: AnalyzeConversationEmotionsInputSchema,
-    outputSchema: AnalyzeConversationEmotionsOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    if (!output) {
-      throw new Error("The model did not return a valid response.");
-    }
-    return output;
+    // Validate result via schema
+    return AnalyzeConversationEmotionsOutputSchema.parse(parsed);
+  } catch (err) {
+    throw new Error('Failed to parse Gemini response as JSON: ' + err?.toString() || '');
   }
-);
+}

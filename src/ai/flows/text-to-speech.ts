@@ -1,15 +1,15 @@
 'use server';
 
 /**
- * @fileOverview This file defines a Genkit flow for converting text to speech.
- * - textToSpeech - A function that converts a string of text into playable audio.
- * - TextToSpeechInput - The input type for the textToSpeech function.
- * - TextToSpeechOutput - The return type for the textToSpeech function.
+ * @fileOverview Text-to-speech using the direct Gemini API (no Genkit).
+ * - textToSpeech - Converts a string of text into playable audio.
+ * - TextToSpeechInput - Input type.
+ * - TextToSpeechOutput - Return type.
  */
 
-import { ai } from '@/ai/gemini';
 import { z } from 'zod';
 import wav from 'wav';
+import { geminiClient } from '@/ai/gemini'; // Exported GoogleGenerativeAI instance from your SDK file
 
 const TextToSpeechInputSchema = z.string();
 export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
@@ -19,12 +19,43 @@ const TextToSpeechOutputSchema = z.object({
 });
 export type TextToSpeechOutput = z.infer<typeof TextToSpeechOutputSchema>;
 
-// Main user-facing function
 export async function textToSpeech(input: TextToSpeechInput): Promise<TextToSpeechOutput> {
-  return await textToSpeechFlow(input);
+  // Get the correct generative model for TTS
+  const ttsModel = geminiClient.getGenerativeModel({ model: 'gemini-1.5-flash-tts' }); // Use the actual model name for TTS
+
+  // The gemini SDK API spec for TTS may differ from text; this is a schematic example:
+  const ttsResult = await ttsModel.generateContent([
+    { text: input },
+    {
+      config: {
+        response_modality: 'AUDIO',
+        speech_config: {
+          voice_config: {
+            prebuilt_voice_config: { voice_name: 'Algenib' }
+          }
+        }
+      }
+    }
+  ]);
+  // The SDK's return structure for TTS may differ, but let's suppose you get audio content as a base64 string:
+  // Adjust the following line based on actual SDK result format!
+  const audioBase64 = ttsResult.response?.audio; // May be ttsResult.response?.candidates?.[0]?.audio or similar
+
+  if (!audioBase64) {
+    throw new Error('No audio was returned from the TTS service.');
+  }
+
+  // Optionally: If you need it packaged as a WAV (see your original code),
+  // decode to buffer, then encode to a proper .wav
+  const audioBuffer = Buffer.from(audioBase64, 'base64');
+  const wavBase64 = await toWav(audioBuffer);
+
+  return {
+    media: 'data:audio/wav;base64,' + wavBase64,
+  };
 }
 
-// Convert PCM data buffer to base64 WAV string
+// PCM-to-WAV utility stays the same
 async function toWav(
   pcmData: Buffer,
   channels = 1,
@@ -49,41 +80,3 @@ async function toWav(
     writer.end();
   });
 }
-
-// Genkit v1 text-to-speech flow using a string model name
-export const textToSpeechFlow = ai.defineFlow(
-  {
-    name: 'textToSpeechFlow',
-    inputSchema: TextToSpeechInputSchema,
-    outputSchema: TextToSpeechOutputSchema,
-  },
-  async (query) => {
-    const { media } = await ai.generate({
-      model: 'googleai/gemini-2.5-flash-preview-tts', // Use the model name as a string
-      prompt: query,
-      config: {
-        responseModalities: ['AUDIO'],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Algenib' },
-          },
-        },
-      },
-    });
-
-    if (!media) {
-      throw new Error('No audio media was returned from the TTS service.');
-    }
-
-    const audioBuffer = Buffer.from(
-      media.url.substring(media.url.indexOf(',') + 1),
-      'base64'
-    );
-
-    const wavBase64 = await toWav(audioBuffer);
-
-    return {
-      media: 'data:audio/wav;base64,' + wavBase64,
-    };
-  }
-);

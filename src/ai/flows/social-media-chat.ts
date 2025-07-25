@@ -1,19 +1,19 @@
 'use server';
 
 /**
- * @fileOverview This file defines a Genkit flow for a social media assistant.
+ * @fileOverview This file defines a Gemini-powered social media assistant.
  * - socialMediaChat - A function that provides social media advice.
  * - SocialMediaChatInput - The input type for the socialMediaChat function.
  * - SocialMediaChatOutput - The return type for the socialMediaChat function.
  */
 
-import { ai } from '@/ai/gemini';
 import { z } from 'zod';
+import { generateText } from '@/ai/gemini';
 
 const SocialMediaChatInputSchema = z.object({
   platform: z.string().describe('The social media platform for the post (e.g., Twitter, LinkedIn).'),
   instructions: z.string().describe("The user's request for social media help."),
-  imageDataUri: z.string().optional().describe("An optional image for the post, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
+  imageDataUri: z.string().optional().describe("An optional image for the post, as a data URI (with MIME type, base64)."),
 });
 export type SocialMediaChatInput = z.infer<typeof SocialMediaChatInputSchema>;
 
@@ -22,43 +22,38 @@ const SocialMediaChatOutputSchema = z.object({
 });
 export type SocialMediaChatOutput = z.infer<typeof SocialMediaChatOutputSchema>;
 
-// Main callable function
 export async function socialMediaChat(input: SocialMediaChatInput): Promise<SocialMediaChatOutput> {
-  return await socialMediaChatFlow(input);
-}
+  const prompt = `
+You are an expert Social Media Strategist. Your goal is to help the user with their social media presence.
 
-const prompt = ai.definePrompt({
-  name: 'socialMediaChatPrompt',
-  input: { schema: SocialMediaChatInputSchema },
-  output: { schema: SocialMediaChatOutputSchema },
-  prompt: `You are an expert Social Media Strategist. Your goal is to help the user with their social media presence.
-  
 Generate a post for the specified social media platform based on the user's instructions.
 
 Be creative, helpful, and align your suggestions with modern social media best practices for the target platform.
 
-{{#if imageDataUri}}
+${input.imageDataUri ? `
 The user has provided an image. Your post should be relevant to this image.
-Image: {{media url=imageDataUri}}
-{{/if}}
+Image Data URI: ${input.imageDataUri}
+` : ''}
 
-Platform: {{{platform}}}
-User's Instructions: {{{instructions}}}
+Platform: ${input.platform}
+User's Instructions: ${input.instructions}
 
-Your generated post:`,
-});
+Respond ONLY as JSON in this format:
+{
+  "post": "Your generated post here"
+}
+  `.trim();
 
-export const socialMediaChatFlow = ai.defineFlow(
-  {
-    name: 'socialMediaChatFlow',
-    inputSchema: SocialMediaChatInputSchema,
-    outputSchema: SocialMediaChatOutputSchema,
-  },
-  async input => {
-    const { output } = await prompt(input);
-    if (!output) {
-      throw new Error('The model did not return a valid post.');
-    }
-    return output;
+  const response = await generateText(prompt);
+
+  try {
+    const jsonStart = response.indexOf('{');
+    const jsonEnd = response.lastIndexOf('}');
+    const jsonString = response.substring(jsonStart, jsonEnd + 1);
+    const data = JSON.parse(jsonString);
+
+    return SocialMediaChatOutputSchema.parse(data);
+  } catch (error) {
+    throw new Error('Failed to parse Gemini response as JSON: ' + (error as any)?.toString());
   }
-);
+}
