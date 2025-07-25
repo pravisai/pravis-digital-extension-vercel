@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview A creative brainstorming AI agent.
@@ -7,9 +6,10 @@
  * - FacilitateCreativeBrainstormingInput - The input type for the facilitateCreativeBrainstorming function.
  * - FacilitateCreativeBrainstormingOutput - The return type for the facilitateCreativeBrainstorming function.
  */
+import '@/ai/genkit';
+import { z } from 'zod';
+import { defineFlow, definePrompt } from '@genkit-ai/core';
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
 
 const FacilitateCreativeBrainstormingInputSchema = z.object({
   topic: z.string().describe('The topic for the brainstorming session.'),
@@ -52,7 +52,7 @@ export async function facilitateCreativeBrainstorming(
   return facilitateCreativeBrainstormingFlow(input);
 }
 
-const prompt = ai.definePrompt({
+const prompt = definePrompt({
   name: 'facilitateCreativeBrainstormingPrompt',
   input: {schema: FacilitateCreativeBrainstormingInputSchema},
   output: {schema: FacilitateCreativeBrainstormingOutputSchema},
@@ -72,7 +72,7 @@ const prompt = ai.definePrompt({
   `,
 });
 
-const facilitateCreativeBrainstormingFlow = ai.defineFlow(
+const facilitateCreativeBrainstormingFlow = defineFlow(
   {
     name: 'facilitateCreativeBrainstormingFlow',
     inputSchema: FacilitateCreativeBrainstormingInputSchema,
@@ -80,6 +80,9 @@ const facilitateCreativeBrainstormingFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("The model did not return a valid response.");
+    }
+    return output;
   }
 );

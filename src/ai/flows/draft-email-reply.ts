@@ -1,15 +1,13 @@
-
 'use server';
 /**
  * @fileOverview This file defines a Genkit flow for drafting email replies conversationally.
- *
  * - draftEmailReply - A function that drafts an email reply based on a conversation history.
  * - DraftEmailReplyInput - The input type for the draftEmailReply function.
  * - DraftEmailReplyOutput - The return type for the draftEmailReply function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import '@/ai/genkit'; // Only for side-effect config!
+import { defineFlow, definePrompt, z } from '@genkit-ai/core';
 
 const MessageSchema = z.object({
   role: z.enum(['user', 'model']),
@@ -20,10 +18,7 @@ const DraftEmailReplyInputSchema = z.object({
   history: z.array(MessageSchema).describe('The conversation history.'),
   prompt: z.string().describe('The latest user prompt.'),
 });
-
-export type DraftEmailReplyInput = z.infer<
-  typeof DraftEmailReplyInputSchema
->;
+export type DraftEmailReplyInput = z.infer<typeof DraftEmailReplyInputSchema>;
 
 const DraftEmailReplyOutputSchema = z.object({
   to: z.string().describe('The recipient email address.'),
@@ -31,20 +26,19 @@ const DraftEmailReplyOutputSchema = z.object({
   tone: z.string().describe('The detected or specified tone of the email.'),
   body: z.string().describe('The drafted email reply body.'),
 });
-export type DraftEmailReplyOutput = z.infer<
-  typeof DraftEmailReplyOutputSchema
->;
+export type DraftEmailReplyOutput = z.infer<typeof DraftEmailReplyOutputSchema>;
 
+// Main callable function
 export async function draftEmailReply(
   input: DraftEmailReplyInput
 ): Promise<DraftEmailReplyOutput> {
-  return draftEmailReplyFlow(input);
+  return await draftEmailReplyFlow(input);
 }
 
-const prompt = ai.definePrompt({
+const prompt = definePrompt({
   name: 'draftEmailReplyPrompt',
-  input: {schema: DraftEmailReplyInputSchema},
-  output: {schema: DraftEmailReplyOutputSchema},
+  input: { schema: DraftEmailReplyInputSchema },
+  output: { schema: DraftEmailReplyOutputSchema },
   prompt: `You are Pravis, an intelligent email composition assistant. Users will interact with you to create emails. Parse their input and generate complete, professional emails based on their requirements.
 
 **Input Processing:**
@@ -70,14 +64,17 @@ Based on the request and history, generate the email draft.
 `,
 });
 
-const draftEmailReplyFlow = ai.defineFlow(
+export const draftEmailReplyFlow = defineFlow(
   {
     name: 'draftEmailReplyFlow',
     inputSchema: DraftEmailReplyInputSchema,
     outputSchema: DraftEmailReplyOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    const { output } = await prompt(input);
+    if (!output) {
+      throw new Error('The model returned an empty or invalid response.');
+    }
+    return output;
   }
 );

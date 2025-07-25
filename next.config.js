@@ -1,18 +1,26 @@
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true, // Recommended for identifying potential problems
+  reactStrictMode: true, // Recommended for identifying potential React problems
   typescript: {
-    // Allows production builds even if your project has type errors.
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: true, // Allows builds to complete with type errors (not recommended for prod, but helps unblock CI)
   },
   eslint: {
-    // Allows production builds even if your project has ESLint errors.
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true, // Allows builds with ESLint errors (useful for fast CI/CD)
   },
+  allowedDevOrigins: [
+    '3000-firebase-studio-1751790025169.cluster-ys234awlzbhwoxmkkse6qo3fz6.cloudworkstations.dev'
+  ],
+  // Uncomment the env block if you want to hard-code environment vars at build time:
+  /*
+  env: {
+    NEXT_PUBLIC_GEMINI_API_KEY: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    // Add any others if you want them baked in server-side
+  },
+  */
   webpack: (config) => {
-    // This is a workaround for some OpenTelemetry issues with Genkit in Next.js.
-    // It prevents errors by aliasing certain modules to false.
+    // Fixes for some OpenTelemetry/Genkit import issues in Next.js
     config.resolve.alias = {
       ...config.resolve.alias,
       '@opentelemetry/exporter-jaeger': false,

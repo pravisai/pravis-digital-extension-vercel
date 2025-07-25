@@ -1,18 +1,16 @@
-
 'use server';
 
 /**
  * @fileOverview This file defines a Genkit flow for converting text to speech.
- *
  * - textToSpeech - A function that converts a string of text into playable audio.
  * - TextToSpeechInput - The input type for the textToSpeech function.
  * - TextToSpeechOutput - The return type for the textToSpeech function.
  */
 
-import { ai } from '@/ai/genkit';
+import '@/ai/genkit';
 import { z } from 'zod';
 import wav from 'wav';
-import { googleAI } from '@genkit-ai/googleai';
+import { defineFlow, generate } from '@genkit-ai/core';
 
 const TextToSpeechInputSchema = z.string();
 export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
@@ -22,10 +20,12 @@ const TextToSpeechOutputSchema = z.object({
 });
 export type TextToSpeechOutput = z.infer<typeof TextToSpeechOutputSchema>;
 
+// Main user-facing function
 export async function textToSpeech(input: TextToSpeechInput): Promise<TextToSpeechOutput> {
-  return textToSpeechFlow(input);
+  return await textToSpeechFlow(input);
 }
 
+// Convert PCM data buffer to base64 WAV string
 async function toWav(
   pcmData: Buffer,
   channels = 1,
@@ -39,12 +39,10 @@ async function toWav(
       bitDepth: sampleWidth * 8,
     });
 
-    let bufs: any[] = [];
+    const bufs: any[] = [];
     writer.on('error', reject);
-    writer.on('data', function (d) {
-      bufs.push(d);
-    });
-    writer.on('end', function () {
+    writer.on('data', d => bufs.push(d));
+    writer.on('finish', () => {
       resolve(Buffer.concat(bufs).toString('base64'));
     });
 
@@ -53,15 +51,16 @@ async function toWav(
   });
 }
 
-const textToSpeechFlow = ai.defineFlow(
+// Genkit v1 text-to-speech flow using a string model name
+export const textToSpeechFlow = defineFlow(
   {
     name: 'textToSpeechFlow',
     inputSchema: TextToSpeechInputSchema,
     outputSchema: TextToSpeechOutputSchema,
   },
   async (query) => {
-    const { media } = await ai.generate({
-      model: googleAI.model('gemini-2.5-flash-preview-tts'),
+    const { media } = await generate({
+      model: 'googleai/gemini-2.5-flash-preview-tts', // Use the model name as a string
       prompt: query,
       config: {
         responseModalities: ['AUDIO'],
@@ -72,18 +71,18 @@ const textToSpeechFlow = ai.defineFlow(
         },
       },
     });
-    
+
     if (!media) {
       throw new Error('No audio media was returned from the TTS service.');
     }
-    
+
     const audioBuffer = Buffer.from(
       media.url.substring(media.url.indexOf(',') + 1),
       'base64'
     );
-    
+
     const wavBase64 = await toWav(audioBuffer);
-    
+
     return {
       media: 'data:audio/wav;base64,' + wavBase64,
     };

@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview This file defines a Genkit flow for analyzing the emotional content of a conversation and flagging it if it needs a more empathetic touch.
@@ -8,8 +7,9 @@
  * - AnalyzeConversationEmotionsOutput - The return type for the analyzeConversationEmotions function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import '@/ai/genkit';
+import { z } from 'zod';
+import { defineFlow, definePrompt } from '@genkit-ai/core';
 
 const AnalyzeConversationEmotionsInputSchema = z.object({
   conversation: z
@@ -36,7 +36,7 @@ export async function analyzeConversationEmotions(
   return analyzeConversationEmotionsFlow(input);
 }
 
-const prompt = ai.definePrompt({
+const prompt = definePrompt({
   name: 'analyzeConversationEmotionsPrompt',
   input: {schema: AnalyzeConversationEmotionsInputSchema},
   output: {schema: AnalyzeConversationEmotionsOutputSchema},
@@ -51,7 +51,7 @@ const prompt = ai.definePrompt({
   Based on your analysis, determine if the conversation needs a more empathetic touch and provide a short summary of the emotional content of the conversation.`,
 });
 
-const analyzeConversationEmotionsFlow = ai.defineFlow(
+const analyzeConversationEmotionsFlow = defineFlow(
   {
     name: 'analyzeConversationEmotionsFlow',
     inputSchema: AnalyzeConversationEmotionsInputSchema,
@@ -59,6 +59,9 @@ const analyzeConversationEmotionsFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("The model did not return a valid response.");
+    }
+    return output;
   }
 );
