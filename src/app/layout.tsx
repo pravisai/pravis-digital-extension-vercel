@@ -54,7 +54,8 @@ function RootLayoutClient({
           {children}
           <Toaster />
           <div className="md:hidden">
-            {isPanelOpen ? <ChatPanel /> : (showPersistentChat && <PersistentChatInput />)}
+            <ChatPanel />
+            {showPersistentChat && <PersistentChatInput />}
           </div>
         </ThemeProvider>
       </body>

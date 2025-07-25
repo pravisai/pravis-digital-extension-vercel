@@ -1,10 +1,11 @@
+
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { BrainCircuit, Send, User, Paperclip, Mic, Smile, Camera, Waves, X } from "lucide-react";
+import { BrainCircuit, Send, User, Paperclip, Mic, Smile, Camera, Waves, X, ChevronDown } from "lucide-react";
 import React, { useRef, useState, useEffect } from "react";
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
@@ -12,6 +13,7 @@ import { useChat } from "@/contexts/chat-context";
 import { useSpeechToText } from "@/hooks/use-speech-to-text";
 import { cn } from "@/lib/utils";
 import { useRouter } from 'next/navigation';
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // === Agentic Intent Parser ===
 function parseUIIntent(input: string) {
@@ -48,7 +50,9 @@ export function ClarityChat() {
     audioDataUri,
     setAudioDataUri,
     attachmentPreview,
-    setAttachment
+    setAttachment,
+    isPanelOpen,
+    setPanelOpen,
   } = useChat();
 
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -56,6 +60,7 @@ export function ClarityChat() {
   const formRef = useRef<HTMLFormElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
 
   const router = useRouter();
 
@@ -134,9 +139,10 @@ export function ClarityChat() {
 
   useEffect(() => {
     const form = formRef.current;
-    form?.addEventListener('submit-voice', handleVoiceSubmit);
+    const voiceSubmitHandler = (e: Event) => handleVoiceSubmit(e as React.FormEvent);
+    form?.addEventListener('submit-voice', voiceSubmitHandler);
     return () => {
-      form?.removeEventListener('submit-voice', handleVoiceSubmit);
+      form?.removeEventListener('submit-voice', voiceSubmitHandler);
     };
   }, [handleVoiceSubmit]);
 
@@ -155,6 +161,11 @@ export function ClarityChat() {
             </p>
           </div>
         </div>
+         {isMobile && isPanelOpen && (
+            <Button variant="ghost" size="icon" onClick={() => setPanelOpen(false)}>
+                <ChevronDown className="h-5 w-5" />
+            </Button>
+        )}
       </header>
       <ScrollArea className="flex-1 w-full" ref={scrollAreaRef}>
         <div className="space-y-6 p-6">
