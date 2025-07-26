@@ -177,19 +177,19 @@
 
   .part-1 { 
     left: 0;
-    animation: move-part-1 8s linear infinite; 
+    animation: move-part-1 8s ease-in-out infinite; 
   }
   .part-2 { 
     left: 25%;
-    animation: move-part-2 8s linear infinite;
+    animation: move-part-2 8s ease-in-out infinite;
   }
   .part-3 { 
     left: 50%;
-    animation: move-part-3 8s linear infinite;
+    animation: move-part-3 8s ease-in-out infinite;
   }
   .part-4 { 
     left: 75%;
-    animation: move-part-4 8s linear infinite;
+    animation: move-part-4 8s ease-in-out infinite;
   }
 
   @keyframes logo-spin {
@@ -198,51 +198,27 @@
   }
 
  @keyframes move-part-1 {
-    0%, 100% { transform: translateZ(0) translateY(0); }
-    /* Move up to form 'M' */
-    20% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.5)); }
-    /* Hold M shape */
-    40% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.5)); }
-    /* Return to cuboid */
-    60% { transform: translateZ(0) translateY(0); }
-    /* Hold cuboid shape */
-    80% { transform: translateZ(0) translateY(0); }
+    0%, 100% { transform: translateY(0); }
+    20%, 40% { transform: translateY(calc(var(--logo-size) * -0.5)); }
+    60%, 80% { transform: translateY(0); }
   }
   
   @keyframes move-part-2 {
-    0%, 100% { transform: translateZ(0) translateY(0); }
-    /* Move up to form 'M' */
-    20% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.25)); }
-    /* Hold M shape */
-    40% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.25)); }
-    /* Return to cuboid */
-    60% { transform: translateZ(0) translateY(0); }
-    /* Hold cuboid shape */
-    80% { transform: translateZ(0) translateY(0); }
+    0%, 100% { transform: translateY(0); }
+    20%, 40% { transform: translateY(calc(var(--logo-size) * -0.25)); }
+    60%, 80% { transform: translateY(0); }
   }
 
   @keyframes move-part-3 {
-    0%, 100% { transform: translateZ(0) translateY(0); }
-    /* Move up to form 'M' */
-    20% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.25)); }
-    /* Hold M shape */
-    40% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.25)); }
-    /* Return to cuboid */
-    60% { transform: translateZ(0) translateY(0); }
-    /* Hold cuboid shape */
-    80% { transform: translateZ(0) translateY(0); }
+    0%, 100% { transform: translateY(0); }
+    20%, 40% { transform: translateY(calc(var(--logo-size) * -0.25)); }
+    60%, 80% { transform: translateY(0); }
   }
 
   @keyframes move-part-4 {
-    0%, 100% { transform: translateZ(0) translateY(0); }
-    /* Move up to form 'M' */
-    20% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.5)); }
-    /* Hold M shape */
-    40% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.5)); }
-    /* Return to cuboid */
-    60% { transform: translateZ(0) translateY(0); }
-    /* Hold cuboid shape */
-    80% { transform: translateZ(0) translateY(0); }
+    0%, 100% { transform: translateY(0); }
+    20%, 40% { transform: translateY(calc(var(--logo-size) * -0.5)); }
+    60%, 80% { transform: translateY(0); }
   }
 
 
