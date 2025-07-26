@@ -1,4 +1,3 @@
-
 "use client"
 
 import { BrainCircuit, Mail, ListChecks, Bot, User, Settings, LogOut, ArrowLeft, LineChart, CheckCircle2, MessageSquare, Timer, Sun, Moon, RefreshCw, Loader2 } from "lucide-react"
@@ -29,6 +28,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { EmailProvider, useEmail } from "@/contexts/email-context"
 import { PravisLogo } from "@/components/pravis-logo"
+
+// ====== AGENTIC LOGIC IMPORTS ======
+import { AgentAutoNavigator } from "@/components/AgentAutoNavigator";
+import AgentCommandBox from "@/components/AgentCommandBox";
+// ===================================
 
 const statCards = [
   {
@@ -183,7 +187,6 @@ function DashboardHeader() {
   );
 }
 
-
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
@@ -227,7 +230,6 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
         return () => unsubscribe();
     }, [router, toast]);
 
-
     if (isLoading) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
@@ -238,6 +240,12 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
     return (
         <div className="flex min-h-screen w-full flex-col">
+            {/* --- Agentic: Auto intent-based navigation for ALL dashboard child pages --- */}
+            <AgentAutoNavigator />
+            {/* --- Optional: Agent command box for manual NL testing --- */}
+            <div className="py-2 px-4 bg-muted/40 border-b border-muted">
+                <AgentCommandBox />
+            </div>
             <DashboardHeader />
             <main className={cn(
                 "flex-1",
@@ -252,7 +260,6 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
         </div>
     )
 }
-
 
 export default function DashboardLayout({
   children,

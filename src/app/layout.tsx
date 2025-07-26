@@ -1,8 +1,5 @@
-
-
 "use client";
 
-import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from '@/components/theme-provider';
@@ -12,11 +9,10 @@ import { PersistentChatInput } from '@/components/persistent-chat-input';
 import { usePathname } from 'next/navigation';
 import React from 'react';
 import { IntentProvider } from '@/contexts/intent-context';
-
-// Metadata can be defined in a Server Component, but since we are making this a client component, 
-// we will handle the title in a different way if needed, or move this to a parent layout if one existed.
-// For now, we will manage the document title dynamically or set it in next.config.js if static.
-// To keep things simple and fix the immediate error, we focus on making the layout a client component.
+// === AGENTIC IMPORTS ===
+import { AgentProvider } from "@/agent/agent-context";
+import { AgentAutoNavigator } from "@/components/AgentAutoNavigator";
+// =======================
 
 function RootLayoutClient({
   children,
@@ -25,12 +21,37 @@ function RootLayoutClient({
 }) {
   const pathname = usePathname();
   const { isPanelOpen } = useChat();
-  
-  // The chat input should be shown if the panel is closed,
-  // and we are not on a page that is a dedicated chat interface.
+
   const isChatPage = pathname === '/dashboard/clarity-chat';
   const showPersistentChat = !isPanelOpen && !isChatPage;
 
+  return (
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="dark"
+      enableSystem
+      disableTransitionOnChange
+    >
+      {/* --- AGENTIC LOGIC: AUTO-NAV LISTENER ONLY --- */}
+      <AgentAutoNavigator />
+      {/* -------------------------------------------- */}
+      {children}
+      <Toaster />
+      <div className="md:hidden">
+        <ChatPanel />
+        {showPersistentChat && <PersistentChatInput />}
+      </div>
+    </ThemeProvider>
+  );
+}
+
+// ---- The real exported entrypoint ----
+// Now includes <html> and <body>, must NOT be a client component!
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -45,35 +66,14 @@ function RootLayoutClient({
         <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-          <Toaster />
-          <div className="md:hidden">
-            <ChatPanel />
-            {showPersistentChat && <PersistentChatInput />}
-          </div>
-        </ThemeProvider>
+        <AgentProvider>
+          <IntentProvider>
+            <ChatProvider>
+              <RootLayoutClient>{children}</RootLayoutClient>
+            </ChatProvider>
+          </IntentProvider>
+        </AgentProvider>
       </body>
     </html>
-  );
-}
-
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <IntentProvider>
-      <ChatProvider>
-        <RootLayoutClient>{children}</RootLayoutClient>
-      </ChatProvider>
-    </IntentProvider>
   );
 }

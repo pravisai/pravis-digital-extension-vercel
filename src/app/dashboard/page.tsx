@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,6 +7,9 @@ import { Modules } from "@/components/daily-rhythms";
 import { FadeIn } from "@/components/animations/fade-in";
 import { Typewriter } from "@/components/animations/typewriter";
 import { Skeleton } from "@/components/ui/skeleton";
+
+// Import AgentCommandBox for testing agent commands
+import AgentCommandBox from "@/components/AgentCommandBox";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -35,6 +37,11 @@ export default function DashboardPage() {
 
   return (
     <div className="h-full flex flex-col items-center justify-center space-y-8">
+      {/* Agent Command Box for agent command input testing */}
+      <div className="w-full max-w-md px-4">
+        <AgentCommandBox />
+      </div>
+
       <FadeIn className="w-full">
         <div className="text-center">
           {getGreeting()}

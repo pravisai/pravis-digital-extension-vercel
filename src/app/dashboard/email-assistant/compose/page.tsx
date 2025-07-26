@@ -1,10 +1,8 @@
-
-
-"use client"
+"use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Loader2, Send, ArrowLeft, BrainCircuit, User, Mic, Waves, ChevronsUpDown } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Loader2, Send, ArrowLeft, BrainCircuit, User, Mic, Waves } from 'lucide-react';
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 
@@ -28,7 +26,6 @@ interface Message {
 }
 
 const emailTones = ["Professional", "Formal", "Casual", "Urgent", "Diplomatic", "Follow-up"];
-
 const initialMessage: Message = { role: 'pravis', content: "I'm ready to draft your email. Please provide the recipient, subject, and message content. You can also select a tone." };
 
 export default function ComposeEmailPage() {
@@ -45,15 +42,20 @@ export default function ComposeEmailPage() {
   const formRef = useRef<HTMLFormElement>(null);
   const { intent, clearIntent } = useIntent();
 
-  
   const { isRecording, transcript, startRecording, stopRecording } = useSpeechToText({
     onTranscriptReady: (text) => {
-        setInput(text);
-        setTimeout(() => formRef.current?.requestSubmit(), 100);
+      setInput(text);
+      setTimeout(() => formRef.current?.requestSubmit(), 100);
     }
   });
 
-  // Handle pre-filling from intent
+  // --- NEW: Handle pre-filling from URL params ---
+  const params = useSearchParams();
+  const prefillTo = params.get("to") || "";
+  const prefillSubject = params.get("subject") || "";
+  const prefillBody = params.get("body") || "";
+
+  // Fill from intent (your previous logic, unchanged)
   useEffect(() => {
     if (intent?.action === 'navigateToEmailCompose') {
       const { to, subject, body } = intent.params;
@@ -61,23 +63,38 @@ export default function ComposeEmailPage() {
       if (to) promptParts.push(`to ${to}`);
       if (subject) promptParts.push(`with the subject "${subject}"`);
       if (body) promptParts.push(`and the message: ${body}`);
-      
       const constructedInput = `Compose an email ${promptParts.join(' ')}`;
       setInput(constructedInput);
-
-      // Auto-submit the form with the constructed prompt
       setTimeout(() => {
-          const mockEvent = new Event('submit', { bubbles: true, cancelable: true });
-          formRef.current?.dispatchEvent(mockEvent);
+        const mockEvent = new Event('submit', { bubbles: true, cancelable: true });
+        formRef.current?.dispatchEvent(mockEvent);
       }, 100);
-
-      clearIntent(); // Clear the intent after it has been used
+      clearIntent();
     }
   }, [intent, clearIntent]);
 
+  // NEW: If no input yet and URL params present, prefill from URL
+  useEffect(() => {
+    if (!input && (prefillTo || prefillSubject || prefillBody)) {
+      let promptParts = [];
+      if (prefillTo) promptParts.push(`to ${prefillTo}`);
+      if (prefillSubject) promptParts.push(`with the subject "${prefillSubject}"`);
+      if (prefillBody) promptParts.push(`and the message: ${prefillBody}`);
+      const constructedInput = `Compose an email ${promptParts.join(' ')}`;
+      setInput(constructedInput);
+      // Optional: Auto-submit just like with intent
+      setTimeout(() => {
+        const mockEvent = new Event('submit', { bubbles: true, cancelable: true });
+        formRef.current?.dispatchEvent(mockEvent);
+      }, 100);
+    }
+    // Only on initial mount or when params change
+    // eslint-disable-next-line
+  }, [prefillTo, prefillSubject, prefillBody]);
+
   useEffect(() => {
     if (transcript) {
-        setInput(transcript);
+      setInput(transcript);
     }
   }, [transcript]);
 
@@ -88,38 +105,35 @@ export default function ComposeEmailPage() {
 
   useEffect(() => {
     if (scrollAreaRef.current) {
-        const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
-        if(viewport) viewport.scrollTop = viewport.scrollHeight;
+      const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
+      if(viewport) viewport.scrollTop = viewport.scrollHeight;
     }
   }, [messages, isDrafting]);
-
 
   const handleDraftEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-    
+
     const promptWithTone = `${input} (Tone: ${selectedTone})`;
     const userMessage: Message = { role: "user", content: input };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
-    
-    const currentInput = input;
+
     setInput('');
-    
     setIsDrafting(true);
     setGeneratedDraft(null);
 
     const historyForApi = newMessages
-        .slice(1) // Remove initial system message
-        .map(msg => ({
-            role: msg.role === 'pravis' ? 'model' : 'user',
-            content: typeof msg.content === 'string' ? msg.content : "Okay, I've drafted that for you. What's next?",
-        }));
+      .slice(1) // Remove initial system message
+      .map(msg => ({
+          role: msg.role === 'pravis' ? 'model' : 'user',
+          content: typeof msg.content === 'string' ? msg.content : "Okay, I've drafted that for you. What's next?",
+      }));
 
     try {
       const result = await draftEmailReply({ prompt: promptWithTone, history: historyForApi.slice(0, -1) });
       setGeneratedDraft(result);
-      
+
       const pravisResponse: Message = { 
         role: "pravis", 
         content: (
@@ -136,7 +150,6 @@ export default function ComposeEmailPage() {
         )
       };
       setMessages(prev => [...prev, pravisResponse]);
-
     } catch (error) {
       console.error("Failed to draft email:", error);
       const errorMessage = { role: 'pravis', content: 'Sorry, I encountered an error while drafting the email. Please try again.' };
@@ -156,7 +169,6 @@ export default function ComposeEmailPage() {
         toast({ variant: 'destructive', title: 'No Draft', description: 'Please generate a draft first.' });
         return;
     }
-    
     setIsSending(true);
     const accessToken = getStoredAccessToken();
     if (!accessToken) {
@@ -217,7 +229,7 @@ export default function ComposeEmailPage() {
              </div>
            </ScrollArea>
            <footer className="p-2 border-t">
-             <form ref={formRef} onSubmit={handleDraftEmail} className="flex items-center gap-2">
+            <form ref={formRef} onSubmit={handleDraftEmail} className="flex items-center gap-2">
                 <Select value={selectedTone} onValueChange={setSelectedTone}>
                     <SelectTrigger className="w-[150px] rounded-full h-12 bg-secondary border-none">
                         <SelectValue placeholder="Select tone" />
@@ -229,23 +241,23 @@ export default function ComposeEmailPage() {
                     </SelectContent>
                 </Select>
                <div className="flex-1 flex items-center bg-secondary rounded-full px-4">
-                 <Input
-                   value={input}
-                   onChange={(e) => setInput(e.target.value)}
-                   placeholder={isRecording ? "Listening..." : "Send email to..."}
-                   className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 h-12"
-                   disabled={isDrafting || isRecording}
-                 />
-               </div>
-               {input ? (
-                 <Button type="submit" size="icon" className="rounded-full w-12 h-12" disabled={isDrafting}><Send className="h-6 w-6" /></Button>
-               ) : (
-                 <Button type="button" size="icon" onClick={handleMicClick} className={cn("rounded-full w-12 h-12", isRecording && "bg-destructive")} disabled={isDrafting}>
-                   {isRecording ? <Waves className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
-                 </Button>
-               )}
-             </form>
-           </footer>
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={isRecording ? "Listening..." : "Send email to..."}
+                  className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 h-12"
+                  disabled={isDrafting || isRecording}
+                />
+              </div>
+              {input ? (
+                <Button type="submit" size="icon" className="rounded-full w-12 h-12" disabled={isDrafting}><Send className="h-6 w-6" /></Button>
+              ) : (
+                <Button type="button" size="icon" onClick={handleMicClick} className={cn("rounded-full w-12 h-12", isRecording && "bg-destructive")} disabled={isDrafting}>
+                  {isRecording ? <Waves className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
+                </Button>
+              )}
+            </form>
+          </footer>
         </div>
     </FadeIn>
   );
