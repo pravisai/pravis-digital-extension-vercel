@@ -14,7 +14,7 @@
     --popover: 0 0% 5%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 34 98% 60%;
+    --primary: 270 90% 60%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 271 100% 25%;
@@ -31,7 +31,7 @@
 
     --border: 271 100% 20%;
     --input: 271 100% 25%;
-    --ring: 34 98% 60%;
+    --ring: 270 90% 60%;
 
     --chart-1: 271 100% 50%; /* neon purple */
     --chart-2: 180 100% 50%; /* electric blue */
@@ -117,7 +117,7 @@
   .logo-scene {
     width: var(--logo-size, 60px);
     height: var(--logo-size, 60px);
-    perspective: calc(var(--logo-size) * 10);
+    perspective: calc(var(--logo-size) * 8);
     display: flex;
     justify-content: center;
     align-items: center;
