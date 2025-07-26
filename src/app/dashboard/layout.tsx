@@ -190,7 +190,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(true);
   
-    const isFullHeightPage = pathname === '/dashboard' || pathname === '/dashboard/creative-partner' || pathname === '/dashboard/clarity-chat' || pathname.startsWith('/dashboard/email-assistant') || pathname === '/dashboard/tasks' || pathname === '/dashboard/social-media';
+    const isFullHeightPage = pathname === '/dashboard' || pathname === '/dashboard/creative-partner' || pathname === '/dashboard/productivity-suite' || pathname === '/dashboard/clarity-chat' || pathname.startsWith('/dashboard/email-assistant') || pathname === '/dashboard/tasks' || pathname === '/dashboard/social-media';
     
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -257,7 +257,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.Node
 }) {
 
   return (
