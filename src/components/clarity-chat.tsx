@@ -151,8 +151,8 @@ export function ClarityChat() {
     <div className="flex flex-col h-full bg-card shadow-sm">
       <header className="p-4 border-b flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Avatar className="p-1.5">
-            <PravisLogo size={30} />
+          <Avatar className="p-1.5 h-10 w-10">
+            <PravisLogo size={24} />
           </Avatar>
           <div>
             <h1 className="font-semibold text-lg">Pravis AI</h1>
@@ -176,8 +176,8 @@ export function ClarityChat() {
               className={`flex items-start gap-4 ${message.role === "user" ? "justify-end" : ""}`}
             >
               {message.role === "pravis" && (
-                <Avatar className="p-1.5">
-                    <PravisLogo size={30} />
+                <Avatar className="p-1.5 h-10 w-10">
+                    <PravisLogo size={24} />
                 </Avatar>
               )}
               <div
@@ -202,8 +202,8 @@ export function ClarityChat() {
           ))}
           {isLoading && (
             <div className="flex items-center gap-4">
-              <Avatar className="p-1.5">
-                <PravisLogo size={30} />
+              <Avatar className="p-1.5 h-10 w-10">
+                <PravisLogo size={24} />
               </Avatar>
               <div className="rounded-lg p-3 bg-secondary animate-pulse">
                 <div className="h-4 w-24 rounded-md bg-muted"></div>
