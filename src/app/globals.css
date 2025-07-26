@@ -14,7 +14,7 @@
     --popover: 0 0% 5%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 270 90% 60%;
+    --primary: 270 90% 65%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 271 100% 25%;
@@ -115,9 +115,9 @@
 @layer components {
   /* --- 3D Translucent Cube Logo --- */
   .logo-scene {
-    width: var(--logo-size, 60px);
-    height: var(--logo-size, 60px);
-    perspective: calc(var(--logo-size) * 8);
+    width: var(--logo-size, 40px);
+    height: var(--logo-size, 40px);
+    perspective: calc(var(--logo-size) * 10);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -128,16 +128,16 @@
     width: 100%;
     height: 100%;
     transform-style: preserve-3d;
-    animation: logo-spin 16s linear infinite;
+    animation: logo-float 20s linear infinite;
   }
 
   .logo-face {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-color: hsl(var(--primary) / 0.15);
-    border: 1px solid hsl(var(--primary) / 0.5);
-    box-shadow: inset 0 0 calc(var(--logo-size) / 4) hsl(var(--primary) / 0.2);
+    background-color: hsl(var(--primary) / 0.1);
+    border: 1px solid hsl(var(--primary) / 0.4);
+    box-shadow: inset 0 0 calc(var(--logo-size) / 4) hsl(var(--primary) / 0.15);
   }
   
   .logo-front  { transform: rotateY(0deg) translateZ(calc(var(--logo-size) / 2)); }
@@ -147,9 +147,12 @@
   .logo-top    { transform: rotateX(90deg) translateZ(calc(var(--logo-size) / 2)); }
   .logo-bottom { transform: rotateX(-90deg) translateZ(calc(var(--logo-size) / 2)); }
 
-  @keyframes logo-spin {
-    from { transform: rotateX(-20deg) rotateY(0deg); }
-    to   { transform: rotateX(-20deg) rotateY(360deg); }
+  @keyframes logo-float {
+    0% { transform: rotateX(-20deg) rotateY(0deg); }
+    25% { transform: rotateX(0deg) rotateY(90deg) rotateZ(10deg); }
+    50% { transform: rotateX(20deg) rotateY(180deg); }
+    75% { transform: rotateX(0deg) rotateY(270deg) rotateZ(-10deg); }
+    100% { transform: rotateX(-20deg) rotateY(360deg); }
   }
 
 
