@@ -1,3 +1,4 @@
+console.log("DEBUG GEMINI_API_KEY:", process.env.GEMINI_API_KEY);
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 if (!process.env.GEMINI_API_KEY) {
