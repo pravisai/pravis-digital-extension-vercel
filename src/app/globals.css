@@ -165,7 +165,7 @@
     top: 0;
     left: 0;
     transform-origin: top;
-    transform: rotateX(90deg);
+    transform: rotateX(90deg) translateY(calc(var(--logo-size) * -0.125));
   }
   
   /* Side faces */
@@ -175,7 +175,7 @@
     top: 0;
     left: 0;
     transform-origin: left;
-    transform: rotateY(-90deg);
+    transform: rotateY(-90deg) translateX(calc(var(--logo-size) * -0.125));
   }
 
   .part-1 { animation: part-1-spin 12s ease-in-out infinite; transform: rotateY(20deg) rotateX(-15deg) translateX(-150%); }
