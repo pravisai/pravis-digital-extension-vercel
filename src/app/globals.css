@@ -115,6 +115,8 @@
 @layer components {
   /* --- Transforming M Logo --- */
   .transforming-logo-scene {
+    width: var(--logo-size, 60px);
+    height: var(--logo-size, 60px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -122,6 +124,8 @@
   }
 
   .transforming-logo-pivot {
+    width: 100%;
+    height: 100%;
     transform-style: preserve-3d;
     animation: logo-spin 16s linear infinite;
   }
@@ -154,7 +158,7 @@
   /* Top/Bottom faces */
   .transforming-logo-part::before {
     width: 100%;
-    height: 25%;
+    height: calc(var(--logo-size) / 4);
     top: 0;
     left: 0;
     transform-origin: top;
@@ -163,7 +167,7 @@
   
   /* Side faces */
   .transforming-logo-part::after {
-    width: 25%;
+    width: calc(var(--logo-size) / 4);
     height: 100%;
     top: 0;
     left: 0;
@@ -195,30 +199,30 @@
 
   @keyframes move-part-1 {
     0%, 100% { transform: translateZ(0) rotateX(0); }
-    25% { transform: translateZ(-25%) rotateX(-35deg); }
+    25% { transform: translateZ(calc(var(--logo-size) * -0.25)) rotateX(-35deg); }
     50% { transform: translateZ(0) rotateX(0); }
-    75% { transform: translateZ(25%) rotateX(35deg); }
+    75% { transform: translateZ(calc(var(--logo-size) * 0.25)) rotateX(35deg); }
   }
   
   @keyframes move-part-2 {
     0%, 100% { transform: translateZ(0) rotateX(0); }
-    25% { transform: translateZ(-10%) rotateX(25deg); }
-    50% { transform: translateZ(20%) rotateX(-15deg); }
+    25% { transform: translateZ(calc(var(--logo-size) * -0.1)) rotateX(25deg); }
+    50% { transform: translateZ(calc(var(--logo-size) * 0.2)) rotateX(-15deg); }
     75% { transform: translateZ(0) rotateX(0); }
   }
 
   @keyframes move-part-3 {
     0%, 100% { transform: translateZ(0) rotateX(0); }
-    25% { transform: translateZ(10%) rotateX(-25deg); }
-    50% { transform: translateZ(-20%) rotateX(15deg); }
+    25% { transform: translateZ(calc(var(--logo-size) * 0.1)) rotateX(-25deg); }
+    50% { transform: translateZ(calc(var(--logo-size) * -0.2)) rotateX(15deg); }
     75% { transform: translateZ(0) rotateX(0); }
   }
 
   @keyframes move-part-4 {
     0%, 100% { transform: translateZ(0) rotateX(0); }
-    25% { transform: translateZ(25%) rotateX(35deg); }
+    25% { transform: translateZ(calc(var(--logo-size) * 0.25)) rotateX(35deg); }
     50% { transform: translateZ(0) rotateX(0); }
-    75% { transform: translateZ(-25%) rotateX(-35deg); }
+    75% { transform: translateZ(calc(var(--logo-size) * -0.25)) rotateX(-35deg); }
   }
 
 
@@ -271,19 +275,19 @@
     border-color: hsl(var(--primary));
   }
   
-  .front:hover { transform: rotateY(0deg) translateZ(135px); }
-  .right:hover { transform: rotateY(90deg) translateZ(135px); }
-  .back:hover { transform: rotateY(180deg) translateZ(135px); }
-  .left:hover { transform: rotateY(-90deg) translateZ(135px); }
-  .top:hover { transform: rotateX(90deg) translateZ(135px); }
-  .bottom:hover { transform: rotateX(-90deg) translateZ(135px); }
-
   .front { transform: rotateY(0deg) translateZ(125px); }
   .right { transform: rotateY(90deg) translateZ(125px); }
   .back { transform: rotateY(180deg) translateZ(125px); }
   .left { transform: rotateY(-90deg) translateZ(125px); }
   .top { transform: rotateX(90deg) translateZ(125px); }
   .bottom { transform: rotateX(-90deg) translateZ(125px); }
+
+  .front:hover { transform: rotateY(0deg) translateZ(135px); }
+  .right:hover { transform: rotateY(90deg) translateZ(135px); }
+  .back:hover { transform: rotateY(180deg) translateZ(135px); }
+  .left:hover { transform: rotateY(-90deg) translateZ(135px); }
+  .top:hover { transform: rotateX(90deg) translateZ(135px); }
+  .bottom:hover { transform: rotateX(-90deg) translateZ(135px); }
 
   .module-icon {
     width: 60px;
