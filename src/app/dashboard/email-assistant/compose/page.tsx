@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Send, ArrowLeft, BrainCircuit, Sparkles, Trash2 } from 'lucide-react';
 
