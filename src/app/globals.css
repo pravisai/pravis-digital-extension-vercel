@@ -117,7 +117,7 @@
   .logo-scene {
     width: var(--logo-size, 40px);
     height: var(--logo-size, 40px);
-    perspective: calc(var(--logo-size) * 10);
+    perspective: calc(var(--logo-size) * 8);
     display: flex;
     justify-content: center;
     align-items: center;
