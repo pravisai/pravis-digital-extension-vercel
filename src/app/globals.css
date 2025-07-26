@@ -113,6 +113,33 @@
 }
 
 @layer components {
+  /* --- Logo Cube Styles --- */
+  .logo-scene {
+    perspective: 800px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-cube {
+    position: relative;
+    transform-style: preserve-3d;
+    animation: logo-spin 12s linear infinite;
+  }
+
+  .logo-cube__face {
+    position: absolute;
+    border: 1px solid hsl(var(--primary) / 0.8);
+    background: hsl(var(--primary) / 0.1);
+  }
+
+  @keyframes logo-spin {
+    from { transform: rotateY(0) rotateX(0); }
+    to   { transform: rotateY(360deg) rotateX(360deg); }
+  }
+
+
+  /* --- Interactive Cube Styles --- */
   .cube-wrapper {
     display: flex;
     justify-content: center;

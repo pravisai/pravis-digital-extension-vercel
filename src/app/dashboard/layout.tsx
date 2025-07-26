@@ -28,6 +28,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { EmailProvider, useEmail } from "@/contexts/email-context"
+import { PravisLogo } from "@/components/pravis-logo"
 
 const statCards = [
   {
@@ -108,7 +109,7 @@ function DashboardHeader() {
             </Button>
           ) : (
              <Link href="/dashboard" className="font-bold text-lg md:hidden">
-                <BrainCircuit className="h-6 w-6 text-primary" />
+                <PravisLogo size={28} />
              </Link>
           )}
         </div>

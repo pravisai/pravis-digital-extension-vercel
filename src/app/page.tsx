@@ -11,7 +11,7 @@ import { signInWithGoogle, signInWithEmail, signUpWithEmail, onAuthStateChanged,
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { FadeIn, StaggeredListItem } from '@/components/animations/fade-in';
-import { Typewriter } from '@/components/animations/typewriter';
+import { PravisLogo } from '@/components/pravis-logo';
 import { Combobox } from '@/components/ui/combobox';
 import { occupations } from '@/lib/occupations';
 
@@ -115,16 +115,21 @@ export default function SignInPage() {
     <div className="flex min-h-svh items-center justify-center bg-background p-4 font-body">
       <FadeIn stagger className="w-full max-w-sm space-y-6 rounded-lg border border-border bg-card p-8 shadow-2xl">
         <StaggeredListItem>
-            <div className="text-center space-y-2">
-                <Typewriter text="PRAVIS" className="font-headline text-5xl font-bold tracking-tight text-primary [text-shadow:0_0_8px_hsl(var(--primary)/0.5)] justify-center" />
-                <p className="text-muted-foreground">Your digital extension</p>
+            <div className="text-center space-y-4">
+                <div className="flex justify-center">
+                    <PravisLogo size={60} />
+                </div>
+                <h1 className="font-headline text-4xl font-bold tracking-tight text-primary [text-shadow:0_0_8px_hsl(var(--primary)/0.5)]">
+                    PRAVIS
+                </h1>
+                <p className="text-muted-foreground -mt-2">Your digital extension</p>
             </div>
         </StaggeredListItem>
         
         <StaggeredListItem>
-            <div className="space-y-4 text-center">
+            <div className="space-y-2 text-center">
                 <h2 className="text-2xl font-semibold tracking-tight text-foreground">{isSignUp ? "Create an Account" : "Welcome Back"}</h2>
-                <p className="text-muted-foreground">{isSignUp ? "Enter your details to begin your journey." : "Log in to continue your journey with Pravis."}</p>
+                <p className="text-sm text-muted-foreground">{isSignUp ? "Enter your details to begin your journey." : "Log in to continue your journey with Pravis."}</p>
             </div>
         </StaggeredListItem>
         
