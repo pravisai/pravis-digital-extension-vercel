@@ -140,10 +140,10 @@
 
   .transforming-logo-part {
     position: absolute;
-    width: 25%;
+    width: 40%;
     height: 100%;
     top: 0;
-    left: 37.5%;
+    left: 30%;
     background: hsl(var(--primary) / 0.7);
     border: 1px solid hsl(var(--primary));
     transform-style: preserve-3d;
@@ -161,21 +161,21 @@
   /* Top/Bottom faces */
   .transforming-logo-part::before {
     width: 100%;
-    height: calc(var(--logo-size) / 4);
+    height: calc(var(--logo-size) * 0.4);
     top: 0;
     left: 0;
     transform-origin: top;
-    transform: rotateX(90deg) translateY(calc(var(--logo-size) * -0.125));
+    transform: rotateX(90deg) translateY(calc(var(--logo-size) * -0.2));
   }
   
   /* Side faces */
   .transforming-logo-part::after {
-    width: calc(var(--logo-size) / 4);
+    width: calc(var(--logo-size) * 0.4);
     height: 100%;
     top: 0;
     left: 0;
     transform-origin: left;
-    transform: rotateY(-90deg) translateX(calc(var(--logo-size) * -0.125));
+    transform: rotateY(-90deg) translateX(calc(var(--logo-size) * -0.2));
   }
 
   .part-1 { animation: part-1-spin 12s ease-in-out infinite; transform: rotateY(20deg) rotateX(-15deg) translateX(-150%); }
