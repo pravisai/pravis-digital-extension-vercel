@@ -8,7 +8,7 @@ import { InteractiveCube, type CubeFace } from "./interactive-cube";
 const modules: CubeFace[] = [
     {
       id: "productivity-suite",
-      href: "/dashboard/clarity-chat",
+      href: "/dashboard/productivity-suite",
       icon: BrainCircuit,
       label: "Productivity Suite",
       description: "Access your AI-powered productivity tools.",
