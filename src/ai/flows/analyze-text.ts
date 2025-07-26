@@ -8,7 +8,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'zod';
+import {z} from 'genkit/zod';
 
 const AnalyzeTextInputSchema = z.object({
   text: z.string().describe('The text to analyze.'),
