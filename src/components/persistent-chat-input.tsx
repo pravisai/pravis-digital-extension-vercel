@@ -5,10 +5,11 @@ import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useChat } from '@/contexts/chat-context';
-import { Send, Mic, BrainCircuit, Paperclip, Camera, Waves } from 'lucide-react';
+import { Send, Mic, Paperclip, Camera, Waves } from 'lucide-react';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { useSpeechToText } from '@/hooks/use-speech-to-text';
 import { cn } from '@/lib/utils';
+import { PravisLogo } from './pravis-logo';
 
 export function PersistentChatInput() {
   const { input, setInput, handleSendMessage, isLoading, setPanelOpen } = useChat();
@@ -45,10 +46,8 @@ export function PersistentChatInput() {
     <div className="fixed bottom-0 left-0 right-0 bg-background/80 p-2 backdrop-blur-sm border-t border-border">
       <form onSubmit={handleSendMessage} ref={formRef} className="flex items-center gap-2">
         <div className="flex-1 flex items-center bg-secondary rounded-full px-2">
-            <Avatar className="h-9 w-9 ml-1 border-2 border-primary/50">
-              <AvatarFallback className="bg-transparent">
-                <BrainCircuit className="h-5 w-5 text-primary" />
-              </AvatarFallback>
+            <Avatar className="h-9 w-9 ml-1 border-2 border-primary/50 flex items-center justify-center p-1">
+                <PravisLogo size={20} />
             </Avatar>
             <Input
                 value={input}

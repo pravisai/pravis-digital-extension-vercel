@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { BrainCircuit, Send, User, Mic, Loader2, Waves } from "lucide-react"
+import { Send, User, Mic, Loader2, Waves } from "lucide-react"
 import React, { useRef, useState, useEffect } from "react"
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth"
 import { auth } from "@/lib/firebase/config"
@@ -13,6 +13,7 @@ import { facilitateCreativeBrainstorming, type FacilitateCreativeBrainstormingIn
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { useSpeechToText } from "@/hooks/use-speech-to-text"
 import { cn } from "@/lib/utils"
+import { PravisLogo } from "./pravis-logo"
 
 enum Stage {
   Topic,
@@ -192,8 +193,8 @@ export function BrainstormChat() {
     <div className="flex flex-col h-full bg-card shadow-sm">
         <header className="p-4 border-b flex items-center justify-between">
             <div className="flex items-center gap-3">
-                <Avatar>
-                    <AvatarFallback><BrainCircuit /></AvatarFallback>
+                <Avatar className="p-1.5">
+                    <PravisLogo size={30} />
                 </Avatar>
                 <div>
                     <h1 className="font-semibold text-lg">Loud Think</h1>
@@ -213,8 +214,8 @@ export function BrainstormChat() {
                 }`}
                 >
                 {message.role === "pravis" && (
-                    <Avatar>
-                        <AvatarFallback><BrainCircuit /></AvatarFallback>
+                    <Avatar className="p-1.5">
+                        <PravisLogo size={30} />
                     </Avatar>
                 )}
                 <div
@@ -243,8 +244,8 @@ export function BrainstormChat() {
             ))}
             {isLoading && (
                 <div className="flex items-center gap-4">
-                <Avatar>
-                    <AvatarFallback><BrainCircuit className="animate-pulse" /></AvatarFallback>
+                <Avatar className="p-1.5">
+                    <PravisLogo size={30} />
                 </Avatar>
                 <div className="rounded-lg p-3 bg-secondary animate-pulse">
                     <Loader2 className="animate-spin" />
