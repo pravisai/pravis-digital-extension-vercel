@@ -12,6 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { FadeIn, StaggeredListItem } from '@/components/animations/fade-in';
 import { Typewriter } from '@/components/animations/typewriter';
+import { Combobox } from '@/components/ui/combobox';
+import { occupations } from '@/lib/occupations';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg role="img" viewBox="0 0 24 24" {...props}>
@@ -33,6 +35,7 @@ export default function SignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [occupation, setOccupation] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -74,7 +77,12 @@ export default function SignInPage() {
     
     try {
       if (isSignUp) {
-          await signUpWithEmail(email, password, displayName);
+          if (!occupation) {
+            toast({ variant: 'destructive', title: 'Occupation Required', description: 'Please select your occupation.' });
+            setIsEmailLoading(false);
+            return;
+          }
+          await signUpWithEmail(email, password, displayName, occupation);
           toast({ title: "Account Created!", description: `Welcome, ${displayName}` });
       } else {
           await signInWithEmail(email, password);
@@ -188,6 +196,20 @@ export default function SignInPage() {
                         required
                     />
                 </div>
+                 {isSignUp && (
+                    <div className="grid w-full items-center gap-1.5">
+                        <Label htmlFor="occupation">Occupation / Role</Label>
+                        <Combobox
+                            options={occupations}
+                            value={occupation}
+                            onChange={setOccupation}
+                            placeholder="Select your occupation..."
+                            searchPlaceholder="Search occupations..."
+                            emptyMessage="Occupation not found."
+                            disabled={isGoogleLoading || isEmailLoading}
+                        />
+                    </div>
+                )}
                 <Button type="submit" className="w-full h-12 text-base" disabled={isEmailLoading || isGoogleLoading}>
                     {isEmailLoading && <Loader2 className="mr-2 animate-spin" />}
                     {isSignUp ? "Sign Up" : "Log In"}

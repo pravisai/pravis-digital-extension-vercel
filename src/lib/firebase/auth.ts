@@ -61,11 +61,15 @@ export const signInWithEmail = async (
 export const signUpWithEmail = async (
   email: string,
   password: string,
-  displayName: string
+  displayName: string,
+  occupation: string // Added occupation
 ): Promise<void> => {
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   if (userCredential.user) {
     await updateProfile(userCredential.user, { displayName });
+    // Here you would typically save the occupation to a user profile in Firestore
+    // For now, we just log it to show it's being captured.
+    console.log(`New user signed up with occupation: ${occupation}`);
   }
 };
 
