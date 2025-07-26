@@ -189,20 +189,20 @@
   }
 
   @keyframes part-1-spin {
-    from { transform: rotateY(20deg) rotateX(-15deg) translateX(-150%) rotateY(0deg); }
-    to   { transform: rotateY(20deg) rotateX(-15deg) translateX(-150%) rotateY(360deg); }
+    from { transform: rotateY(20deg) rotateX(-15deg) translateX(-150%) rotateX(0deg); }
+    to   { transform: rotateY(20deg) rotateX(-15deg) translateX(-150%) rotateX(360deg); }
   }
   @keyframes part-2-spin {
-    from { transform: rotateY(-20deg) rotateX(15deg) translateX(-50%) rotateY(0deg); }
-    to   { transform: rotateY(-20deg) rotateX(15deg) translateX(-50%) rotateY(-360deg); }
+    from { transform: rotateY(-20deg) rotateX(15deg) translateX(-50%) rotateX(0deg); }
+    to   { transform: rotateY(-20deg) rotateX(15deg) translateX(-50%) rotateX(-360deg); }
   }
   @keyframes part-3-spin {
-    from { transform: rotateY(20deg) rotateX(15deg) translateX(50%) rotateY(0deg); }
-    to   { transform: rotateY(20deg) rotateX(15deg) translateX(50%) rotateY(360deg); }
+    from { transform: rotateY(20deg) rotateX(15deg) translateX(50%) rotateX(0deg); }
+    to   { transform: rotateY(20deg) rotateX(15deg) translateX(50%) rotateX(360deg); }
   }
   @keyframes part-4-spin {
-    from { transform: rotateY(-20deg) rotateX(-15deg) translateX(150%) rotateY(0deg); }
-    to   { transform: rotateY(-20deg) rotateX(-15deg) translateX(150%) rotateY(-360deg); }
+    from { transform: rotateY(-20deg) rotateX(-15deg) translateX(150%) rotateX(0deg); }
+    to   { transform: rotateY(-20deg) rotateX(-15deg) translateX(150%) rotateX(-360deg); }
   }
 
 
