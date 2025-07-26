@@ -10,9 +10,8 @@ interface PravisLogoProps {
 
 export function PravisLogo({ className, size = 60 }: PravisLogoProps) {
     const wrapperStyle = {
-        width: `${size}px`,
-        height: `${size}px`,
-    };
+        '--logo-size': `${size}px`,
+    } as React.CSSProperties;
 
     return (
         <div className={cn("transforming-logo-scene", className)} style={wrapperStyle}>
