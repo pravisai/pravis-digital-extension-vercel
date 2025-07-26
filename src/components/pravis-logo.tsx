@@ -14,14 +14,14 @@ export function PravisLogo({ className, size = 60 }: PravisLogoProps) {
     } as React.CSSProperties;
 
     return (
-        <div className={cn("transforming-logo-scene", className)} style={wrapperStyle}>
-            <div className="transforming-logo-pivot">
-                <div className="transforming-logo-m">
-                    <div className="transforming-logo-part part-1"></div>
-                    <div className="transforming-logo-part part-2"></div>
-                    <div className="transforming-logo-part part-3"></div>
-                    <div className="transforming-logo-part part-4"></div>
-                </div>
+        <div className={cn("logo-scene", className)} style={wrapperStyle}>
+            <div className="logo-cube">
+                <div className="logo-face logo-front"></div>
+                <div className="logo-face logo-back"></div>
+                <div className="logo-face logo-right"></div>
+                <div className="logo-face logo-left"></div>
+                <div className="logo-face logo-top"></div>
+                <div className="logo-face logo-bottom"></div>
             </div>
         </div>
     );

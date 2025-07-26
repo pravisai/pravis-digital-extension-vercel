@@ -113,49 +113,43 @@
 }
 
 @layer components {
-  /* --- Transforming M Logo --- */
-  .transforming-logo-scene {
+  /* --- 3D Translucent Cube Logo --- */
+  .logo-scene {
     width: var(--logo-size, 60px);
     height: var(--logo-size, 60px);
+    perspective: calc(var(--logo-size) * 10);
     display: flex;
     justify-content: center;
     align-items: center;
-    perspective: 1000px;
   }
 
-  .transforming-logo-pivot {
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    animation: logo-spin 24s linear infinite;
-  }
-  
-  .transforming-logo-m {
+  .logo-cube {
     position: relative;
     width: 100%;
     height: 100%;
     transform-style: preserve-3d;
+    animation: logo-spin 16s linear infinite;
   }
 
-  .transforming-logo-part {
+  .logo-face {
     position: absolute;
-    width: 50%;
+    width: 100%;
     height: 100%;
-    top: 0;
-    left: 25%;
-    background: hsl(var(--primary));
-    transform-style: preserve-3d;
+    background-color: hsl(var(--primary) / 0.15);
+    border: 1px solid hsl(var(--primary) / 0.5);
+    box-shadow: inset 0 0 calc(var(--logo-size) / 4) hsl(var(--primary) / 0.2);
   }
-
-  .part-1 { transform: rotateY(0deg) translateZ(calc(var(--logo-size) / 4)); }
-  .part-2 { transform: rotateY(90deg) translateZ(calc(var(--logo-size) / 4)); }
-  .part-3 { transform: rotateY(180deg) translateZ(calc(var(--logo-size) / 4)); }
-  .part-4 { transform: rotateY(270deg) translateZ(calc(var(--logo-size) / 4)); }
   
+  .logo-front  { transform: rotateY(0deg) translateZ(calc(var(--logo-size) / 2)); }
+  .logo-back   { transform: rotateY(180deg) translateZ(calc(var(--logo-size) / 2)); }
+  .logo-right  { transform: rotateY(90deg) translateZ(calc(var(--logo-size) / 2)); }
+  .logo-left   { transform: rotateY(-90deg) translateZ(calc(var(--logo-size) / 2)); }
+  .logo-top    { transform: rotateX(90deg) translateZ(calc(var(--logo-size) / 2)); }
+  .logo-bottom { transform: rotateX(-90deg) translateZ(calc(var(--logo-size) / 2)); }
 
   @keyframes logo-spin {
-    from { transform: rotateY(0) rotateX(15deg); }
-    to   { transform: rotateY(360deg) rotateX(15deg); }
+    from { transform: rotateX(-20deg) rotateY(0deg); }
+    to   { transform: rotateX(-20deg) rotateY(360deg); }
   }
 
 
