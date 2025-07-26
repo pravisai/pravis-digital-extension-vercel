@@ -177,19 +177,19 @@
 
   .part-1 { 
     left: 0;
-    animation: move-part-1 8s ease-in-out infinite; 
+    animation: move-part-1 8s linear infinite; 
   }
   .part-2 { 
     left: 25%;
-    animation: move-part-2 8s ease-in-out infinite;
+    animation: move-part-2 8s linear infinite;
   }
   .part-3 { 
     left: 50%;
-    animation: move-part-3 8s ease-in-out infinite;
+    animation: move-part-3 8s linear infinite;
   }
   .part-4 { 
     left: 75%;
-    animation: move-part-4 8s ease-in-out infinite;
+    animation: move-part-4 8s linear infinite;
   }
 
   @keyframes logo-spin {
@@ -197,32 +197,52 @@
     to   { transform: rotateY(360deg) rotateX(360deg); }
   }
 
-  @keyframes move-part-1 {
-    0%, 100% { transform: translateZ(0) rotateX(0); }
-    25% { transform: translateZ(calc(var(--logo-size) * -0.25)) rotateX(-35deg); }
-    50% { transform: translateZ(0) rotateX(0); }
-    75% { transform: translateZ(calc(var(--logo-size) * 0.25)) rotateX(35deg); }
+ @keyframes move-part-1 {
+    0%, 100% { transform: translateZ(0) translateY(0); }
+    /* Move up to form 'M' */
+    20% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.5)); }
+    /* Hold M shape */
+    40% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.5)); }
+    /* Return to cuboid */
+    60% { transform: translateZ(0) translateY(0); }
+    /* Hold cuboid shape */
+    80% { transform: translateZ(0) translateY(0); }
   }
   
   @keyframes move-part-2 {
-    0%, 100% { transform: translateZ(0) rotateX(0); }
-    25% { transform: translateZ(calc(var(--logo-size) * -0.1)) rotateX(25deg); }
-    50% { transform: translateZ(calc(var(--logo-size) * 0.2)) rotateX(-15deg); }
-    75% { transform: translateZ(0) rotateX(0); }
+    0%, 100% { transform: translateZ(0) translateY(0); }
+    /* Move up to form 'M' */
+    20% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.25)); }
+    /* Hold M shape */
+    40% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.25)); }
+    /* Return to cuboid */
+    60% { transform: translateZ(0) translateY(0); }
+    /* Hold cuboid shape */
+    80% { transform: translateZ(0) translateY(0); }
   }
 
   @keyframes move-part-3 {
-    0%, 100% { transform: translateZ(0) rotateX(0); }
-    25% { transform: translateZ(calc(var(--logo-size) * 0.1)) rotateX(-25deg); }
-    50% { transform: translateZ(calc(var(--logo-size) * -0.2)) rotateX(15deg); }
-    75% { transform: translateZ(0) rotateX(0); }
+    0%, 100% { transform: translateZ(0) translateY(0); }
+    /* Move up to form 'M' */
+    20% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.25)); }
+    /* Hold M shape */
+    40% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.25)); }
+    /* Return to cuboid */
+    60% { transform: translateZ(0) translateY(0); }
+    /* Hold cuboid shape */
+    80% { transform: translateZ(0) translateY(0); }
   }
 
   @keyframes move-part-4 {
-    0%, 100% { transform: translateZ(0) rotateX(0); }
-    25% { transform: translateZ(calc(var(--logo-size) * 0.25)) rotateX(35deg); }
-    50% { transform: translateZ(0) rotateX(0); }
-    75% { transform: translateZ(calc(var(--logo-size) * -0.25)) rotateX(-35deg); }
+    0%, 100% { transform: translateZ(0) translateY(0); }
+    /* Move up to form 'M' */
+    20% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.5)); }
+    /* Hold M shape */
+    40% { transform: translateZ(0) translateY(calc(var(--logo-size) * -0.5)); }
+    /* Return to cuboid */
+    60% { transform: translateZ(0) translateY(0); }
+    /* Hold cuboid shape */
+    80% { transform: translateZ(0) translateY(0); }
   }
 
 
