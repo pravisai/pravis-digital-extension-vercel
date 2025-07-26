@@ -10,8 +10,8 @@ const modules: CubeFace[] = [
       id: "creative-partner",
       href: "/dashboard/creative-partner",
       icon: BrainCircuit,
-      label: "Calibrate",
-      description: "your inner guide to making precise decisions",
+      label: "Productivity Suite",
+      description: "Access your AI-powered productivity tools.",
       face: "front",
       colorClass: "neon-purple"
     },
