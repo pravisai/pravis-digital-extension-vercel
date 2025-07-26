@@ -257,7 +257,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
 export default function DashboardLayout({
   children,
 }: {
-  children: React.Node
+  children: React.ReactNode
 }) {
 
   return (
