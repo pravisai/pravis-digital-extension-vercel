@@ -7,6 +7,13 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true, // Allows builds with ESLint errors (useful for fast CI/CD)
   },
+  experimental: {
+    // This is the fix for the invariant error.
+    serverComponentsExternalPackages: [
+      "@google-cloud/functions-framework",
+      "firebase-functions",
+    ],
+  },
   allowedDevOrigins: [
     '3000-firebase-studio-1751790025169.cluster-ys234awlzbhwoxmkkse6qo3fz6.cloudworkstations.dev'
   ],
