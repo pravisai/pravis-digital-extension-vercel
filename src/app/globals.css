@@ -164,12 +164,14 @@
   
   /* Top/Bottom faces */
   .transforming-logo-part::before {
-    transform: rotateX(90deg) translateZ(calc(var(--logo-size) * 0.125));
+    height: calc(var(--logo-size) * 0.25);
+    transform-origin: top;
+    transform: rotateX(90deg);
   }
-  
-  /* Side faces */
   .transforming-logo-part::after {
-    transform: rotateY(90deg) translateZ(calc(var(--logo-size) * 0.125));
+    height: calc(var(--logo-size) * 0.25);
+    transform-origin: bottom;
+    transform: translateY(calc(var(--logo-size) * 1 - (var(--logo-size) * 0.25))) rotateX(-90deg);
   }
 
   .part-1 { animation: part-1-spin 12s ease-in-out infinite; transform: translateX(-150%); }
