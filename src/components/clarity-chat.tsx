@@ -17,9 +17,10 @@ import { useRouter } from "next/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PravisLogo } from "./pravis-logo";
 
-// === AGENTIC INTENT ===
+// === AGENTIC INTENT & GEMINI ===
 import { useAgent } from "@/agent/agent-context";
 import { parseAgentIntent } from "@/agent/intent-parser";
+import { generateText } from "@/ai/gemini";
 // ======================
 
 export function ClarityChat() {
@@ -100,20 +101,47 @@ export function ClarityChat() {
     }
   };
 
-  // === MAIN FORM SUBMIT HANDLER - AGENTIC LOGIC ADDED ===
-  const handleFormSubmit = (e: React.FormEvent) => {
+  // MAIN FORM SUBMIT HANDLER — NOW FULLY AI-AGENTIC!
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // AGENTIC INTENT: parse and route via agent context
     const intent = parseAgentIntent(input);
-    if (intent) {
-      setPendingIntent(intent);
-      setPanelOpen(false); // Hide/collapse chat panel for smooth handoff
-      setInput("");
-      return;
+    if (intent && intent.type === "email_compose" && intent.to) {
+      // Compose Gemini prompt
+      let about = intent.about || "no subject";
+      // Gemini gets topic and recipient
+      const geminiPrompt = `Write a professional, friendly email to ${intent.to} about "${about}". Return the subject line on the first line, then a blank line, then the email body.`;
+
+      // Call Gemini for subject/body
+      let subject = "";
+      let body = "";
+      try {
+        const geminiReply = await generateText(geminiPrompt);
+        // Split subject and body
+        const [subjectLine, ...bodyLines] = geminiReply.split('\n');
+        subject = subjectLine.trim();
+        // remove extra blank lines at start of body
+        body = bodyLines.join('\n').replace(/^\s*\n+/g, '').trim();
+
+        // Set pending agentic intent for navigator
+        setPendingIntent({
+          type: "email_compose",
+          to: intent.to,
+          subject,
+          body,
+        });
+        setPanelOpen(false);
+        setInput("");
+        return;
+      } catch (err) {
+        setInput(""); // Clear user input if agentic intent fails
+        // Optionally show an error in your chat
+        return;
+      }
     }
 
-    // Plain chatbot message fallback:
+    // If no agentic intent or fallback: normal chatbot
     handleSendMessage(e, false);
   };
 

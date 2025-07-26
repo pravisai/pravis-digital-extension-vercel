@@ -1,9 +1,8 @@
-
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, Send, ArrowLeft, BrainCircuit, Sparkles, X, Trash2 } from 'lucide-react';
+import { Loader2, Send, ArrowLeft, BrainCircuit, Sparkles, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,39 +21,33 @@ export default function ComposeEmailPage() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
 
-  const [to, setTo] = useState('');
-  const [subject, setSubject] = useState('');
-  const [body, setBody] = useState('');
-  const [aiPrompt, setAiPrompt] = useState('');
-
-  const [isSending, setIsSending] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  
-  const { intent, clearIntent } = useIntent();
-
+  // Read values from query params for agentic prefill
   const prefillTo = searchParams.get("to") || "";
   const prefillSubject = searchParams.get("subject") || "";
   const prefillBody = searchParams.get("body") || "";
 
-  useEffect(() => {
-    let handled = false;
-    if (intent?.action === 'navigateToEmailCompose') {
-      const { to, subject, body } = intent.params;
-      if (to) setTo(to);
-      if (subject) setSubject(subject);
-      if (body) setBody(body);
-      clearIntent();
-      handled = true;
-    }
-    
-    // Only prefill from URL if intent didn't handle it
-    if (!handled) {
-      if (prefillTo) setTo(prefillTo);
-      if (prefillSubject) setSubject(prefillSubject);
-      if (prefillBody) setBody(prefillBody);
-    }
-  }, [intent, clearIntent, prefillTo, prefillSubject, prefillBody]);
+  // Controlled fields
+  const [to, setTo] = useState(prefillTo);
+  const [subject, setSubject] = useState(prefillSubject);
+  const [body, setBody] = useState(prefillBody);
+  const [aiPrompt, setAiPrompt] = useState('');
 
+  const [isSending, setIsSending] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // If intent context is ever used for manual agent nav/pre-fill as well
+  const { intent, clearIntent } = useIntent();
+
+  // Sync with URL params on navigation/change
+  useEffect(() => {
+    setTo(prefillTo);
+  }, [prefillTo]);
+  useEffect(() => {
+    setSubject(prefillSubject);
+  }, [prefillSubject]);
+  useEffect(() => {
+    setBody(prefillBody);
+  }, [prefillBody]);
 
   const handleGenerateWithPravis = async () => {
     if (!aiPrompt.trim()) {
@@ -110,7 +103,7 @@ export default function ComposeEmailPage() {
       setIsSending(false);
     }
   };
-  
+
   const handleDiscard = () => {
     setTo('');
     setSubject('');
@@ -133,56 +126,54 @@ export default function ComposeEmailPage() {
         </header>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            <div className="flex items-center gap-2 border-b pb-2">
-                <Label htmlFor="to" className="text-muted-foreground">To</Label>
-                <Input
-                    id="to"
-                    value={to}
-                    onChange={(e) => setTo(e.target.value)}
-                    placeholder="Recipient"
-                    className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent flex-1"
-                />
-            </div>
-             <div className="flex items-center gap-2 border-b pb-2">
-                <Label htmlFor="subject" className="text-muted-foreground">Subject</Label>
-                <Input
-                    id="subject"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    placeholder="Subject"
-                    className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent flex-1"
-                />
-            </div>
-            
-            <Textarea
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                placeholder="Compose your email..."
-                className="flex-1 h-96 resize-none border-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-base"
+          <div className="flex items-center gap-2 border-b pb-2">
+            <Label htmlFor="to" className="text-muted-foreground">To</Label>
+            <Input
+              id="to"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              placeholder="Recipient"
+              className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent flex-1"
             />
-            
-            <Card className="bg-primary/5 border-primary/20">
-              <CardContent className="p-4 space-y-3">
-                  <div className="flex items-center gap-2">
-                      <BrainCircuit className="h-5 w-5 text-primary" />
-                      <Label htmlFor="ai-prompt" className="font-semibold text-primary">Generate with Pravis</Label>
-                  </div>
-                  <Textarea
-                    id="ai-prompt"
-                    value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
-                    placeholder="e.g., Write a follow-up email to John about our meeting last week and ask for the documents."
-                    className="bg-background/50"
-                  />
-                  <div className="flex justify-end">
-                      <Button onClick={handleGenerateWithPravis} disabled={isGenerating} size="sm" variant="secondary">
-                          {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                          Generate
-                      </Button>
-                  </div>
-              </CardContent>
-            </Card>
+          </div>
+          <div className="flex items-center gap-2 border-b pb-2">
+            <Label htmlFor="subject" className="text-muted-foreground">Subject</Label>
+            <Input
+              id="subject"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="Subject"
+              className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent flex-1"
+            />
+          </div>
+          <Textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="Compose your email..."
+            className="flex-1 h-96 resize-none border-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-base"
+          />
 
+          <Card className="bg-primary/5 border-primary/20">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <BrainCircuit className="h-5 w-5 text-primary" />
+                <Label htmlFor="ai-prompt" className="font-semibold text-primary">Generate with Pravis</Label>
+              </div>
+              <Textarea
+                id="ai-prompt"
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                placeholder="e.g., Write a follow-up email to John about our meeting last week and ask for the documents."
+                className="bg-background/50"
+              />
+              <div className="flex justify-end">
+                <Button onClick={handleGenerateWithPravis} disabled={isGenerating} size="sm" variant="secondary">
+                  {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                  Generate
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <footer className="p-4 border-t flex justify-between items-center">

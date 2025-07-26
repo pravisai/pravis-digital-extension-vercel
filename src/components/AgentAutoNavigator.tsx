@@ -8,13 +8,19 @@ export function AgentAutoNavigator() {
 
   useEffect(() => {
     if (pendingIntent?.type === "email_compose") {
-      let url = "/dashboard/email-assistant?agent=1";
-      if (pendingIntent.to) url += `&to=${encodeURIComponent(pendingIntent.to)}`;
-      if (pendingIntent.subject) url += `&subject=${encodeURIComponent(pendingIntent.subject)}`;
+      let url = "/dashboard/email-assistant/compose";
+      const params: Record<string, string> = {};
+      if (pendingIntent.to) params.to = pendingIntent.to;
+      if (pendingIntent.subject) params.subject = pendingIntent.subject;
+      if (pendingIntent.body) params.body = pendingIntent.body;
+
+      const searchParams = new URLSearchParams(params).toString();
+      if (searchParams) url += `?${searchParams}`;
       router.push(url);
       setPendingIntent(null);
     }
-  }, [pendingIntent]);
+    // Add further intent types here as needed!
+  }, [pendingIntent, router, setPendingIntent]);
 
   return null;
 }
