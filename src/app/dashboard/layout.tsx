@@ -31,7 +31,6 @@ import { PravisLogo } from "@/components/pravis-logo"
 
 // ====== AGENTIC LOGIC IMPORTS ======
 import { AgentAutoNavigator } from "@/components/AgentAutoNavigator";
-import AgentCommandBox from "@/components/AgentCommandBox";
 // ===================================
 
 const statCards = [
@@ -244,7 +243,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
             <AgentAutoNavigator />
             {/* --- Optional: Agent command box for manual NL testing --- */}
             <div className="py-2 px-4 bg-muted/40 border-b border-muted">
-                <AgentCommandBox />
+              
             </div>
             <DashboardHeader />
             <main className={cn(

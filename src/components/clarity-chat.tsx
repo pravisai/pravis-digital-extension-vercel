@@ -1,45 +1,26 @@
-
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, User, Paperclip, Mic, Smile, Camera, Waves, X, ChevronDown } from "lucide-react";
+import {
+  Send, User, Paperclip, Mic, Smile, Camera, Waves, X, ChevronDown
+} from "lucide-react";
 import React, { useRef, useState, useEffect } from "react";
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import { useChat } from "@/contexts/chat-context";
 import { useSpeechToText } from "@/hooks/use-speech-to-text";
 import { cn } from "@/lib/utils";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PravisLogo } from "./pravis-logo";
 
-// === Agentic Intent Parser ===
-function parseUIIntent(input: string) {
-  const v = input.toLowerCase().trim();
-
-  // Navigation for email composer:
-  if (
-    v.startsWith("open the email composer") ||
-    v.startsWith("compose email") ||
-    v.startsWith("go to email")
-  ) {
-    return { intent: "navigate", target: "/dashboard/email-assistant/compose" };
-  }
-  // Navigation for calendar:
-  if (v.includes("calendar")) {
-    return { intent: "navigate", target: "/dashboard/calendar" };
-  }
-  // Navigation for dashboard:
-  if (v.includes("dashboard")) {
-    return { intent: "navigate", target: "/dashboard" };
-  }
-  return null;
-}
-
-// ===== Main Chat UI Component =====
+// === AGENTIC INTENT ===
+import { useAgent } from "@/agent/agent-context";
+import { parseAgentIntent } from "@/agent/intent-parser";
+// ======================
 
 export function ClarityChat() {
   const {
@@ -56,7 +37,10 @@ export function ClarityChat() {
     setPanelOpen,
   } = useChat();
 
+  const { setPendingIntent } = useAgent();
+
   const [user, setUser] = useState<FirebaseUser | null>(null);
+
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -65,14 +49,17 @@ export function ClarityChat() {
 
   const router = useRouter();
 
-  const { isRecording, transcript, startRecording, stopRecording } = useSpeechToText({
-    onTranscriptReady: (text) => {
-      setInput(text);
-      setTimeout(() => {
-        formRef.current?.dispatchEvent(new CustomEvent('submit-voice', { bubbles: true }));
-      }, 100);
-    }
-  });
+  const { isRecording, transcript, startRecording, stopRecording } =
+    useSpeechToText({
+      onTranscriptReady: (text) => {
+        setInput(text);
+        setTimeout(() => {
+          formRef.current?.dispatchEvent(
+            new CustomEvent("submit-voice", { bubbles: true })
+          );
+        }, 100);
+      },
+    });
 
   useEffect(() => {
     if (transcript) {
@@ -89,7 +76,9 @@ export function ClarityChat() {
 
   useEffect(() => {
     if (scrollAreaRef.current) {
-      const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
+      const viewport = scrollAreaRef.current.querySelector(
+        "div[data-radix-scroll-area-viewport]"
+      );
       if (viewport) viewport.scrollTop = viewport.scrollHeight;
     }
   }, [messages, isLoading, attachmentPreview]);
@@ -97,7 +86,9 @@ export function ClarityChat() {
   useEffect(() => {
     if (audioDataUri && audioRef.current) {
       audioRef.current.src = audioDataUri;
-      audioRef.current.play().catch(e => console.error("Audio playback failed:", e));
+      audioRef.current.play().catch((e) =>
+        console.error("Audio playback failed:", e)
+      );
     }
   }, [audioDataUri]);
 
@@ -113,13 +104,16 @@ export function ClarityChat() {
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const navIntent = parseUIIntent(input);
-    if (navIntent && navIntent.intent === "navigate") {
-      router.push(navIntent.target);
+    // AGENTIC INTENT: parse and route via agent context
+    const intent = parseAgentIntent(input);
+    if (intent) {
+      setPendingIntent(intent);
+      setPanelOpen(false); // Hide/collapse chat panel for smooth handoff
       setInput("");
       return;
     }
 
+    // Plain chatbot message fallback:
     handleSendMessage(e, false);
   };
 
@@ -140,10 +134,11 @@ export function ClarityChat() {
 
   useEffect(() => {
     const form = formRef.current;
-    const voiceSubmitHandler = (e: Event) => handleVoiceSubmit(e as React.FormEvent);
-    form?.addEventListener('submit-voice', voiceSubmitHandler);
+    const voiceSubmitHandler = (e: Event) =>
+      handleVoiceSubmit(e as React.FormEvent);
+    form?.addEventListener("submit-voice", voiceSubmitHandler);
     return () => {
-      form?.removeEventListener('submit-voice', voiceSubmitHandler);
+      form?.removeEventListener("submit-voice", voiceSubmitHandler);
     };
   }, [handleVoiceSubmit]);
 
@@ -162,10 +157,14 @@ export function ClarityChat() {
             </p>
           </div>
         </div>
-         {isMobile && isPanelOpen && (
-            <Button variant="ghost" size="icon" onClick={() => setPanelOpen(false)}>
-                <ChevronDown className="h-5 w-5" />
-            </Button>
+        {isMobile && isPanelOpen && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setPanelOpen(false)}
+          >
+            <ChevronDown className="h-5 w-5" />
+          </Button>
         )}
       </header>
       <ScrollArea className="flex-1 w-full" ref={scrollAreaRef}>
@@ -173,11 +172,13 @@ export function ClarityChat() {
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`flex items-start gap-4 ${message.role === "user" ? "justify-end" : ""}`}
+              className={`flex items-start gap-4 ${
+                message.role === "user" ? "justify-end" : ""
+              }`}
             >
               {message.role === "pravis" && (
                 <Avatar className="p-1.5 h-10 w-10">
-                    <PravisLogo size={24} />
+                  <PravisLogo size={24} />
                 </Avatar>
               )}
               <div
@@ -187,15 +188,26 @@ export function ClarityChat() {
                     : "bg-secondary"
                 }`}
               >
-                {typeof message.content === 'string'
-                  ? <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                  : message.content}
+                {typeof message.content === "string" ? (
+                  <p className="text-sm whitespace-pre-wrap">
+                    {message.content}
+                  </p>
+                ) : (
+                  message.content
+                )}
               </div>
               {message.role === "user" && (
                 <Avatar>
-                  {user?.photoURL
-                    ? <AvatarImage src={user.photoURL} alt={user.displayName || "User"} />
-                    : <AvatarFallback><User /></AvatarFallback>}
+                  {user?.photoURL ? (
+                    <AvatarImage
+                      src={user.photoURL}
+                      alt={user.displayName || "User"}
+                    />
+                  ) : (
+                    <AvatarFallback>
+                      <User />
+                    </AvatarFallback>
+                  )}
                 </Avatar>
               )}
             </div>
@@ -215,10 +227,14 @@ export function ClarityChat() {
       <footer className="p-2 border-t">
         {attachmentPreview && (
           <div className="p-2 relative w-fit">
-            <img src={attachmentPreview} alt="attachment preview" className="h-20 w-20 object-cover rounded-md" />
-            <Button 
-              size="icon" 
-              variant="destructive" 
+            <img
+              src={attachmentPreview}
+              alt="attachment preview"
+              className="h-20 w-20 object-cover rounded-md"
+            />
+            <Button
+              size="icon"
+              variant="destructive"
               className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
               onClick={() => setAttachment(null)}
             >
@@ -228,7 +244,12 @@ export function ClarityChat() {
         )}
         <form onSubmit={handleFormSubmit} ref={formRef} className="flex items-center gap-2">
           <div className="flex-1 flex items-center bg-secondary rounded-full px-2">
-            <Button variant="ghost" size="icon" type="button" className="shrink-0 rounded-full">
+            <Button
+              variant="ghost"
+              size="icon"
+              type="button"
+              className="shrink-0 rounded-full"
+            >
               <Smile className="h-6 w-6 text-muted-foreground" />
             </Button>
             <Input
@@ -245,31 +266,42 @@ export function ClarityChat() {
               className="hidden"
               accept="image/*"
             />
-            <Button variant="ghost" size="icon" type="button" className="shrink-0 rounded-full" onClick={handleAttachmentClick}>
+            <Button
+              variant="ghost"
+              size="icon"
+              type="button"
+              className="shrink-0 rounded-full"
+              onClick={handleAttachmentClick}
+            >
               <Paperclip className="h-6 w-6 text-muted-foreground" />
             </Button>
-            <Button variant="ghost" size="icon" type="button" className="shrink-0 rounded-full">
+            <Button
+              variant="ghost"
+              size="icon"
+              type="button"
+              className="shrink-0 rounded-full"
+            >
               <Camera className="h-6 w-6 text-muted-foreground" />
             </Button>
           </div>
           {(input.trim() || attachmentPreview) ? (
-            <Button 
-              type="submit" 
-              size="icon" 
-              className="rounded-full w-12 h-12 bg-primary text-primary-foreground shrink-0 transition-all duration-300" 
+            <Button
+              type="submit"
+              size="icon"
+              className="rounded-full w-12 h-12 bg-primary text-primary-foreground shrink-0 transition-all duration-300"
               disabled={isLoading}
             >
               <Send className="h-6 w-6" />
             </Button>
           ) : (
-            <Button 
+            <Button
               type="button"
-              onClick={handleMicClick} 
-              size="icon" 
+              onClick={handleMicClick}
+              size="icon"
               className={cn(
                 "rounded-full w-12 h-12 bg-primary text-primary-foreground shrink-0 transition-all duration-300",
                 isRecording && "bg-destructive"
-              )} 
+              )}
               disabled={isLoading}
             >
               {isRecording ? <Waves className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
