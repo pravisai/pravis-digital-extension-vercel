@@ -9,7 +9,7 @@
 
 import { z } from 'zod';
 import wav from 'wav';
-import { geminiClient } from '@/ai/gemini'; // Exported GoogleGenerativeAI instance from your SDK file
+import { geminiClient } from '@/ai/openrouter'; // Exported GoogleGenerativeAI instance from your SDK file
 
 const TextToSpeechInputSchema = z.string();
 export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;

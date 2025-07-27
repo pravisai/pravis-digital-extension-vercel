@@ -5,7 +5,7 @@
  */
 
 import { z } from 'zod';
-import { generateText } from '@/ai/gemini';
+import { generateText } from '@/ai/openrouter';
 
 const ClarityChatInputSchema = z.object({
   prompt: z.string().describe("The user's message to Pravis."),

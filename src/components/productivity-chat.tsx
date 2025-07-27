@@ -17,7 +17,7 @@ import { Skeleton } from "./ui/skeleton"
 import { Label } from "./ui/label"
 import { FadeIn } from "./animations/fade-in"
 import { copyToClipboard } from "@/lib/clipboard"
-import { generateText } from "@/ai/gemini";
+import { generateText } from "@/ai/openrouter";
 
 
 const productivitySchema = z.object({

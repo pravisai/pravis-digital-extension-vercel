@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PravisLogo } from "./pravis-logo";
-import { generateText } from "@/ai/gemini";
+import { generateText } from "@/ai/openrouter";
 
 // === AGENTIC INTENT & GEMINI ===
 import { useAgent } from "@/agent/agent-context";

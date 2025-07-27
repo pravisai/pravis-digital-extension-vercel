@@ -7,7 +7,7 @@
  */
 
 import { z } from 'zod';
-import { generateText } from '@/ai/gemini';  // <-- The Gemini helper you just created
+import { generateText } from '@/ai/openrouter';  // <-- The Gemini helper you just created
 
 const AnalyzeConversationEmotionsInputSchema = z.object({
   conversation: z

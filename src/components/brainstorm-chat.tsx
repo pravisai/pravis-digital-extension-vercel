@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { useSpeechToText } from "@/hooks/use-speech-to-text"
 import { cn } from "@/lib/utils"
 import { PravisLogo } from "./pravis-logo"
-import { generateText } from "@/ai/gemini";
+import { generateText } from "@/ai/openrouter";
 
 enum Stage {
   Topic,

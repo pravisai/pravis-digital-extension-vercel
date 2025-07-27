@@ -15,7 +15,7 @@ import { FadeIn } from '@/components/animations/fade-in';
 import { draftEmailReply } from '@/ai/flows/draft-email-reply';
 import { useIntent } from '@/contexts/intent-context';
 import { Card, CardContent } from '@/components/ui/card';
-import { generateText } from '@/ai/gemini';
+import { generateText } from '@/ai/openrouter';
 
 export default function ComposeEmailPage() {
   const router = useRouter();

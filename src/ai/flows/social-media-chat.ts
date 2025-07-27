@@ -8,7 +8,7 @@
  */
 
 import { z } from 'zod';
-import { generateText } from '@/ai/gemini';
+import { generateText } from '@/ai/openrouter';
 
 const SocialMediaChatInputSchema = z.object({
   platform: z.string().describe('The social media platform for the post (e.g., Twitter, LinkedIn).'),

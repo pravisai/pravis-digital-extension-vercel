@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { generateText } from '@/ai/gemini';
+import { generateText } from '@/ai/openrouter';
 
 const FacilitateCreativeBrainstormingInputSchema = z.object({
   topic: z.string().describe('The topic for the brainstorming session.'),

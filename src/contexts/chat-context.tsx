@@ -13,7 +13,7 @@ import { clarityChat } from "@/ai/flows/clarity-chat";
 import { textToSpeech } from "@/ai/flows/text-to-speech";
 import { useToast } from "@/hooks/use-toast";
 import { useIntent } from "./intent-context";
-import { generateText } from "@/ai/gemini";
+import { generateText } from "@/ai/openrouter";
 
 interface Message {
   role: "user" | "pravis";
