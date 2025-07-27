@@ -1,6 +1,6 @@
 // src/ai/openrouter.ts
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "PASTE_YOUR_KEY_HERE";
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "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";
 if (!OPENROUTER_API_KEY) {
   throw new Error("OPENROUTER_API_KEY missing. Set it in .env");
 }

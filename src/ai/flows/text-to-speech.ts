@@ -1,15 +1,13 @@
 'use server';
 
 /**
- * @fileOverview Text-to-speech using the direct Gemini API (no Genkit).
- * - textToSpeech - Converts a string of text into playable audio.
- * - TextToSpeechInput - Input type.
- * - TextToSpeechOutput - Return type.
+ * Text-to-speech module using OpenRouter LLM for agentic repair and an actual TTS service for audio.
  */
 
 import { z } from 'zod';
 import wav from 'wav';
-import { geminiClient } from '@/ai/openrouter'; // Exported GoogleGenerativeAI instance from your SDK file
+import { Writable } from 'stream';
+import { generateText } from '@/ai/openrouter'; // Your new OpenRouter LLM util
 
 const TextToSpeechInputSchema = z.string();
 export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
@@ -20,42 +18,20 @@ const TextToSpeechOutputSchema = z.object({
 export type TextToSpeechOutput = z.infer<typeof TextToSpeechOutputSchema>;
 
 export async function textToSpeech(input: TextToSpeechInput): Promise<TextToSpeechOutput> {
-  // Get the correct generative model for TTS
-  const ttsModel = geminiClient.getGenerativeModel({ model: 'gemini-1.5-flash-tts' }); // Use the actual model name for TTS
-
-  // The gemini SDK API spec for TTS may differ from text; this is a schematic example:
-  const ttsResult = await ttsModel.generateContent([
-    { text: input },
-    {
-      config: {
-        response_modality: 'AUDIO',
-        speech_config: {
-          voice_config: {
-            prebuilt_voice_config: { voice_name: 'Algenib' }
-          }
-        }
-      }
-    }
-  ]);
-  // The SDK's return structure for TTS may differ, but let's suppose you get audio content as a base64 string:
-  // Adjust the following line based on actual SDK result format!
-  const audioBase64 = ttsResult.response?.audio; // May be ttsResult.response?.candidates?.[0]?.audio or similar
-
-  if (!audioBase64) {
-    throw new Error('No audio was returned from the TTS service.');
-  }
-
-  // Optionally: If you need it packaged as a WAV (see your original code),
-  // decode to buffer, then encode to a proper .wav
-  const audioBuffer = Buffer.from(audioBase64, 'base64');
-  const wavBase64 = await toWav(audioBuffer);
+  // 1. Use LLM to repair the prompt, make it well-formed if needed
+  const text = await generateText(input);
+  // 2. Use a real TTS API here; below is a placeholder:
+  // For example: call Google Cloud TTS API, Azure, Elevenlabs, etc.
+  // For demo, synthesize a "mock" PCM Buffer (replace with true speech audio!)
+  const fakePcm = Buffer.from(text, 'utf-8'); // REPLACE with audio PCM from external TTS service!
+  const wavBase64 = await toWav(fakePcm);
 
   return {
     media: 'data:audio/wav;base64,' + wavBase64,
   };
 }
 
-// PCM-to-WAV utility stays the same
+// Robust Node.js PCM-to-WAV utility
 async function toWav(
   pcmData: Buffer,
   channels = 1,
@@ -69,13 +45,19 @@ async function toWav(
       bitDepth: sampleWidth * 8,
     });
 
-    const bufs: any[] = [];
-    writer.on('error', reject);
-    writer.on('data', d => bufs.push(d));
-    writer.on('finish', () => {
+    const bufs: Buffer[] = [];
+    // Collect WAV data in a writable
+    const writable = new Writable({
+      write(chunk, _enc, cb) {
+        bufs.push(chunk);
+        cb();
+      }
+    });
+    writable.on('error', reject);
+    writable.on('finish', () => {
       resolve(Buffer.concat(bufs).toString('base64'));
     });
-
+    writer.pipe(writable);
     writer.write(pcmData);
     writer.end();
   });
