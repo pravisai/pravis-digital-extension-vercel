@@ -17,6 +17,8 @@ import { Skeleton } from "./ui/skeleton"
 import { Label } from "./ui/label"
 import { FadeIn } from "./animations/fade-in"
 import { copyToClipboard } from "@/lib/clipboard"
+import { generateText } from "@/ai/gemini";
+
 
 const productivitySchema = z.object({
   task: z.string().min(1, { message: "Please select a task." }),
@@ -41,9 +43,19 @@ export function ProductivityChat() {
   async function onGenerate(values: ProductivityValues) {
     setIsGenerating(true);
     setGeneratedContent("");
-
+  
     try {
-      const result = await analyzeText({ text: values.instructions });
+      // Step 1: Always clarify and repair vague/short instructions
+      const clarifier = `
+  You are a productivity AI agent.
+  If the user's instructions are unclear, too short, or ambiguous, rewrite it as a clear and effective command for the chosen task (${values.task}).
+  If you still can't clarify, suggest two possible instructions or ask a helpful follow-up.
+  Instruction: "${values.instructions}"
+      `;
+      const improvedInstruction = await generateText(clarifier);
+  
+      // Step 2: Continue as before, but use the improved instructions
+      const result = await analyzeText({ text: improvedInstruction });
       setGeneratedContent(result.analysis);
     } catch (error) {
       console.error("Failed to generate content:", error);
@@ -56,6 +68,7 @@ export function ProductivityChat() {
       setIsGenerating(false);
     }
   }
+  
 
   const handleCopy = async () => {
     const success = await copyToClipboard(generatedContent);

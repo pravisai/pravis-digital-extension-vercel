@@ -9,10 +9,13 @@ import { PersistentChatInput } from '@/components/persistent-chat-input';
 import { usePathname } from 'next/navigation';
 import React from 'react';
 import { IntentProvider } from '@/contexts/intent-context';
+
 // === AGENTIC IMPORTS ===
 import { AgentProvider } from "@/agent/agent-context";
 import { AgentAutoNavigator } from "@/components/AgentAutoNavigator";
-// =======================
+// ========================
+
+import RouteLoaderProvider from "@/components/RouteLoaderProvider"; // IMPORTANT: import your loader provider
 
 function RootLayoutClient({
   children,
@@ -35,12 +38,14 @@ function RootLayoutClient({
       {/* --- AGENTIC LOGIC: AUTO-NAV LISTENER ONLY --- */}
       <AgentAutoNavigator />
       {/* -------------------------------------------- */}
-      {children}
-      <Toaster />
-      <div className="md:hidden">
-        <ChatPanel />
-        {showPersistentChat && <PersistentChatInput />}
-      </div>
+      <RouteLoaderProvider>
+        {children}
+        <Toaster />
+        <div className="md:hidden">
+          <ChatPanel />
+          {showPersistentChat && <PersistentChatInput />}
+        </div>
+      </RouteLoaderProvider>
     </ThemeProvider>
   );
 }

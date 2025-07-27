@@ -16,11 +16,11 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PravisLogo } from "./pravis-logo";
+import { generateText } from "@/ai/gemini";
 
 // === AGENTIC INTENT & GEMINI ===
 import { useAgent } from "@/agent/agent-context";
 import { parseAgentIntent } from "@/agent/intent-parser";
-import { generateText } from "@/ai/gemini";
 // ======================
 
 export function ClarityChat() {
@@ -102,29 +102,40 @@ export function ClarityChat() {
   };
 
   // MAIN FORM SUBMIT HANDLER — NOW FULLY AI-AGENTIC!
-  const handleFormSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    // AGENTIC INTENT: parse and route via agent context
-    const intent = parseAgentIntent(input);
+  
+    // Step 1: Clarify or repair the user's input
+    let improvedInput = input;
+    try {
+      const clarifier = `
+  You are a proactive AI clarity coach.
+  If the user's input is incomplete, ambiguous, or too broad, rewrite it as a clear, specific question or action request.
+  If still unclear, offer two likely questions or actions, or politely ask for clarification.
+  User input: "${input}"
+      `;
+      improvedInput = await generateText(clarifier);
+    } catch {
+      // fallback to plain input if needed
+    }
+  
+    // Step 2: Put the clarified input back in state
+    setInput(improvedInput);
+  
+    // Step 3: Detect intent (email, etc) — as in your original code
+    const intent = parseAgentIntent(improvedInput);
     if (intent && intent.type === "email_compose" && intent.to) {
-      // Compose Gemini prompt
       let about = intent.about || "no subject";
-      // Gemini gets topic and recipient
       const geminiPrompt = `Write a professional, friendly email to ${intent.to} about "${about}". Return the subject line on the first line, then a blank line, then the email body.`;
-
-      // Call Gemini for subject/body
+  
       let subject = "";
       let body = "";
       try {
         const geminiReply = await generateText(geminiPrompt);
-        // Split subject and body
         const [subjectLine, ...bodyLines] = geminiReply.split('\n');
         subject = subjectLine.trim();
-        // remove extra blank lines at start of body
         body = bodyLines.join('\n').replace(/^\s*\n+/g, '').trim();
-
-        // Set pending agentic intent for navigator
+  
         setPendingIntent({
           type: "email_compose",
           to: intent.to,
@@ -134,16 +145,16 @@ export function ClarityChat() {
         setPanelOpen(false);
         setInput("");
         return;
-      } catch (err) {
-        setInput(""); // Clear user input if agentic intent fails
-        // Optionally show an error in your chat
+      } catch {
+        setInput(""); // Clear if error
         return;
       }
     }
-
-    // If no agentic intent or fallback: normal chatbot
-    handleSendMessage(e, false);
+  
+    // Step 4: Continue as before—just call your normal handler (reads state)
+    await handleSendMessage(e, false);
   };
+  
 
   const handleVoiceSubmit = (e: React.FormEvent) => {
     handleSendMessage(e, true);
@@ -162,14 +173,21 @@ export function ClarityChat() {
 
   useEffect(() => {
     const form = formRef.current;
-    const voiceSubmitHandler = (e: Event) =>
-      handleVoiceSubmit(e as React.FormEvent);
-    form?.addEventListener("submit-voice", voiceSubmitHandler);
+    if (!form) return;
+  
+    // Wrap async handler for event listener compatibility
+    const voiceSubmitHandler = (e: Event) => {
+      // No need for await here; fire and forget is fine for user interaction
+      // Also, typecast e as FormEvent for your handler signature
+      void handleVoiceSubmit(e as React.FormEvent);
+    };
+    
+    form.addEventListener("submit-voice", voiceSubmitHandler);
     return () => {
-      form?.removeEventListener("submit-voice", voiceSubmitHandler);
+      form.removeEventListener("submit-voice", voiceSubmitHandler);
     };
   }, [handleVoiceSubmit]);
-
+  
   return (
     <div className="flex flex-col h-full bg-card shadow-sm">
       <header className="p-4 border-b flex items-center justify-between">
