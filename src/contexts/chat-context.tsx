@@ -13,6 +13,11 @@ import { clarityChat } from "@/ai/flows/clarity-chat";
 import { textToSpeech } from "@/ai/flows/text-to-speech";
 import { useToast } from "@/hooks/use-toast";
 import { useIntent } from "./intent-context";
+import { auth, getValidAccessToken, User } from "@/lib/firebase/auth";
+import { generateGreeting } from "@/ai/flows/generate-greeting";
+import { fetchCalendarEvents } from "@/lib/calender";
+import { format, isSameDay, parseISO, startOfToday } from "date-fns";
+import { onAuthStateChanged } from "firebase/auth";
 
 interface Message {
   role: "user" | "pravis";
@@ -53,15 +58,51 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const { handleIntent } = useIntent();
 
   useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([
-        {
-          role: "pravis",
-          content: "Shall we begin, sir?"
+    const generateInitialMessage = async (user: User) => {
+      setIsLoading(true);
+      try {
+        const token = getValidAccessToken();
+        let eventsForPrompt = [];
+
+        if (token) {
+          const { events } = await fetchCalendarEvents(token);
+          const today = startOfToday();
+          eventsForPrompt = events
+            .filter(event => {
+              const eventDate = event.start?.dateTime ? parseISO(event.start.dateTime) : (event.start?.date ? parseISO(event.start.date) : null);
+              return eventDate ? isSameDay(eventDate, today) : false;
+            })
+            .map(event => ({
+              summary: event.summary,
+              start: event.start?.dateTime ? format(parseISO(event.start.dateTime), 'p') : 'All-day',
+            }));
         }
-      ]);
-    }
-  }, [messages.length]);
+
+        const greetingResult = await generateGreeting({
+          userName: user.displayName?.split(' ')[0] || 'Sir',
+          events: eventsForPrompt,
+        });
+
+        setMessages([{ role: "pravis", content: greetingResult.greeting }]);
+
+      } catch (error) {
+        console.error("Failed to generate personalized greeting:", error);
+        setMessages([{ role: "pravis", content: "Welcome. How may I assist you today?" }]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user && messages.length === 0) {
+            generateInitialMessage(user);
+        } else if (!user) {
+            setMessages([{ role: "pravis", content: "Shall we begin, sir?" }]);
+        }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (audioDataUri) {
