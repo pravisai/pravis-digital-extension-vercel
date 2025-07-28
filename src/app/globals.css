@@ -113,6 +113,45 @@
 }
 
 @layer components {
+  /* --- Custom Chat Bubble Styles --- */
+  .chat-bubble-base {
+    @apply relative max-w-md p-3;
+  }
+
+  .chat-bubble-user {
+    @apply chat-bubble-base rounded-lg bg-primary text-primary-foreground;
+    border-bottom-right-radius: 0;
+  }
+  
+  .chat-bubble-user::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: -10px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 10px 0 0 10px;
+    border-color: transparent transparent transparent hsl(var(--primary));
+  }
+
+  .chat-bubble-pravis {
+    @apply chat-bubble-base rounded-lg border border-border;
+    border-bottom-left-radius: 0;
+  }
+
+  .chat-bubble-pravis::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -10px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 10px 10px 0;
+    border-color: transparent hsl(var(--border)) transparent transparent;
+  }
+  
   /* --- 3D Translucent Cube Logo --- */
   .logo-scene {
     width: var(--logo-size, 40px);

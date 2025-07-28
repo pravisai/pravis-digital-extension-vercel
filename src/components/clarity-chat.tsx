@@ -146,11 +146,12 @@ export function ClarityChat() {
                     <span className="text-xs text-muted-foreground ml-3 mb-1">Pravis</span>
                 )}
                  <div
-                    className={`rounded-lg p-3 max-w-md ${
+                    className={cn(
+                      "max-w-md",
                       message.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "border border-border"
-                    }`}
+                        ? "chat-bubble-user"
+                        : "chat-bubble-pravis"
+                    )}
                   >
                   {typeof message.content === "string" ? (
                     <p className="text-sm whitespace-pre-wrap">
