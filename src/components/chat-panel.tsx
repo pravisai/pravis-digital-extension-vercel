@@ -17,7 +17,7 @@ export function ChatPanel() {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="hidden md:block w-full bg-transparent overflow-hidden"
             >
-                <div className="h-full p-4 border-t">
+                <div className="h-full p-2 border-t">
                      <ClarityChat />
                 </div>
             </motion.aside>

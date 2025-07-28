@@ -10,8 +10,7 @@ import { PersistentChatInput } from '@/components/persistent-chat-input';
 import { usePathname } from 'next/navigation';
 import React from 'react';
 import { IntentProvider } from '@/contexts/intent-context';
-import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 // === AGENTIC IMPORTS ===
 import { AgentProvider } from "@/agent/agent-context";
@@ -42,26 +41,23 @@ function RootLayoutClient({
       <AgentAutoNavigator />
       <RouteLoaderProvider>
         <div className="flex flex-col h-svh w-full overflow-hidden">
-            <motion.main
-              initial={false}
-              animate={{ height: isPanelOpen ? '66.666667%' : '100%' }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="w-full flex-shrink-0"
-            >
-              {children}
-            </motion.main>
-            <ChatPanel />
+          <motion.main
+            initial={false}
+            animate={{ height: isPanelOpen ? '66.666667%' : '100%' }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="w-full flex-shrink-0"
+          >
+            {children}
+          </motion.main>
+          <ChatPanel />
         </div>
 
         <Toaster />
 
-        {/* Mobile-only chat interface */}
+        {/* Mobile-only persistent input */}
         <div className="md:hidden">
-          {/* This panel is the slide-up sheet on mobile */}
-          <ChatPanel /> 
           {showPersistentChat && <PersistentChatInput />}
         </div>
-
       </RouteLoaderProvider>
     </ThemeProvider>
   );
