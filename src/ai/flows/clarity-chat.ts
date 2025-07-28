@@ -1,10 +1,4 @@
-
 'use server';
-/**
- * @fileOverview This is the direct version of the Clarity Chatbot.
- * It uses a direct fetch call to OpenRouter to parse user intent,
- * trigger tool actions (like navigation), or reply conversationally.
- */
 
 import { z } from 'zod';
 import { generateText } from '@/ai/openrouter';
@@ -40,27 +34,43 @@ Your entire response MUST be a single JSON object matching this Zod schema:
 ${JSON.stringify(ClarityChatOutputSchema.shape)}
 `;
 
+  let responseText = '';
   try {
-    const responseText = await generateText(systemInstruction);
+    responseText = await generateText(systemInstruction);
+    console.log("Raw LLM response:", responseText);
 
     // Find the JSON in the model's response
     const jsonStart = responseText.indexOf('{');
     const jsonEnd = responseText.lastIndexOf('}');
     if (jsonStart === -1 || jsonEnd === -1) {
-      // If no JSON object is found, assume it's a simple text reply
-      return { reply: responseText };
+      // If no JSON object is found, reply with all text
+      return { reply: responseText.trim() };
     }
     const jsonString = responseText.substring(jsonStart, jsonEnd + 1);
 
-    const parsed = JSON.parse(jsonString);
+    let parsed: any;
+    try {
+      parsed = JSON.parse(jsonString);
+    } catch (parseErr) {
+      console.error("JSON parse error in clarityChat:", parseErr, "jsonString:", jsonString, "FullResponse:", responseText);
+      return {
+        reply: "Sorry, I couldn't understand the AI's response. Please try rephrasing your message.",
+      };
+    }
 
     // Validate result via schema
-    return ClarityChatOutputSchema.parse(parsed);
+    try {
+      return ClarityChatOutputSchema.parse(parsed);
+    } catch(schemaErr) {
+      console.error("Schema validation error in clarityChat:", schemaErr, "Parsed:", parsed, "FullResponse:", responseText);
+      return {
+        reply: "Sorry, I couldn't interpret the result. Please try rephrasing.",
+      };
+    }
   } catch (error) {
-    console.error("Failed to process clarity chat:", error);
-    // Return a fallback error message
+    console.error("Failed to process clarity chat:", error, responseText);
     return {
-      reply: "I'm sorry, I encountered an issue processing your request. Please try again.",
+      reply: "I'm sorry, something went wrong while processing your request. Please try again or check your network/API key.",
     };
   }
 }
