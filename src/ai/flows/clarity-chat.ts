@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This is the direct Gemini version of the Clarity Chatbot—
@@ -54,7 +55,8 @@ TO NAVIGATE TO CALENDAR:
   }
 }
 
-Otherwise, respond as:
+If the user's request does not match one of the tools above, provide a conversational response.
+Respond as:
 {
   "reply": "Text of your helpful response"
 }
@@ -71,12 +73,17 @@ ${input.imageDataUri ? `Attached image (data URI): ${input.imageDataUri}` : ""}
   try {
     const jsonStart = response.indexOf('{');
     const jsonEnd = response.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1) {
+      // If no JSON object is found, treat the whole response as a reply
+      return { reply: response };
+    }
     const jsonString = response.substring(jsonStart, jsonEnd + 1);
     const parsed = JSON.parse(jsonString);
 
     // Validate using Zod
     return ClarityChatOutputSchema.parse(parsed);
   } catch (err) {
-    return { reply: 'Sorry, I could not understand or process your request.' };
+    // If parsing fails, fall back to treating the response as a simple reply
+    return { reply: response };
   }
 }

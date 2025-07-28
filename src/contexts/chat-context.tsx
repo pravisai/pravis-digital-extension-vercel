@@ -135,8 +135,7 @@ Input: "${currentInput}"
         });
 
         if (result.toolRequest) {
-          const { name, input: toolInput } = result.toolRequest;
-          handleIntent({ action: name, params: toolInput });
+          handleIntent(result.toolRequest);
           const confirmationMessage: Message = {
             role: "pravis",
             content: `Understood. Navigating to the appropriate module to handle your request.`
