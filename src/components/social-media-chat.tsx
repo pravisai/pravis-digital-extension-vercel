@@ -29,12 +29,12 @@ const postGeneratorSchema = z.object({
 type PostGeneratorValues = z.infer<typeof postGeneratorSchema>;
 
 const attachmentOptions = [
-    { icon: FileText, label: 'Document', color: 'bg-indigo-500' },
-    { icon: Camera, label: 'Camera', color: 'bg-red-500' },
-    { icon: ImageIcon, label: 'Gallery', color: 'bg-purple-500', action: 'gallery' },
-    { icon: Mic, label: 'Audio', color: 'bg-orange-500' },
-    { icon: MapPin, label: 'Location', color: 'bg-green-500' },
-    { icon: BarChart3, label: 'Poll', color: 'bg-cyan-500' },
+    { icon: FileText, label: 'Document', color: 'bg-primary' },
+    { icon: Camera, label: 'Camera', color: 'bg-destructive' },
+    { icon: ImageIcon, label: 'Gallery', color: 'bg-secondary', action: 'gallery' },
+    { icon: Mic, label: 'Audio', color: 'bg-primary' },
+    { icon: MapPin, label: 'Location', color: 'bg-accent' },
+    { icon: BarChart3, label: 'Poll', color: 'bg-accent' },
 ]
 
 export function SocialPostGenerator() {

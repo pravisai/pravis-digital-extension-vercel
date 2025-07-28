@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Send, ArrowLeft, BrainCircuit, Sparkles, Trash2 } from 'lucide-react';
 
@@ -15,7 +15,23 @@ import { FadeIn } from '@/components/animations/fade-in';
 import { draftEmailReply } from '@/ai/flows/draft-email-reply';
 import { useIntent } from '@/contexts/intent-context';
 import { Card, CardContent } from '@/components/ui/card';
-import { generateText } from '@/ai/openrouter';
+<<<<<<< HEAD
+
+// REMOVED import { generateText } from '@/ai/openrouter';
+
+// --- New: Helper function for secure server-side LLM calls
+async function fetchServerGeneratedText(prompt: string) {
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt })
+  });
+  const data = await res.json();
+  if (!data.reply) throw new Error(data.error || "AI Error");
+  return data.reply;
+}
+=======
+>>>>>>> 3dabb8b897697fd81238fef3f5fc7b737edf502e
 
 export default function ComposeEmailPage() {
   const router = useRouter();
@@ -50,6 +66,7 @@ export default function ComposeEmailPage() {
     setBody(prefillBody);
   }, [prefillBody]);
 
+  // --- CHANGED to use fetchServerGeneratedText
   const handleGenerateWithPravis = async () => {
     if (!aiPrompt.trim()) {
       toast({
@@ -61,17 +78,22 @@ export default function ComposeEmailPage() {
     }
     setIsGenerating(true);
     try {
+<<<<<<< HEAD
       // Step 1: Clarify, repair, or upgrade ANY user prompt so it always works
       const clarifier = `
-  You are an expert email-writing agent.
-  If the user's instructions are vague, short, or hard to understand, rewrite it as a clear and complete command for an email.
-  If you still aren't sure, suggest a likely action or ask a helpful follow-up question.
-  User instruction: "${aiPrompt}"
-  `;
-      const improvedPrompt = await generateText(clarifier);
-  
+You are an expert email-writing agent.
+If the user's instructions are vague, short, or hard to understand, rewrite it as a clear and complete command for an email.
+If you still aren't sure, suggest a likely action or ask a helpful follow-up question.
+User instruction: "${aiPrompt}"
+`;
+      // === USE THE API fetch instead of direct generateText ===
+      const improvedPrompt = await fetchServerGeneratedText(clarifier);
+
       // Step 2: Continue with main workflow using the clarified/rewritten prompt
       const result = await draftEmailReply({ prompt: improvedPrompt });
+=======
+      const result = await draftEmailReply({ prompt: aiPrompt });
+>>>>>>> 3dabb8b897697fd81238fef3f5fc7b737edf502e
       setTo(prev => prev || result.to);
       setSubject(result.subject);
       setBody(result.body);
@@ -86,7 +108,6 @@ export default function ComposeEmailPage() {
       setIsGenerating(false);
     }
   };
-  
 
   const handleSendEmail = async () => {
     if (!to || !subject || !body) {
@@ -123,7 +144,7 @@ export default function ComposeEmailPage() {
     setAiPrompt('');
     toast({ title: 'Draft Discarded' });
     router.back();
-  }
+  };
 
   return (
     <FadeIn className="h-full flex flex-col bg-background">

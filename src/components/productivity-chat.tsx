@@ -1,7 +1,6 @@
-
 "use client"
 
-import React, { useState, useRef } from "react"
+import React, { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -17,8 +16,21 @@ import { Skeleton } from "./ui/skeleton"
 import { Label } from "./ui/label"
 import { FadeIn } from "./animations/fade-in"
 import { copyToClipboard } from "@/lib/clipboard"
-import { generateText } from "@/ai/openrouter";
+<<<<<<< HEAD
 
+// ---- HELPER: Secure API fetch for server LLM ----
+async function fetchServerGeneratedText(prompt: string) {
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt }),
+  });
+  const data = await res.json();
+  if (!data.reply) throw new Error(data.error || "AI Error");
+  return data.reply;
+}
+=======
+>>>>>>> 3dabb8b897697fd81238fef3f5fc7b737edf502e
 
 const productivitySchema = z.object({
   task: z.string().min(1, { message: "Please select a task." }),
@@ -43,19 +55,24 @@ export function ProductivityChat() {
   async function onGenerate(values: ProductivityValues) {
     setIsGenerating(true);
     setGeneratedContent("");
-  
+
     try {
+<<<<<<< HEAD
       // Step 1: Always clarify and repair vague/short instructions
       const clarifier = `
-  You are a productivity AI agent.
-  If the user's instructions are unclear, too short, or ambiguous, rewrite it as a clear and effective command for the chosen task (${values.task}).
-  If you still can't clarify, suggest two possible instructions or ask a helpful follow-up.
-  Instruction: "${values.instructions}"
+You are a productivity AI agent.
+If the user's instructions are unclear, too short, or ambiguous, rewrite it as a clear and effective command for the chosen task (${values.task}).
+If you still can't clarify, suggest two possible instructions or ask a helpful follow-up.
+Instruction: "${values.instructions}"
       `;
-      const improvedInstruction = await generateText(clarifier);
-  
+      // === SECURE: Use our helper, not generateText ===
+      const improvedInstruction = await fetchServerGeneratedText(clarifier);
+
       // Step 2: Continue as before, but use the improved instructions
       const result = await analyzeText({ text: improvedInstruction });
+=======
+      const result = await analyzeText({ text: values.instructions });
+>>>>>>> 3dabb8b897697fd81238fef3f5fc7b737edf502e
       setGeneratedContent(result.analysis);
     } catch (error) {
       console.error("Failed to generate content:", error);
@@ -68,7 +85,6 @@ export function ProductivityChat() {
       setIsGenerating(false);
     }
   }
-  
 
   const handleCopy = async () => {
     const success = await copyToClipboard(generatedContent);

@@ -110,10 +110,7 @@ Please address the reply to ${selectedEmail.email}.
 `;
 
     try {
-      const result = await draftEmailReply({
-        prompt: prompt,
-        history: [],
-      });
+      const result = await draftEmailReply({ prompt });
       setDraftedReply(result.body);
     } catch (error) {
       console.error("Failed to draft reply:", error);

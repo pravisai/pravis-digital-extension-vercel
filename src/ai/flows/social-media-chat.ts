@@ -32,13 +32,12 @@ Be creative, helpful, and align your suggestions with modern social media best p
 
 ${input.imageDataUri ? `
 The user has provided an image. Your post should be relevant to this image.
-Image Data URI: ${input.imageDataUri}
 ` : ''}
 
 Platform: ${input.platform}
 User's Instructions: ${input.instructions}
 
-Respond ONLY as JSON in this format:
+Respond ONLY with a valid JSON object in this format. Do not add any extra text or explanation.
 {
   "post": "Your generated post here"
 }
@@ -49,11 +48,15 @@ Respond ONLY as JSON in this format:
   try {
     const jsonStart = response.indexOf('{');
     const jsonEnd = response.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1) {
+        throw new Error("No JSON object found in the AI response.");
+    }
     const jsonString = response.substring(jsonStart, jsonEnd + 1);
     const data = JSON.parse(jsonString);
 
     return SocialMediaChatOutputSchema.parse(data);
   } catch (error) {
-    throw new Error('Failed to parse Gemini response as JSON: ' + (error as any)?.toString());
+    console.error("Failed to parse social media chat response from AI:", error, "Raw response:", response);
+    throw new Error('Failed to parse AI response as JSON. The format was invalid.');
   }
 }
