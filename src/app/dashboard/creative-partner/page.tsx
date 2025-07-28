@@ -19,7 +19,7 @@ const interactionModes: PyramidFace[] = [
     id: "call",
     title: "Call me",
     icon: Phone,
-    href: "#", // Placeholder
+    href: "/dashboard/creative-partner/call",
     position: "right"
   },
   {
