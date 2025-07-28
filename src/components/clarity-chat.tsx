@@ -113,7 +113,7 @@ export function ClarityChat() {
   };
   
   return (
-    <div className="flex flex-col h-full bg-transparent shadow-sm">
+    <div className="flex flex-col h-full bg-transparent">
       <header className="p-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
         </div>
@@ -190,7 +190,7 @@ export function ClarityChat() {
           )}
         </div>
       </ScrollArea>
-      <footer className="p-2 border-t border-white/10">
+      <footer className="p-2">
         {attachmentPreview && (
           <div className="p-2 relative w-fit">
             <img
