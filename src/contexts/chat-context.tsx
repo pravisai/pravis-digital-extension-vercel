@@ -93,6 +93,11 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       }
     };
     
+    // Set initial message for non-logged-in users or as a fallback
+    if (messages.length === 0 && !auth.currentUser) {
+        setMessages([{ role: "pravis", content: "Shall we begin, sir?" }]);
+    }
+    
     const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user && messages.length === 0) {
             generateInitialMessage(user);
@@ -102,6 +107,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
