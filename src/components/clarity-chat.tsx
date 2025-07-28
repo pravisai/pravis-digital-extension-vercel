@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Send, User, Paperclip, Mic, Smile, Camera, Waves, X, ChevronDown
+  Send, User, Paperclip, Mic, Smile, Camera, Waves, X
 } from "lucide-react";
 import React, { useRef, useState, useEffect } from "react";
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
@@ -29,8 +29,6 @@ export function ClarityChat() {
     setAudioDataUri,
     attachmentPreview,
     setAttachment,
-    isPanelOpen,
-    setPanelOpen,
   } = useChat();
 
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -39,7 +37,6 @@ export function ClarityChat() {
   const formRef = useRef<HTMLFormElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const isMobile = useIsMobile();
 
   const router = useRouter();
 
@@ -113,27 +110,7 @@ export function ClarityChat() {
   };
   
   return (
-    <div className="flex flex-col h-full rounded-lg">
-      <header className="p-3 border-b flex items-center justify-between">
-        <div className="flex items-center gap-2">
-           <Avatar className="p-1.5 h-9 w-9">
-              <PravisLogo size={20} />
-           </Avatar>
-           <div>
-              <h2 className="font-semibold text-lg">Pravis</h2>
-              <p className="text-xs text-muted-foreground">Online</p>
-           </div>
-        </div>
-        {isMobile && isPanelOpen && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setPanelOpen(false)}
-          >
-            <ChevronDown className="h-5 w-5" />
-          </Button>
-        )}
-      </header>
+    <div className="flex flex-col h-full rounded-lg bg-transparent">
       <ScrollArea className="flex-1 w-full" ref={scrollAreaRef}>
         <div className="space-y-4 p-4">
           {messages.map((message, index) => (
