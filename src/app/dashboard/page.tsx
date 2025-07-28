@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -47,9 +46,6 @@ export default function DashboardPage() {
       <FadeIn className="w-full">
         <div className="text-center">
           {getGreeting()}
-          <p className="text-muted-foreground mt-2">
-            Here's a snapshot of your digital extension.
-          </p>
         </div>
       </FadeIn>
       <div className="w-full flex-1 min-h-0">
