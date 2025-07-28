@@ -57,7 +57,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       setMessages([
         {
           role: "pravis",
-          content: "Hello! I'm Pravis, your personal AI assistant. How can I help you find clarity today?"
+          content: "Shall we begin, sir?"
         }
       ]);
     }
