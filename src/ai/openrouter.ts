@@ -1,13 +1,12 @@
 // src/ai/openrouter.ts
 
-const OPENROUTER_API_KEY = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY; // <-- Do NOT use NEXT_PUBLIC_ prefix!
 if (!OPENROUTER_API_KEY) {
-  throw new Error("OPENROUTER_API_KEY missing. Set it in .env");
+  throw new Error("OPENROUTER_API_KEY missing. Set it in .env (server-side only)");
 }
 
-
 // ----- Qwen3 via OpenRouter -----
-console.log("Loaded OpenRouter key: ", OPENROUTER_API_KEY && OPENROUTER_API_KEY.slice(0,12));
+console.log("Loaded OpenRouter key: ", OPENROUTER_API_KEY && OPENROUTER_API_KEY.slice(0, 12));
 
 export async function generateText(userPrompt: string) {
   try {
