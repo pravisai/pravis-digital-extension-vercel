@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useChat } from "@/contexts/chat-context"
@@ -9,23 +8,8 @@ export function ChatPanel() {
     const { isPanelOpen } = useChat()
     
     return (
-<<<<<<< HEAD
-        <AnimatePresence>
-            {isPanelOpen && (
-                <motion.div
-                    initial={{ y: "100%" }}
-                    animate={{ y: 0 }}
-                    exit={{ y: "100%" }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="fixed bottom-0 left-0 right-0 z-50 h-1/3 w-full bg-transparent md:h-full md:w-96 md:border-l-0 md:border-t-0 md:left-auto md:bottom-0 md:right-0"
-                >
-                    <ClarityChat />
-                </motion.div>
-            )}
-        </AnimatePresence>
-=======
         <>
-            {/* Desktop Panel: part of the flex layout, appears at the bottom */}
+            {/* Desktop Panel: flex layout, appears at the bottom (not visible on mobile) */}
             <motion.aside
                 initial={false}
                 animate={{ height: isPanelOpen ? '33.333333%' : '0%' }}
@@ -33,7 +17,7 @@ export function ChatPanel() {
                 className="hidden md:block bg-background overflow-hidden w-full"
             >
                 <div className="h-full p-2 border-t">
-                     <ClarityChat />
+                    <ClarityChat />
                 </div>
             </motion.aside>
 
@@ -52,6 +36,5 @@ export function ChatPanel() {
                 )}
             </AnimatePresence>
         </>
->>>>>>> 3dabb8b897697fd81238fef3f5fc7b737edf502e
     )
 }
