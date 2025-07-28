@@ -113,18 +113,14 @@ export function ClarityChat() {
   };
   
   return (
-    <div className="flex flex-col h-full bg-card shadow-sm">
-      <header className="p-4 border-b flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Avatar className="p-1.5 h-10 w-10">
-            <PravisLogo size={24} />
+    <div className="flex flex-col h-full bg-card/80 backdrop-blur-sm shadow-sm">
+      <header className="p-3 border-b border-white/10 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Avatar className="p-1.5 h-9 w-9">
+            <PravisLogo size={20} />
           </Avatar>
           <div>
-            <h1 className="font-semibold text-lg">Pravis AI</h1>
-            <p className="text-xs text-chart-4 flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-chart-4 inline-block"></span>
-              Online
-            </p>
+            <h1 className="font-semibold text-base">Pravis AI</h1>
           </div>
         </div>
         {isMobile && isPanelOpen && (
@@ -138,17 +134,17 @@ export function ClarityChat() {
         )}
       </header>
       <ScrollArea className="flex-1 w-full" ref={scrollAreaRef}>
-        <div className="space-y-6 p-6">
+        <div className="space-y-4 p-4">
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`flex items-start gap-4 ${
+              className={`flex items-start gap-3 ${
                 message.role === "user" ? "justify-end" : ""
               }`}
             >
               {message.role === "pravis" && (
-                <Avatar className="p-1.5 h-10 w-10">
-                  <PravisLogo size={24} />
+                <Avatar className="p-1.5 h-9 w-9">
+                  <PravisLogo size={20} />
                 </Avatar>
               )}
               <div
@@ -183,9 +179,9 @@ export function ClarityChat() {
             </div>
           ))}
           {isLoading && (
-            <div className="flex items-center gap-4">
-              <Avatar className="p-1.5 h-10 w-10">
-                <PravisLogo size={24} />
+            <div className="flex items-center gap-3">
+              <Avatar className="p-1.5 h-9 w-9">
+                <PravisLogo size={20} />
               </Avatar>
               <div className="rounded-lg p-3 bg-secondary animate-pulse">
                 <div className="h-4 w-24 rounded-md bg-muted"></div>
@@ -194,7 +190,7 @@ export function ClarityChat() {
           )}
         </div>
       </ScrollArea>
-      <footer className="p-2 border-t">
+      <footer className="p-2 border-t border-white/10">
         {attachmentPreview && (
           <div className="p-2 relative w-fit">
             <img
@@ -220,13 +216,13 @@ export function ClarityChat() {
               type="button"
               className="shrink-0 rounded-full"
             >
-              <Smile className="h-6 w-6 text-muted-foreground" />
+              <Smile className="h-5 w-5 text-muted-foreground" />
             </Button>
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={isRecording ? "Listening..." : "Shall we begin, sir?"}
-              className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 h-12"
+              className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 h-11"
               disabled={isLoading || isRecording}
             />
             <input
@@ -243,7 +239,7 @@ export function ClarityChat() {
               className="shrink-0 rounded-full"
               onClick={handleAttachmentClick}
             >
-              <Paperclip className="h-6 w-6 text-muted-foreground" />
+              <Paperclip className="h-5 w-5 text-muted-foreground" />
             </Button>
             <Button
               variant="ghost"
@@ -251,17 +247,17 @@ export function ClarityChat() {
               type="button"
               className="shrink-0 rounded-full"
             >
-              <Camera className="h-6 w-6 text-muted-foreground" />
+              <Camera className="h-5 w-5 text-muted-foreground" />
             </Button>
           </div>
           {(input.trim() || attachmentPreview) ? (
             <Button
               type="submit"
               size="icon"
-              className="rounded-full w-12 h-12 bg-primary text-primary-foreground shrink-0 transition-all duration-300"
+              className="rounded-full w-11 h-11 bg-primary text-primary-foreground shrink-0 transition-all duration-300"
               disabled={isLoading}
             >
-              <Send className="h-6 w-6" />
+              <Send className="h-5 w-5" />
             </Button>
           ) : (
             <Button
@@ -269,12 +265,12 @@ export function ClarityChat() {
               onClick={handleMicClick}
               size="icon"
               className={cn(
-                "rounded-full w-12 h-12 bg-primary text-primary-foreground shrink-0 transition-all duration-300",
+                "rounded-full w-11 h-11 bg-primary text-primary-foreground shrink-0 transition-all duration-300",
                 isRecording && "bg-destructive"
               )}
               disabled={isLoading}
             >
-              {isRecording ? <Waves className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
+              {isRecording ? <Waves className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
             </Button>
           )}
         </form>
