@@ -275,10 +275,9 @@
     filter: none;
   }
 
-  .module-icon.neon-purple { color: #9D00FF; }
-  .module-icon.electric-blue { color: #00FFFF; }
-  .module-icon.bright-pink { color: #FF007F; }
-  .module-icon.acid-green { color: #39FF14; }
+  .module-icon.theme-primary { color: hsl(var(--primary)); }
+  .module-icon.theme-secondary { color: hsl(var(--secondary)); }
+  .module-icon.theme-accent { color: hsl(var(--accent)); }
   
   .cube-face h3 {
     color: #ffffff;
