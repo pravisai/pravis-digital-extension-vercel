@@ -1,10 +1,4 @@
-// src/ai/openrouter.ts
-
-<<<<<<< HEAD
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-=======
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY; // <-- Do NOT use NEXT_PUBLIC_ prefix!
->>>>>>> 0d8feb59a73cbae35ee2458747cf76b1c7d49c1a
 if (!OPENROUTER_API_KEY) {
   throw new Error("OPENROUTER_API_KEY missing. Set it in .env (server-side only)");
 }

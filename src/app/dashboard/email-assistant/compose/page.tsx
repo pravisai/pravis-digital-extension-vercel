@@ -15,11 +15,8 @@ import { FadeIn } from '@/components/animations/fade-in';
 import { draftEmailReply } from '@/ai/flows/draft-email-reply';
 import { useIntent } from '@/contexts/intent-context';
 import { Card, CardContent } from '@/components/ui/card';
-<<<<<<< HEAD
 
-// REMOVED import { generateText } from '@/ai/openrouter';
-
-// --- New: Helper function for secure server-side LLM calls
+// Helper for secure server-side LLM call
 async function fetchServerGeneratedText(prompt: string) {
   const res = await fetch('/api/chat', {
     method: 'POST',
@@ -30,20 +27,16 @@ async function fetchServerGeneratedText(prompt: string) {
   if (!data.reply) throw new Error(data.error || "AI Error");
   return data.reply;
 }
-=======
->>>>>>> 3dabb8b897697fd81238fef3f5fc7b737edf502e
 
 export default function ComposeEmailPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
 
-  // Read values from query params for agentic prefill
   const prefillTo = searchParams.get("to") || "";
   const prefillSubject = searchParams.get("subject") || "";
   const prefillBody = searchParams.get("body") || "";
 
-  // Controlled fields
   const [to, setTo] = useState(prefillTo);
   const [subject, setSubject] = useState(prefillSubject);
   const [body, setBody] = useState(prefillBody);
@@ -52,21 +45,12 @@ export default function ComposeEmailPage() {
   const [isSending, setIsSending] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // If intent context is ever used for manual agent nav/pre-fill as well
   const { intent, clearIntent } = useIntent();
 
-  // Sync with URL params on navigation/change
-  useEffect(() => {
-    setTo(prefillTo);
-  }, [prefillTo]);
-  useEffect(() => {
-    setSubject(prefillSubject);
-  }, [prefillSubject]);
-  useEffect(() => {
-    setBody(prefillBody);
-  }, [prefillBody]);
+  useEffect(() => { setTo(prefillTo); }, [prefillTo]);
+  useEffect(() => { setSubject(prefillSubject); }, [prefillSubject]);
+  useEffect(() => { setBody(prefillBody); }, [prefillBody]);
 
-  // --- CHANGED to use fetchServerGeneratedText
   const handleGenerateWithPravis = async () => {
     if (!aiPrompt.trim()) {
       toast({
@@ -78,22 +62,14 @@ export default function ComposeEmailPage() {
     }
     setIsGenerating(true);
     try {
-<<<<<<< HEAD
-      // Step 1: Clarify, repair, or upgrade ANY user prompt so it always works
       const clarifier = `
 You are an expert email-writing agent.
 If the user's instructions are vague, short, or hard to understand, rewrite it as a clear and complete command for an email.
 If you still aren't sure, suggest a likely action or ask a helpful follow-up question.
 User instruction: "${aiPrompt}"
 `;
-      // === USE THE API fetch instead of direct generateText ===
       const improvedPrompt = await fetchServerGeneratedText(clarifier);
-
-      // Step 2: Continue with main workflow using the clarified/rewritten prompt
       const result = await draftEmailReply({ prompt: improvedPrompt });
-=======
-      const result = await draftEmailReply({ prompt: aiPrompt });
->>>>>>> 3dabb8b897697fd81238fef3f5fc7b737edf502e
       setTo(prev => prev || result.to);
       setSubject(result.subject);
       setBody(result.body);
@@ -125,7 +101,6 @@ User instruction: "${aiPrompt}"
       setIsSending(false);
       return;
     }
-
     try {
       await sendEmail(accessToken, to, subject, body);
       toast({ title: 'Email Sent!', description: `Your message to ${to} has been sent successfully.` });
@@ -157,7 +132,6 @@ User instruction: "${aiPrompt}"
             <h1 className="text-base font-medium">New Message</h1>
           </div>
         </header>
-
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           <div className="flex items-center gap-2 border-b pb-2">
             <Label htmlFor="to" className="text-muted-foreground">To</Label>
@@ -208,7 +182,6 @@ User instruction: "${aiPrompt}"
             </CardContent>
           </Card>
         </div>
-
         <footer className="p-4 border-t flex justify-between items-center">
           <Button onClick={handleSendEmail} disabled={isSending || isGenerating}>
             {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
