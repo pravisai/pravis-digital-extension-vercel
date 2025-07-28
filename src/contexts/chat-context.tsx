@@ -31,7 +31,6 @@ interface ChatContextType {
   setInput: (input: string) => void;
   handleSendMessage: (
     originalInput: string,
-    promptForAi: string,
     isVoiceInput?: boolean
   ) => Promise<void>;
   setPanelOpen: (isOpen: boolean) => void;
@@ -84,7 +83,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
   const handleSendMessage = useCallback
   (
-    async (originalInput: string, promptForAi: string, isVoiceInput: boolean = false) => {
+    async (originalInput: string, isVoiceInput: boolean = false) => {
       if (!originalInput.trim() && !attachment) return;
 
       setPanelOpen(true);
@@ -117,7 +116,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
       try {
         const result = await clarityChat({
-          prompt: promptForAi,
+          prompt: originalInput,
           imageDataUri
         });
 

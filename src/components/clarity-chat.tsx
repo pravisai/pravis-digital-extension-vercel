@@ -17,12 +17,6 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PravisLogo } from "./pravis-logo";
-import { generateText } from "@/ai/openrouter";
-
-// === AGENTIC INTENT & AI FLOWS ===
-import { useAgent } from "@/agent/agent-context";
-import { parseAgentIntent } from "@/agent/intent-parser";
-// ======================
 
 export function ClarityChat() {
   const {
@@ -38,8 +32,6 @@ export function ClarityChat() {
     isPanelOpen,
     setPanelOpen,
   } = useChat();
-
-  const { setPendingIntent } = useAgent();
 
   const [user, setUser] = useState<FirebaseUser | null>(null);
 
@@ -105,27 +97,7 @@ export function ClarityChat() {
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!input.trim() && !attachmentPreview) return;
-  
-    // The agentic pre-computation step.
-    // It clarifies the prompt for the AI, but we will still display the *original* user input.
-    let promptForAi = input;
-    if (input.trim().length > 0 && input.trim().length < 20) {
-        try {
-            const clarifier = `
-        You are a proactive AI clarity coach.
-        If the user's input is incomplete, ambiguous, or too broad, rewrite it as a clear, specific question or action request.
-        If still unclear, offer two likely questions or actions, or politely ask for clarification.
-        User input: "${input}"
-            `;
-            promptForAi = await generateText(clarifier);
-        } catch {
-            // fallback to plain input if the clarifier fails
-            promptForAi = input;
-        }
-    }
-    
-    // Pass both original input and the (potentially improved) prompt to the handler.
-    handleSendMessage(input, promptForAi);
+    handleSendMessage(input);
   };
   
 
