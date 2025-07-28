@@ -40,7 +40,7 @@ export default function DashboardPage() {
   return (
     <div className={cn(
       "h-full flex flex-col items-center justify-center space-y-8 transition-all duration-300",
-      isPanelOpen ? "pb-48 md:pb-8" : "pb-32 md:pb-0"
+      isPanelOpen ? "pb-32 md:pb-8" : "pb-32 md:pb-0"
     )}>
       {/* Agent Command Box for agent command input testing */}
       <div className="w-full max-w-md px-4">

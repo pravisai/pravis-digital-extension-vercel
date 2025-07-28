@@ -36,7 +36,7 @@ export default function CreativePartnerPage() {
     return (
         <FadeIn className={cn(
             "h-full flex flex-col items-center justify-center p-4 md:p-8 space-y-8 transition-all duration-300",
-            isPanelOpen ? "pb-48 md:pb-8" : "pb-32 md:pb-0"
+            isPanelOpen ? "pb-32 md:pb-8" : "pb-32 md:pb-0"
         )}>
             <div className="text-center">
                 <h1 className="text-4xl font-bold tracking-tight">Loud Think</h1>
