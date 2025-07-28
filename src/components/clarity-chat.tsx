@@ -193,7 +193,7 @@ export function ClarityChat() {
           </div>
         )}
         <form onSubmit={handleFormSubmit} ref={formRef} className="flex items-center gap-2">
-          <div className="flex-1 flex items-center bg-secondary rounded-full px-2">
+          <div className="flex-1 flex items-center bg-transparent border border-primary/50 shadow-[0_0_8px_hsl(var(--primary)/0.5)] rounded-full px-2">
             <Button
               variant="ghost"
               size="icon"
