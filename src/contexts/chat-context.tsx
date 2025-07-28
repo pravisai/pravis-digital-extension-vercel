@@ -10,13 +10,11 @@ import React, {
   useEffect
 } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { textToSpeech } from "@/ai/flows/text-to-speech";
+import { clarityChat } from "@/ai/flows/clarity-chat";
 import { useIntent } from "./intent-context";
-import { auth, getValidAccessToken, User } from "@/lib/firebase/auth";
-import { generateGreeting } from "@/ai/flows/generate-greeting";
-import { fetchCalendarEvents } from "@/lib/calender";
-import { format, isSameDay, parseISO, startOfToday } from "date-fns";
+import { auth } from "@/lib/firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
-import { chatService, type ChatRequest, type ChatResponse } from "@/lib/chatService"; // Updated import
 
 interface Message {
   role: "user" | "pravis";
@@ -57,47 +55,12 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const { handleIntent } = useIntent();
 
   useEffect(() => {
-    const generateInitialMessage = async (user: User) => {
-      setIsLoading(true);
-      try {
-        const token = getValidAccessToken();
-        let eventsForPrompt = [];
-
-        if (token) {
-          const { events } = await fetchCalendarEvents(token);
-          const today = startOfToday();
-          eventsForPrompt = events
-            .filter(event => {
-              const eventDate = event.start?.dateTime ? parseISO(event.start.dateTime) : (event.start?.date ? parseISO(event.start.date) : null);
-              return eventDate ? isSameDay(eventDate, today) : false;
-            })
-            .map(event => ({
-              summary: event.summary,
-              start: event.start?.dateTime ? format(parseISO(event.start.dateTime), 'p') : 'All-day',
-            }));
-        }
-
-        const greetingResult = await generateGreeting({
-          userName: user.displayName?.split(' ')[0] || 'Sir',
-          events: eventsForPrompt,
-        });
-
-        setMessages([{ role: "pravis", content: greetingResult.greeting }]);
-
-      } catch (error) {
-        console.error("Failed to generate personalized greeting:", error);
-        setMessages([{ role: "pravis", content: "Welcome. How may I assist you today?" }]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user && messages.length === 0) {
-            generateInitialMessage(user);
-        } else if (!user && messages.length === 0) {
-            setMessages([{ role: "pravis", content: "Shall we begin, sir?" }]);
-        }
+      if (user && messages.length === 0) {
+        setMessages([{ role: "pravis", content: "Shall we begin, sir?" }]);
+      } else if (!user && messages.length === 0) {
+        setMessages([{ role: "pravis", content: "Shall we begin, sir?" }]);
+      }
     });
 
     return () => unsubscribe();
@@ -156,10 +119,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       }
 
       try {
-        const result = await chatService.sendMessage({
-          prompt: originalInput,
-          imageDataUri
-        });
+        const result = await clarityChat({ prompt: originalInput, imageDataUri });
 
         if (result.toolRequest) {
           handleIntent(result.toolRequest);
@@ -173,9 +133,10 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
           const pravisResponse = result.reply;
           const pravisMessage: Message = { role: "pravis", content: pravisResponse };
           setMessages((prev) => [...prev, pravisMessage]);
-        } else {
-             const errorMessage: Message = { role: "pravis", content: "I'm sorry, I wasn't able to process that. Could you please try rephrasing?" };
-             setMessages((prev) => [...prev, errorMessage]);
+          if (isVoiceInput) {
+            const { media } = await textToSpeech(pravisResponse);
+            setAudioDataUri(media);
+          }
         }
       } catch (error: any) {
         console.error("Pravis chatbot error:", error);
@@ -190,7 +151,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(false);
       }
     },
-    [toast, attachment, attachmentPreview, handleIntent, setAttachment, setInput, setMessages, setPanelOpen, setIsLoading]
+    [toast, attachment, attachmentPreview, handleIntent, setAttachment, setInput, setMessages, setPanelOpen, setAudioDataUri]
   );
 
   const value = {
