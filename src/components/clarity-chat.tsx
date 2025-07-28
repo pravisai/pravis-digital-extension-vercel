@@ -113,7 +113,7 @@ export function ClarityChat() {
   };
   
   return (
-    <div className="flex flex-col h-full bg-card shadow-sm rounded-lg">
+    <div className="flex flex-col h-full rounded-lg">
       <header className="p-3 border-b flex items-center justify-between">
         <div className="flex items-center gap-2">
            <Avatar className="p-1.5 h-9 w-9">
