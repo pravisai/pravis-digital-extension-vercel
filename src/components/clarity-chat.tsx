@@ -116,7 +116,6 @@ export function ClarityChat() {
     <div className="flex flex-col h-full bg-transparent shadow-sm">
       <header className="p-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {/* Header content can be added here if needed in the future */}
         </div>
         {isMobile && isPanelOpen && (
           <Button
@@ -150,7 +149,7 @@ export function ClarityChat() {
                     className={`rounded-lg p-3 max-w-md ${
                       message.role === "user"
                         ? "bg-primary text-primary-foreground"
-                        : "bg-secondary/50"
+                        : "border border-border"
                     }`}
                   >
                   {typeof message.content === "string" ? (
