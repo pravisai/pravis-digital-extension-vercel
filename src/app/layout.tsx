@@ -34,7 +34,7 @@ function RootLayoutClient({
   const showPersistentChat = isDashboard && !isPanelOpen;
 
   const mainVariants = {
-    open: { height: isMobile ? '100%' : '66.666667%' },
+    open: { height: '66.666667%' },
     closed: { height: '100%' },
   };
 
@@ -50,10 +50,10 @@ function RootLayoutClient({
         <div className="flex flex-col h-svh w-full overflow-hidden">
            <motion.main
               initial={false}
-              animate={isPanelOpen ? "open" : "closed"}
+              animate={isMobile ? "closed" : (isPanelOpen ? "open" : "closed")}
               variants={mainVariants}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="flex-1"
+              className="flex-1 min-h-0" // min-h-0 is CRITICAL for flexbox to allow shrinking and internal scrolling
             >
               {children}
             </motion.main>

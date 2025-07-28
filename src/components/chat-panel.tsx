@@ -15,7 +15,7 @@ export function ChatPanel() {
                 initial={false}
                 animate={{ height: isPanelOpen ? '33.333333%' : '0%' }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="hidden md:block bg-transparent overflow-hidden w-full"
+                className="hidden md:block bg-background overflow-hidden w-full"
             >
                 <div className="h-full p-2 border-t">
                      <ClarityChat />
