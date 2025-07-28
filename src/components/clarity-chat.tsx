@@ -114,14 +114,9 @@ export function ClarityChat() {
   
   return (
     <div className="flex flex-col h-full bg-transparent shadow-sm">
-      <header className="p-3 border-b border-white/10 flex items-center justify-between">
+      <header className="p-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Avatar className="p-1.5 h-9 w-9">
-            <PravisLogo size={20} />
-          </Avatar>
-          <div>
-            <h1 className="font-semibold text-base">Pravis AI</h1>
-          </div>
+          {/* Header content can be added here if needed in the future */}
         </div>
         {isMobile && isPanelOpen && (
           <Button
@@ -147,20 +142,25 @@ export function ClarityChat() {
                   <PravisLogo size={20} />
                 </Avatar>
               )}
-              <div
-                className={`rounded-lg p-3 max-w-md ${
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary"
-                }`}
-              >
-                {typeof message.content === "string" ? (
-                  <p className="text-sm whitespace-pre-wrap">
-                    {message.content}
-                  </p>
-                ) : (
-                  message.content
+              <div className="flex flex-col">
+                {message.role === 'pravis' && (
+                    <span className="text-xs text-muted-foreground ml-3 mb-1">Pravis</span>
                 )}
+                 <div
+                    className={`rounded-lg p-3 max-w-md ${
+                      message.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary"
+                    }`}
+                  >
+                  {typeof message.content === "string" ? (
+                    <p className="text-sm whitespace-pre-wrap">
+                      {message.content}
+                    </p>
+                  ) : (
+                    message.content
+                  )}
+                 </div>
               </div>
               {message.role === "user" && (
                 <Avatar>
