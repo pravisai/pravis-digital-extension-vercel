@@ -17,25 +17,25 @@
     --primary: 0 90% 65%; /* Neon Red */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 175 90% 55%; /* Neon Cyan */
+    --secondary: 30 90% 60%; /* Neon Copper */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 220 10% 20%;
     --muted-foreground: 220 10% 65%;
 
-    --accent: 310 90% 60%; /* Neon Magenta */
+    --accent: 310 90% 60%; /* Neon Purple/Magenta */
     --accent-foreground: 0 0% 5%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 0 80% 20%;
-    --input: 175 90% 20%;
+    --input: 30 90% 20%; /* Neon Copper based input */
     --ring: 0 90% 60%;
 
     --chart-1: 0 90% 65%; /* neon red */
-    --chart-2: 175 90% 55%; /* neon cyan */
-    --chart-3: 310 90% 60%; /* neon magenta */
+    --chart-2: 30 90% 60%; /* neon copper */
+    --chart-3: 310 90% 60%; /* neon purple */
     --chart-4: 70 95% 55%; /* neon yellow-green */
     --chart-5: 220 10% 65%; /* muted foreground */
   }
