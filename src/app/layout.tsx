@@ -40,15 +40,15 @@ function RootLayoutClient({
     >
       <AgentAutoNavigator />
       <RouteLoaderProvider>
-        <div className="flex flex-col h-svh w-full overflow-hidden">
-          <motion.main
-            initial={false}
-            animate={{ height: isPanelOpen ? '66.666667%' : '100%' }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="w-full flex-shrink-0"
-          >
-            {children}
-          </motion.main>
+        <div className="flex h-svh w-full overflow-hidden">
+           <motion.main
+              initial={false}
+              animate={{ width: isPanelOpen ? "66.666667%" : "100%"}}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="flex-1"
+            >
+              {children}
+            </motion.main>
           <ChatPanel />
         </div>
 
