@@ -14,16 +14,16 @@
     --popover: 0 0% 5%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 0 90% 65%;
+    --primary: 0 90% 65%; /* Neon Red */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 175 90% 55%;
+    --secondary: 175 90% 55%; /* Neon Cyan */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 220 10% 20%;
     --muted-foreground: 220 10% 65%;
 
-    --accent: 70 95% 55%;
+    --accent: 310 90% 60%; /* Neon Magenta */
     --accent-foreground: 0 0% 5%;
 
     --destructive: 0 72% 51%;
@@ -115,15 +115,15 @@
 @layer components {
   /* --- Custom Chat Bubble Styles --- */
   .chat-bubble-base {
-    @apply relative max-w-md p-3;
+    @apply relative max-w-md p-3 rounded-2xl;
   }
 
   .chat-bubble-user {
-    @apply chat-bubble-base rounded-2xl bg-primary text-primary-foreground;
+    @apply chat-bubble-base bg-primary text-primary-foreground;
   }
   
   .chat-bubble-pravis {
-    @apply chat-bubble-base rounded-2xl border bg-transparent;
+    @apply chat-bubble-base border bg-transparent;
     box-shadow: 0 0 8px hsl(var(--primary) / 0.5);
     border-color: hsl(var(--primary) / 0.6);
   }
