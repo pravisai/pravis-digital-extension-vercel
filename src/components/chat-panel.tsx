@@ -15,10 +15,10 @@ export function ChatPanel() {
         <>
             {/* Desktop Panel */}
             <motion.div
-                initial={false}
-                animate={{ width: isPanelOpen ? '33.333333%' : '0%' }}
+                initial={{ x: '100%' }}
+                animate={{ x: isPanelOpen ? '0%' : '100%' }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="hidden md:block h-full bg-transparent overflow-hidden"
+                className="hidden md:block fixed top-0 right-0 h-full w-1/3 bg-transparent z-40"
             >
                 <div className="h-full p-4">
                      <ClarityChat />

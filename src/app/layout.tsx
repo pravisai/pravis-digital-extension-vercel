@@ -11,6 +11,7 @@ import { usePathname } from 'next/navigation';
 import React from 'react';
 import { IntentProvider } from '@/contexts/intent-context';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 // === AGENTIC IMPORTS ===
 import { AgentProvider } from "@/agent/agent-context";
@@ -40,10 +41,15 @@ function RootLayoutClient({
     >
       <AgentAutoNavigator />
       <RouteLoaderProvider>
-        <div className="flex h-full w-full">
-            <main className="flex-1 h-full w-full transition-all duration-300 ease-in-out">
+        <div className="flex h-full w-full overflow-hidden">
+            <motion.main
+              initial={false}
+              animate={{ marginRight: isPanelOpen ? '33.333333%' : '0%' }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="flex-1 h-full w-full"
+            >
               {children}
-            </main>
+            </motion.main>
             <ChatPanel />
         </div>
 
