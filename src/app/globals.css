@@ -270,6 +270,10 @@
     margin-bottom: 1rem;
     transition: all 0.3s ease;
   }
+
+  .theme-primary { @apply bg-primary/20 text-primary; }
+  .theme-secondary { @apply bg-secondary/20 text-secondary; }
+  .theme-accent { @apply bg-accent/20 text-accent; }
   
   .cube-face:hover .module-icon {
     filter: none;
