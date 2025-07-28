@@ -274,10 +274,6 @@
   .cube-face:hover .module-icon {
     filter: none;
   }
-
-  .module-icon.theme-primary { color: hsl(var(--primary)); }
-  .module-icon.theme-secondary { color: hsl(var(--secondary)); }
-  .module-icon.theme-accent { color: hsl(var(--accent)); }
   
   .cube-face h3 {
     color: #ffffff;
