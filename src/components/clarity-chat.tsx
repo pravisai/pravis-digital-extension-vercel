@@ -104,10 +104,12 @@ export function ClarityChat() {
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!input.trim() && !attachmentPreview) return;
   
-    // Step 1: Clarify or repair the user's input with a pre-computation/agentic step
-    let improvedInput = input;
-    if (input.trim().length > 0 && input.trim().length < 20) { // Only for short/ambiguous prompts
+    // The agentic pre-computation step.
+    // It clarifies the prompt for the AI, but we will still display the *original* user input.
+    let promptForAi = input;
+    if (input.trim().length > 0 && input.trim().length < 20) {
         try {
             const clarifier = `
         You are a proactive AI clarity coach.
@@ -115,20 +117,15 @@ export function ClarityChat() {
         If still unclear, offer two likely questions or actions, or politely ask for clarification.
         User input: "${input}"
             `;
-            improvedInput = await generateText(clarifier);
+            promptForAi = await generateText(clarifier);
         } catch {
             // fallback to plain input if the clarifier fails
+            promptForAi = input;
         }
     }
     
-    // Step 2: Set the (potentially improved) input into state so handleSendMessage can use it
-    setInput(improvedInput);
-  
-    // Step 3: Trigger the main send message handler
-    // Use a short timeout to allow React to update the state before sending
-    setTimeout(() => {
-        handleSendMessage(e, false);
-    }, 50);
+    // Pass both original input and the (potentially improved) prompt to the handler.
+    handleSendMessage(input, promptForAi);
   };
   
 

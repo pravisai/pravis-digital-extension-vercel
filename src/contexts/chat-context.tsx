@@ -13,7 +13,6 @@ import { clarityChat } from "@/ai/flows/clarity-chat";
 import { textToSpeech } from "@/ai/flows/text-to-speech";
 import { useToast } from "@/hooks/use-toast";
 import { useIntent } from "./intent-context";
-import { generateText } from "@/ai/openrouter";
 
 interface Message {
   role: "user" | "pravis";
@@ -31,7 +30,8 @@ interface ChatContextType {
   isSpeaking: boolean;
   setInput: (input: string) => void;
   handleSendMessage: (
-    e?: React.FormEvent<any> | Event,
+    originalInput: string,
+    promptForAi: string,
     isVoiceInput?: boolean
   ) => Promise<void>;
   setPanelOpen: (isOpen: boolean) => void;
@@ -84,20 +84,18 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
   const handleSendMessage = useCallback
   (
-    async (e?: React.FormEvent<any> | Event, isVoiceInput: boolean = false) => {
-      if (e && typeof (e as any).preventDefault === "function") (e as any).preventDefault();
-      if (!input.trim() && !attachment) return;
+    async (originalInput: string, promptForAi: string, isVoiceInput: boolean = false) => {
+      if (!originalInput.trim() && !attachment) return;
 
       setPanelOpen(true);
-      const currentInput = input;
       const currentAttachment = attachment;
 
-      let userMessageContent: React.ReactNode = currentInput;
+      let userMessageContent: React.ReactNode = originalInput;
       if (currentAttachment && attachmentPreview) {
         userMessageContent = (
           <div>
             <img src={attachmentPreview} alt={currentAttachment.name} className="max-w-xs rounded-md mb-2" />
-            {currentInput}
+            {originalInput}
           </div>
         );
       }
@@ -119,7 +117,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
       try {
         const result = await clarityChat({
-          prompt: currentInput,
+          prompt: promptForAi,
           imageDataUri
         });
 
@@ -157,7 +155,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(false);
       }
     },
-    [input, toast, attachment, attachmentPreview, handleIntent]
+    [toast, attachment, attachmentPreview, handleIntent]
   );
 
   const value = {
