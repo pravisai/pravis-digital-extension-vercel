@@ -31,10 +31,6 @@ import { EmailProvider, useEmail } from "@/contexts/email-context"
 import { PravisLogo } from "@/components/pravis-logo"
 import { useChat } from "@/contexts/chat-context"
 
-// ====== AGENTIC LOGIC IMPORTS ======
-import { AgentAutoNavigator } from "@/components/AgentAutoNavigator";
-// ===================================
-
 const statCards = [
   {
     title: "Tasks Completed",
@@ -192,7 +188,6 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
     const { toast } = useToast();
-    const { isPanelOpen } = useChat();
     const [isLoading, setIsLoading] = useState(true);
   
     const isFullHeightPage = pathname === '/dashboard' || pathname === '/dashboard/creative-partner' || pathname === '/dashboard/productivity-suite' || pathname === '/dashboard/clarity-chat' || pathname.startsWith('/dashboard/email-assistant') || pathname === '/dashboard/tasks' || pathname === '/dashboard/social-media';
@@ -242,12 +237,6 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
     return (
         <div className="flex min-h-screen w-full flex-col">
-            {/* --- Agentic: Auto intent-based navigation for ALL dashboard child pages --- */}
-            <AgentAutoNavigator />
-            {/* --- Optional: Agent command box for manual NL testing --- */}
-            <div className="py-2 px-4 bg-muted/40 border-b border-muted">
-              
-            </div>
             <DashboardHeader />
             <main className={cn(
                 "flex-1",

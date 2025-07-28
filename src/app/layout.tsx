@@ -1,3 +1,4 @@
+
 "use client";
 
 import './globals.css';
@@ -9,6 +10,7 @@ import { PersistentChatInput } from '@/components/persistent-chat-input';
 import { usePathname } from 'next/navigation';
 import React from 'react';
 import { IntentProvider } from '@/contexts/intent-context';
+import { cn } from '@/lib/utils';
 
 // === AGENTIC IMPORTS ===
 import { AgentProvider } from "@/agent/agent-context";
@@ -24,9 +26,10 @@ function RootLayoutClient({
 }) {
   const pathname = usePathname();
   const { isPanelOpen } = useChat();
+  const isDashboard = pathname.startsWith('/dashboard');
 
-  const isChatPage = pathname === '/dashboard/clarity-chat';
-  const showPersistentChat = !isPanelOpen && !isChatPage;
+  // Show persistent chat only on dashboard pages when panel is closed.
+  const showPersistentChat = isDashboard && !isPanelOpen;
 
   return (
     <ThemeProvider
@@ -35,16 +38,28 @@ function RootLayoutClient({
       enableSystem
       disableTransitionOnChange
     >
-      {/* --- AGENTIC LOGIC: AUTO-NAV LISTENER ONLY --- */}
       <AgentAutoNavigator />
-      {/* -------------------------------------------- */}
       <RouteLoaderProvider>
-        {children}
+        <div className="flex h-full">
+            <main className={cn(
+              "flex-1 h-full transition-all duration-300 ease-in-out",
+              isPanelOpen ? "md:mr-[33.333333%]" : "md:mr-0"
+            )}>
+              {children}
+            </main>
+            <div className="hidden md:block">
+              <ChatPanel />
+            </div>
+        </div>
+
         <Toaster />
+
+        {/* Mobile-only chat interface */}
         <div className="md:hidden">
           <ChatPanel />
           {showPersistentChat && <PersistentChatInput />}
         </div>
+
       </RouteLoaderProvider>
     </ThemeProvider>
   );
