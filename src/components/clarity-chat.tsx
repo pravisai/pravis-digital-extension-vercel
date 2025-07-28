@@ -150,7 +150,7 @@ export function ClarityChat() {
                     className={`rounded-lg p-3 max-w-md ${
                       message.role === "user"
                         ? "bg-primary text-primary-foreground"
-                        : "bg-secondary"
+                        : "bg-secondary/50"
                     }`}
                   >
                   {typeof message.content === "string" ? (
@@ -183,7 +183,7 @@ export function ClarityChat() {
               <Avatar className="p-1.5 h-9 w-9">
                 <PravisLogo size={20} />
               </Avatar>
-              <div className="rounded-lg p-3 bg-secondary animate-pulse">
+              <div className="rounded-lg p-3 bg-secondary/50 animate-pulse">
                 <div className="h-4 w-24 rounded-md bg-muted"></div>
               </div>
             </div>
@@ -209,7 +209,7 @@ export function ClarityChat() {
           </div>
         )}
         <form onSubmit={handleFormSubmit} ref={formRef} className="flex items-center gap-2">
-          <div className="flex-1 flex items-center bg-secondary rounded-full px-2">
+          <div className="flex-1 flex items-center bg-secondary/50 rounded-full px-2">
             <Button
               variant="ghost"
               size="icon"
