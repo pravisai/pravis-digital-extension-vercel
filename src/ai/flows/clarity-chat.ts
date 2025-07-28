@@ -1,8 +1,9 @@
 
 'use server';
 /**
- * @fileOverview This is the direct Gemini version of the Clarity Chatbot—
+ * @fileOverview This is the direct version of the Clarity Chatbot—
  * parses user intent, can trigger tool actions (navigation), or reply conversationally.
+ * It uses the AI model configured in openrouter.ts.
  */
 
 import { z } from 'zod';
@@ -32,6 +33,7 @@ You can also perform the following special actions if requested or inferred from
 ALWAYS respond with a valid compact JSON object as required!
 
 TO NAVIGATE TO EMAIL COMPOSE:
+Respond with:
 {
   "toolRequest": {
     "action": "navigateToEmailCompose",
@@ -44,6 +46,7 @@ TO NAVIGATE TO EMAIL COMPOSE:
 }
 
 TO NAVIGATE TO CALENDAR:
+Respond with:
 {
   "toolRequest": {
     "action": "navigateToCalendar",
@@ -56,7 +59,7 @@ TO NAVIGATE TO CALENDAR:
 }
 
 If the user's request does not match one of the tools above, provide a conversational response.
-Respond as:
+Respond with:
 {
   "reply": "Text of your helpful response"
 }
@@ -66,7 +69,7 @@ User message: """${input.prompt}"""
 ${input.imageDataUri ? `Attached image (data URI): ${input.imageDataUri}` : ""}
 `;
 
-  // Call Gemini and get the output
+  // Call the AI model and get the output
   const response = await generateText(mainPrompt);
 
   // Parse to JSON

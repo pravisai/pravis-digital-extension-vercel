@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,7 +19,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { PravisLogo } from "./pravis-logo";
 import { generateText } from "@/ai/openrouter";
 
-// === AGENTIC INTENT & GEMINI ===
+// === AGENTIC INTENT & AI FLOWS ===
 import { useAgent } from "@/agent/agent-context";
 import { parseAgentIntent } from "@/agent/intent-parser";
 // ======================
@@ -56,7 +57,7 @@ export function ClarityChat() {
         setInput(text);
         setTimeout(() => {
           formRef.current?.dispatchEvent(
-            new CustomEvent("submit-voice", { bubbles: true })
+            new Event("submit", { cancelable: true, bubbles: true })
           );
         }, 100);
       },
@@ -101,64 +102,35 @@ export function ClarityChat() {
     }
   };
 
-  // MAIN FORM SUBMIT HANDLER — NOW FULLY AI-AGENTIC!
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   
-    // Step 1: Clarify or repair the user's input
+    // Step 1: Clarify or repair the user's input with a pre-computation/agentic step
     let improvedInput = input;
-    try {
-      const clarifier = `
-  You are a proactive AI clarity coach.
-  If the user's input is incomplete, ambiguous, or too broad, rewrite it as a clear, specific question or action request.
-  If still unclear, offer two likely questions or actions, or politely ask for clarification.
-  User input: "${input}"
-      `;
-      improvedInput = await generateText(clarifier);
-    } catch {
-      // fallback to plain input if needed
+    if (input.trim().length > 0 && input.trim().length < 20) { // Only for short/ambiguous prompts
+        try {
+            const clarifier = `
+        You are a proactive AI clarity coach.
+        If the user's input is incomplete, ambiguous, or too broad, rewrite it as a clear, specific question or action request.
+        If still unclear, offer two likely questions or actions, or politely ask for clarification.
+        User input: "${input}"
+            `;
+            improvedInput = await generateText(clarifier);
+        } catch {
+            // fallback to plain input if the clarifier fails
+        }
     }
-  
-    // Step 2: Put the clarified input back in state
+    
+    // Step 2: Set the (potentially improved) input into state so handleSendMessage can use it
     setInput(improvedInput);
   
-    // Step 3: Detect intent (email, etc) — as in your original code
-    const intent = parseAgentIntent(improvedInput);
-    if (intent && intent.type === "email_compose" && intent.to) {
-      let about = intent.about || "no subject";
-      const geminiPrompt = `Write a professional, friendly email to ${intent.to} about "${about}". Return the subject line on the first line, then a blank line, then the email body.`;
-  
-      let subject = "";
-      let body = "";
-      try {
-        const geminiReply = await generateText(geminiPrompt);
-        const [subjectLine, ...bodyLines] = geminiReply.split('\n');
-        subject = subjectLine.trim();
-        body = bodyLines.join('\n').replace(/^\s*\n+/g, '').trim();
-  
-        setPendingIntent({
-          type: "email_compose",
-          to: intent.to,
-          subject,
-          body,
-        });
-        setPanelOpen(false);
-        setInput("");
-        return;
-      } catch {
-        setInput(""); // Clear if error
-        return;
-      }
-    }
-  
-    // Step 4: Continue as before—just call your normal handler (reads state)
-    await handleSendMessage(e, false);
+    // Step 3: Trigger the main send message handler
+    // Use a short timeout to allow React to update the state before sending
+    setTimeout(() => {
+        handleSendMessage(e, false);
+    }, 50);
   };
   
-
-  const handleVoiceSubmit = (e: React.FormEvent) => {
-    handleSendMessage(e, true);
-  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -170,23 +142,6 @@ export function ClarityChat() {
   const handleAttachmentClick = () => {
     fileInputRef.current?.click();
   };
-
-  useEffect(() => {
-    const form = formRef.current;
-    if (!form) return;
-  
-    // Wrap async handler for event listener compatibility
-    const voiceSubmitHandler = (e: Event) => {
-      // No need for await here; fire and forget is fine for user interaction
-      // Also, typecast e as FormEvent for your handler signature
-      void handleVoiceSubmit(e as React.FormEvent);
-    };
-    
-    form.addEventListener("submit-voice", voiceSubmitHandler);
-    return () => {
-      form.removeEventListener("submit-voice", voiceSubmitHandler);
-    };
-  }, [handleVoiceSubmit]);
   
   return (
     <div className="flex flex-col h-full bg-card shadow-sm">

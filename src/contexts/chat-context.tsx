@@ -118,19 +118,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       }
 
       try {
-        let improvedInput = currentInput;
-        try {
-          const clarifier = `
-You are a proactive AI assistant.
-If the user's input is unclear, too short, incomplete, or ambiguous, rewrite it as a clear and specific question or request.
-If you can't clarify, suggest two follow-up questions or actions, or politely ask for clarification.
-Input: "${currentInput}"
-          `;
-          improvedInput = await generateText(clarifier);
-        } catch { /* fallback to currentInput if AI fails */ }
-
         const result = await clarityChat({
-          prompt: improvedInput,
+          prompt: currentInput,
           imageDataUri
         });
 
@@ -138,9 +127,10 @@ Input: "${currentInput}"
           handleIntent(result.toolRequest);
           const confirmationMessage: Message = {
             role: "pravis",
-            content: `Understood. Navigating to the appropriate module to handle your request.`
+            content: `Understood. I will handle that request for you.`
           };
           setMessages((prev) => [...prev, confirmationMessage]);
+          setPanelOpen(false); // Close panel on successful intent
         } else if (result.reply) {
           const pravisResponse = result.reply;
           const pravisMessage: Message = { role: "pravis", content: pravisResponse };
@@ -149,6 +139,10 @@ Input: "${currentInput}"
             const audioResult = await textToSpeech(pravisResponse);
             setAudioDataUri(audioResult.media);
           }
+        } else {
+            // Handle case where AI returns neither reply nor toolRequest
+             const errorMessage: Message = { role: "pravis", content: "I'm sorry, I wasn't able to process that. Could you please try rephrasing?" };
+             setMessages((prev) => [...prev, errorMessage]);
         }
       } catch (error: any) {
         console.error("Pravis chatbot error:", error);
