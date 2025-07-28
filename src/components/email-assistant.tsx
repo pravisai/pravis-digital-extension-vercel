@@ -16,6 +16,8 @@ import { useRouter } from 'next/navigation'
 import { InteractiveCube, type CubeFace } from './interactive-cube'
 import { Typewriter } from './animations/typewriter'
 import { useIntent } from '@/contexts/intent-context'
+import { cn } from '@/lib/utils'
+import { useChat } from '@/contexts/chat-context'
 
 
 const emailCubeFaces: CubeFace[] = [
@@ -27,10 +29,14 @@ const emailCubeFaces: CubeFace[] = [
     { id: "Compose", href: "/dashboard/email-assistant/compose", icon: PenSquare, label: "Compose", description: "Write a new email", face: "bottom", colorClass: "electric-blue" },
 ];
 
+interface EmailAssistantContentProps {
+  size?: 'default' | 'small';
+}
 
-export function EmailAssistantContent() {
+export function EmailAssistantContent({ size = 'default' }: EmailAssistantContentProps) {
   const router = useRouter();
   const { intent, clearIntent } = useIntent();
+  const { isPanelOpen } = useChat();
 
   // Handle intent-based navigation
   useEffect(() => {
@@ -53,12 +59,15 @@ export function EmailAssistantContent() {
   }));
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center text-foreground bg-background p-4 md:p-8 space-y-6">
+    <div className={cn(
+        "h-full w-full flex flex-col items-center justify-center text-foreground bg-background p-4 md:p-8 space-y-6 transition-all duration-300",
+        isPanelOpen ? "pb-48 md:pb-8" : "pb-32 md:pb-0"
+    )}>
       <div className="text-center">
         <Typewriter text="Welcome back. Shall I prepare your environment?" className="text-3xl md:text-4xl font-bold tracking-tight justify-center" />
         <p className="text-muted-foreground mt-2 text-lg max-w-2xl mx-auto">Interact with the cube below to access different parts of your inbox or compose a new message.</p>
       </div>
-      <InteractiveCube faces={enhancedEmailCubeFaces} />
+      <InteractiveCube faces={enhancedEmailCubeFaces} size={size} />
     </div>
   )
 }

@@ -16,9 +16,10 @@ export interface PyramidFace {
 
 interface InteractivePyramidProps {
   faces: PyramidFace[];
+  size?: 'default' | 'small';
 }
 
-export function InteractivePyramid({ faces }: InteractivePyramidProps) {
+export function InteractivePyramid({ faces, size = 'default' }: InteractivePyramidProps) {
     const router = useRouter();
     const pyramidRef = useRef<HTMLDivElement>(null);
 
@@ -32,7 +33,10 @@ export function InteractivePyramid({ faces }: InteractivePyramidProps) {
     };
     
     return (
-        <div className="cube-wrapper">
+        <div className={cn("cube-wrapper", {
+            "size-default": size === 'default',
+            "size-small": size === 'small',
+        })}>
             <div className="pyramid-scene">
                 <div ref={pyramidRef} className="pyramid">
                     {faces.map((item) => (
