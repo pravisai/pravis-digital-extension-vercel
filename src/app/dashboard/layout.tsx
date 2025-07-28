@@ -250,11 +250,9 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
             </div>
             <DashboardHeader />
             <main className={cn(
-                "flex-1 transition-all duration-300",
+                "flex-1",
                 {
                     "p-4 md:p-8": !isFullHeightPage,
-                    "h-[calc(100vh-4rem)]": isFullHeightPage && !isPanelOpen,
-                    "h-[calc(67vh-4rem)]": isFullHeightPage && isPanelOpen,
                 },
                  pathname === '/dashboard' && "p-0 md:p-0"
             )}>
