@@ -27,7 +27,7 @@ export function PersistentChatInput() {
     if (transcript) {
         setInput(transcript);
     }
-  }, [transcript]);
+  }, [transcript, setInput]);
 
   const handleFocus = () => {
     setPanelOpen(true);
@@ -44,7 +44,7 @@ export function PersistentChatInput() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-background/80 p-2 backdrop-blur-sm border-t border-border">
-      <form onSubmit={handleSendMessage} ref={formRef} className="flex items-center gap-2">
+      <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(input); }} ref={formRef} className="flex items-center gap-2">
         <div className="flex-1 flex items-center bg-secondary rounded-full px-2">
             <Avatar className="h-9 w-9 ml-1 border-2 border-primary/50 flex items-center justify-center p-1">
                 <PravisLogo size={20} />
@@ -53,7 +53,7 @@ export function PersistentChatInput() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onFocus={handleFocus}
-                placeholder={isRecording ? "Listening..." : "Shall we begin, sir?"}
+                placeholder={isRecording ? "Listening..." : "Ready when you are"}
                 className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 h-12"
                 disabled={isLoading || isRecording}
             />

@@ -220,7 +220,7 @@ export function ClarityChat() {
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={isRecording ? "Listening..." : "Shall we begin, sir?"}
+              placeholder={isRecording ? "Listening..." : "Ready when you are"}
               className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 h-11"
               disabled={isLoading || isRecording}
             />

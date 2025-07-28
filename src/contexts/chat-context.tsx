@@ -154,7 +154,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(false);
       }
     },
-    [toast, attachment, attachmentPreview, handleIntent]
+    [toast, attachment, attachmentPreview, handleIntent, setAttachment, setInput, setMessages, setPanelOpen, setIsLoading, setAudioDataUri]
   );
 
   const value = {
