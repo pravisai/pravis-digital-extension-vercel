@@ -19,19 +19,20 @@ const ClarityChatOutputSchema = z.object({
 export type ClarityChatOutput = z.infer<typeof ClarityChatOutputSchema>;
 
 export async function clarityChat(input: ClarityChatInput): Promise<ClarityChatOutput> {
-  const systemInstruction = `You are Pravis, a personal AI assistant. Be compassionate, empathetic, and always guide the user with kindness.
-You can perform special actions. Based on the user's message, decide if a tool is needed or if a conversational reply is best.
+  // -- Strongest possible system prompt to enforce JSON response --
+  const systemInstruction = `
+You are Pravis, a personal AI assistant. Be compassionate, empathetic, and always guide the user with kindness.
 
-- If the user asks to compose an email, respond with a JSON object containing a "toolRequest" field. The action should be "navigateToEmailCompose". Extract parameters like 'to', 'subject', or 'body'.
-- If the user asks to view or schedule something on their calendar, respond with a JSON object with a "toolRequest" field and the action "navigateToCalendar".
-- For all other requests, provide a conversational response in the "reply" field of the JSON object.
-- If an image is provided, comment on it as part of your reply.
+- For email requests, reply ONLY as: {"toolRequest": {"action": "navigateToEmailCompose", ...params}}
+- For calendar requests, reply ONLY as: {"toolRequest": {"action": "navigateToCalendar", ...params}}
+- For other requests, reply ONLY as: {"reply": "your message"}
+- If an image is provided, comment on it within your reply.
 
-User message: "${input.prompt}"
-${input.imageDataUri ? `(Image data is attached)` : ''}
+IMPORTANT: Your entire response MUST be a single, valid JSON object matching this shape and NOTHING else (no greetings, no explanation, no extra text). 
 
-Your entire response MUST be a single JSON object matching this Zod schema:
 ${JSON.stringify(ClarityChatOutputSchema.shape)}
+
+For example: {"reply": "Hello! How can I help you today?"}
 `;
 
   let responseText = '';
@@ -39,14 +40,13 @@ ${JSON.stringify(ClarityChatOutputSchema.shape)}
     responseText = await generateText(systemInstruction);
     console.log("Raw LLM response:", responseText);
 
-    // Find the JSON in the model's response
-    const jsonStart = responseText.indexOf('{');
-    const jsonEnd = responseText.lastIndexOf('}');
-    if (jsonStart === -1 || jsonEnd === -1) {
-      // If no JSON object is found, reply with all text
+    // Extract the first {...} JSON block (robust to minor LLM drift)
+    const match = responseText.match(/{[\s\S]*}/m);
+    if (!match) {
+      console.error("No JSON object found in response.", responseText);
       return { reply: responseText.trim() };
     }
-    const jsonString = responseText.substring(jsonStart, jsonEnd + 1);
+    const jsonString = match[0];
 
     let parsed: any;
     try {
@@ -54,21 +54,22 @@ ${JSON.stringify(ClarityChatOutputSchema.shape)}
     } catch (parseErr) {
       console.error("JSON parse error in clarityChat:", parseErr, "jsonString:", jsonString, "FullResponse:", responseText);
       return {
-        reply: "Sorry, I couldn't understand the AI's response. Please try rephrasing your message.",
+        reply: "Sorry, I couldn't understand Pravis's response. Please try rephrasing your message.",
       };
     }
 
-    // Validate result via schema
     try {
       return ClarityChatOutputSchema.parse(parsed);
     } catch(schemaErr) {
       console.error("Schema validation error in clarityChat:", schemaErr, "Parsed:", parsed, "FullResponse:", responseText);
+      // Graceful fallback: return reply if present
+      if (parsed && typeof parsed.reply === "string") return { reply: parsed.reply };
       return {
         reply: "Sorry, I couldn't interpret the result. Please try rephrasing.",
       };
     }
   } catch (error) {
-    console.error("Failed to process clarity chat:", error, responseText);
+    console.error("Top-level clarityChat error:", error, "Raw LLM response:", responseText);
     return {
       reply: "I'm sorry, something went wrong while processing your request. Please try again or check your network/API key.",
     };
