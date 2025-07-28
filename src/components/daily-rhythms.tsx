@@ -65,7 +65,6 @@ const modules: CubeFace[] = [
 export function Modules() {
     return (
         <section>
-            <h2 className="text-2xl font-bold mb-4 tracking-tight">Modules</h2>
             <InteractiveCube faces={modules} />
         </section>
     );
