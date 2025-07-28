@@ -4,28 +4,25 @@
 import { useChat } from "@/contexts/chat-context"
 import { ClarityChat } from "./clarity-chat"
 import { AnimatePresence, motion } from "framer-motion"
-import { cn } from "@/lib/utils"
 
 export function ChatPanel() {
     const { isPanelOpen } = useChat()
     
-    // For Desktop: A slide-in panel from the right
-    // For Mobile: A slide-up panel from the bottom
     return (
         <>
-            {/* Desktop Panel */}
-            <motion.div
-                initial={{ x: '100%' }}
-                animate={{ x: isPanelOpen ? '0%' : '100%' }}
+            {/* Desktop Panel: part of the flex layout */}
+            <motion.aside
+                initial={false}
+                animate={{ width: isPanelOpen ? '33.333333%' : '0%' }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="hidden md:block fixed top-0 right-0 h-full w-1/3 bg-transparent z-40"
+                className="hidden md:block h-full bg-transparent overflow-hidden"
             >
-                <div className="h-full p-4">
+                <div className="h-full p-4 border-l">
                      <ClarityChat />
                 </div>
-            </motion.div>
+            </motion.aside>
 
-            {/* Mobile Panel */}
+            {/* Mobile Panel: a fixed overlay that slides up */}
             <AnimatePresence>
                 {isPanelOpen && (
                     <motion.div

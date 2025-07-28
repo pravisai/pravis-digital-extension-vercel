@@ -11,7 +11,7 @@ import { usePathname } from 'next/navigation';
 import React from 'react';
 import { IntentProvider } from '@/contexts/intent-context';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // === AGENTIC IMPORTS ===
 import { AgentProvider } from "@/agent/agent-context";
@@ -41,12 +41,12 @@ function RootLayoutClient({
     >
       <AgentAutoNavigator />
       <RouteLoaderProvider>
-        <div className="flex h-full w-full overflow-hidden">
+        <div className="flex h-svh w-full overflow-hidden">
             <motion.main
               initial={false}
-              animate={{ marginRight: isPanelOpen ? '33.333333%' : '0%' }}
+              animate={{ width: isPanelOpen ? '66.666667%' : '100%' }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="flex-1 h-full w-full"
+              className="h-full flex-shrink-0"
             >
               {children}
             </motion.main>
@@ -57,7 +57,8 @@ function RootLayoutClient({
 
         {/* Mobile-only chat interface */}
         <div className="md:hidden">
-          <ChatPanel />
+          {/* This panel is the slide-up sheet on mobile */}
+          <ChatPanel /> 
           {showPersistentChat && <PersistentChatInput />}
         </div>
 
