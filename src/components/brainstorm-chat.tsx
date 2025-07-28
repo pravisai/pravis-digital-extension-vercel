@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { useSpeechToText } from "@/hooks/use-speech-to-text"
 import { cn } from "@/lib/utils"
 import { PravisLogo } from "./pravis-logo"
+<<<<<<< HEAD
 
 // --- NEW: add fetch helper here ---
 async function fetchServerGeneratedText(prompt: string) {
@@ -26,6 +27,8 @@ async function fetchServerGeneratedText(prompt: string) {
   return data.reply;
 }
 
+=======
+>>>>>>> 3dabb8b897697fd81238fef3f5fc7b737edf502e
 
 enum Stage {
   Topic,
@@ -103,6 +106,7 @@ export function BrainstormChat() {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
+<<<<<<< HEAD
     const userMessage: Message = { role: "user", content: input };
     setMessages(prev => [...prev, userMessage]);
     
@@ -182,6 +186,42 @@ export function BrainstormChat() {
       startRecording();
     }
   };
+=======
+    const userMessage: Message = { role: "user", content: input };
+    setMessages(prev => [...prev, userMessage]);
+    
+    const currentInput = input;
+    setInput("");
+    
+    let nextStage = stage + 1;
+
+    switch (stage) {
+      case Stage.Topic:
+        formValues.current.topic = currentInput;
+        break;
+      case Stage.Problem:
+        formValues.current.problemStatement = currentInput;
+        break;
+      case Stage.Outcome:
+        formValues.current.desiredOutcome = currentInput;
+        break;
+      case Stage.Constraints:
+        formValues.current.knownConstraints = currentInput.toLowerCase() === 'no' ? undefined : currentInput;
+        break;
+    }
+
+    if (nextStage === Stage.Ready) {
+      setIsLoading(true);
+      setMessages(prev => [...prev, { role: "pravis", content: stagePrompts[Stage.Ready] }]);
+      try {
+        const result = await facilitateCreativeBrainstorming(formValues.current as FacilitateCreativeBrainstormingInput);
+        const pravisResponse: Message = {
+            role: "pravis",
+            content: <BrainstormingResults results={result} />
+        };
+        setMessages(prev => [...prev, pravisResponse]);
+        setStage(Stage.Done);
+>>>>>>> 3dabb8b897697fd81238fef3f5fc7b737edf502e
 
   const BrainstormingResults = ({ results }: { results: FacilitateCreativeBrainstormingOutput }) => (
     <div className="space-y-4">

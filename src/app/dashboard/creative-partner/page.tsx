@@ -19,7 +19,7 @@ const interactionModes: PyramidFace[] = [
     id: "call",
     title: "Call me",
     icon: Phone,
-    href: "#", // Placeholder
+    href: "/dashboard/creative-partner/call",
     position: "right"
   },
   {
@@ -34,10 +34,7 @@ const interactionModes: PyramidFace[] = [
 export default function CreativePartnerPage() {
     const { isPanelOpen } = useChat();
     return (
-        <FadeIn className={cn(
-            "h-full flex flex-col items-center justify-center p-4 md:p-8 space-y-8 transition-all duration-300",
-            isPanelOpen ? "pb-40 md:pb-8" : "pb-32 md:pb-0"
-        )}>
+        <FadeIn className="h-full flex flex-col items-center justify-center p-4 md:p-8 space-y-8">
             <div className="text-center">
                 <h1 className="text-4xl font-bold tracking-tight">Loud Think</h1>
                 <p className="text-muted-foreground mt-2 text-lg">Choose how you want to interact with Pravis.</p>

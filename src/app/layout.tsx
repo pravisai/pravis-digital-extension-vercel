@@ -1,3 +1,4 @@
+
 "use client";
 
 import './globals.css';
@@ -9,6 +10,7 @@ import { PersistentChatInput } from '@/components/persistent-chat-input';
 import { usePathname } from 'next/navigation';
 import React from 'react';
 import { IntentProvider } from '@/contexts/intent-context';
+import { motion } from 'framer-motion';
 
 // === AGENTIC IMPORTS ===
 import { AgentProvider } from "@/agent/agent-context";
@@ -16,6 +18,7 @@ import { AgentAutoNavigator } from "@/components/AgentAutoNavigator";
 // ========================
 
 import RouteLoaderProvider from "@/components/RouteLoaderProvider"; // IMPORTANT: import your loader provider
+import { useIsMobile } from '@/hooks/use-mobile';
 
 function RootLayoutClient({
   children,
@@ -24,9 +27,16 @@ function RootLayoutClient({
 }) {
   const pathname = usePathname();
   const { isPanelOpen } = useChat();
+  const isDashboard = pathname.startsWith('/dashboard');
+  const isMobile = useIsMobile();
 
-  const isChatPage = pathname === '/dashboard/clarity-chat';
-  const showPersistentChat = !isPanelOpen && !isChatPage;
+  // Show persistent chat only on dashboard pages when panel is closed.
+  const showPersistentChat = isDashboard && !isPanelOpen;
+
+  const mainVariants = {
+    open: { height: '66.666667%' },
+    closed: { height: '100%' },
+  };
 
   return (
     <ThemeProvider
@@ -35,14 +45,25 @@ function RootLayoutClient({
       enableSystem
       disableTransitionOnChange
     >
-      {/* --- AGENTIC LOGIC: AUTO-NAV LISTENER ONLY --- */}
       <AgentAutoNavigator />
-      {/* -------------------------------------------- */}
       <RouteLoaderProvider>
-        {children}
-        <Toaster />
-        <div className="md:hidden">
+        <div className="flex flex-col h-svh w-full overflow-hidden">
+           <motion.main
+              initial={false}
+              animate={isMobile ? "closed" : (isPanelOpen ? "open" : "closed")}
+              variants={mainVariants}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="flex-1 min-h-0" // min-h-0 is CRITICAL for flexbox to allow shrinking and internal scrolling
+            >
+              {children}
+            </motion.main>
           <ChatPanel />
+        </div>
+
+        <Toaster />
+
+        {/* Mobile-only persistent input */}
+        <div className="md:hidden">
           {showPersistentChat && <PersistentChatInput />}
         </div>
       </RouteLoaderProvider>

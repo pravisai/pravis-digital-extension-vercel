@@ -1,11 +1,10 @@
-
 'use server';
 /**
- * @fileOverview This file drafts email replies based on a user prompt using Genkit.
+ * @fileOverview This file drafts email replies based on a user prompt using OpenRouter.
  */
 
 import { z } from 'zod';
-import { ai } from '@/ai/genkit';
+import { generateText } from '@/ai/openrouter';
 
 const DraftEmailReplyInputSchema = z.object({
   prompt: z.string().describe('The user prompt detailing the email to be drafted. Should include recipient, subject, and message intent.'),
@@ -19,12 +18,10 @@ const DraftEmailReplyOutputSchema = z.object({
 });
 export type DraftEmailReplyOutput = z.infer<typeof DraftEmailReplyOutputSchema>;
 
-
-const draftEmailPrompt = ai.definePrompt({
-    name: 'draftEmailPrompt',
-    input: { schema: DraftEmailReplyInputSchema },
-    output: { schema: DraftEmailReplyOutputSchema },
-    prompt: `
+export async function draftEmailReply(
+  input: DraftEmailReplyInput
+): Promise<DraftEmailReplyOutput> {
+  const prompt = `
 You are Pravis, an intelligent email composition assistant. A user will provide a prompt, and you must generate a complete, professional email based on their request.
 
 Your tasks are:
@@ -33,27 +30,28 @@ Your tasks are:
 3. Draft a well-written email body that accurately reflects the user's instructions.
 
 User Prompt:
-"{{{prompt}}}"
+"${input.prompt}"
 
-Generate the email content based on this prompt.
-`,
-});
+Respond ONLY with a valid JSON object in the following format, with no additional text or explanation:
+{
+  "to": "...",
+  "subject": "...",
+  "body": "..."
+}
+`;
 
-
-const draftEmailFlow = ai.defineFlow(
-  {
-    name: 'draftEmailReplyFlow',
-    inputSchema: DraftEmailReplyInputSchema,
-    outputSchema: DraftEmailReplyOutputSchema,
-  },
-  async (input) => {
-    const { output } = await draftEmailPrompt(input);
-    return output!;
+  const responseText = await generateText(prompt);
+  try {
+    const jsonStart = responseText.indexOf('{');
+    const jsonEnd = responseText.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1) {
+        throw new Error("No JSON object found in the AI response.");
+    }
+    const jsonString = responseText.substring(jsonStart, jsonEnd + 1);
+    const parsed = JSON.parse(jsonString);
+    return DraftEmailReplyOutputSchema.parse(parsed);
+  } catch (error) {
+    console.error("Failed to parse draft email reply from AI:", error, "Raw response:", responseText);
+    throw new Error("Failed to generate a valid email draft. The AI response was not in the expected format.");
   }
-);
-
-export async function draftEmailReply(
-  input: DraftEmailReplyInput
-): Promise<DraftEmailReplyOutput> {
-    return draftEmailFlow(input);
 }

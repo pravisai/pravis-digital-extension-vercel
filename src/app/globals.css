@@ -14,29 +14,29 @@
     --popover: 0 0% 5%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 270 90% 65%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 30 90% 60%; /* Neon Copper */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 271 100% 25%;
+    --secondary: 310 90% 60%; /* Neon Purple/Magenta */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 220 10% 20%;
     --muted-foreground: 220 10% 65%;
 
-    --accent: 297 84% 68%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 190 95% 55%; /* Electric Cyan */
+    --accent-foreground: 0 0% 5%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 271 100% 20%;
-    --input: 271 100% 25%;
-    --ring: 270 90% 60%;
+    --border: 30 80% 20%;
+    --input: 30 90% 20%;
+    --ring: 30 90% 60%;
 
-    --chart-1: 271 100% 50%; /* neon purple */
-    --chart-2: 180 100% 50%; /* electric blue */
-    --chart-3: 329 100% 50%; /* bright pink */
-    --chart-4: 110 89% 54%; /* acid green */
+    --chart-1: 30 90% 60%; /* neon copper */
+    --chart-2: 310 90% 60%; /* neon purple */
+    --chart-3: 190 95% 55%; /* electric cyan */
+    --chart-4: 70 95% 55%; /* neon yellow-green */
     --chart-5: 220 10% 65%; /* muted foreground */
   }
 
@@ -47,7 +47,7 @@
     --card-foreground: 224 71% 4%;
     --popover: 0 0% 100%;
     --popover-foreground: 224 71% 4%;
-    --primary: 271 82% 45%;
+    --primary: 25 95% 53%; /* Strong Orange for Light Mode */
     --primary-foreground: 0 0% 98%;
     --secondary: 240 5% 90%;
     --secondary-foreground: 240 6% 10%;
@@ -59,12 +59,12 @@
     --destructive-foreground: 0 0% 98%;
     --border: 240 6% 90%;
     --input: 240 6% 90%;
-    --ring: 262 82% 60%;
+    --ring: 25 95% 55%;
 
-    --chart-1: 271 82% 45%;
-    --chart-2: 190 90% 45%;
-    --chart-3: 330 85% 55%;
-    --chart-4: 110 70% 40%;
+    --chart-1: 25 95% 53%;
+    --chart-2: 310 75% 55%;
+    --chart-3: 190 80% 50%;
+    --chart-4: 70 70% 40%;
     --chart-5: 220 10% 45%;
   }
 
@@ -115,41 +115,17 @@
 @layer components {
   /* --- Custom Chat Bubble Styles --- */
   .chat-bubble-base {
-    @apply relative max-w-md p-3;
+    @apply relative max-w-md p-3 rounded-2xl;
   }
 
   .chat-bubble-user {
-    @apply chat-bubble-base rounded-lg bg-primary text-primary-foreground;
-    border-bottom-right-radius: 0;
+    @apply chat-bubble-base bg-primary text-primary-foreground;
   }
   
-  .chat-bubble-user::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: -10px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 10px 0 0 10px;
-    border-color: transparent transparent transparent hsl(var(--primary));
-  }
-
   .chat-bubble-pravis {
-    @apply chat-bubble-base rounded-lg border border-border;
-    border-bottom-left-radius: 0;
-  }
-
-  .chat-bubble-pravis::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: -10px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 0 10px 10px 0;
-    border-color: transparent hsl(var(--border)) transparent transparent;
+    @apply chat-bubble-base border bg-transparent;
+    box-shadow: 0 0 8px hsl(var(--primary) / 0.5);
+    border-color: hsl(var(--primary) / 0.6);
   }
   
   /* --- 3D Translucent Cube Logo --- */
@@ -248,8 +224,9 @@
   .size-small .module-icon svg { width: 20px; height: 20px; }
 
   .cube-face:hover {
-    background-color: hsl(var(--accent));
-    border-color: hsl(var(--primary));
+    background-color: hsl(var(--card) / 0.1); /* Translucent background */
+    border-color: hsl(var(--primary) / 0.8);
+    box-shadow: 0 0 15px hsl(var(--primary) / 0.7); /* Glowing border */
   }
   
   /* Default size transforms */
@@ -293,15 +270,27 @@
     margin-bottom: 1rem;
     transition: all 0.3s ease;
   }
+
+  .neon-purple {
+    background-color: rgba(191, 95, 255, 0.1);
+    color: #BF5FFF;
+  }
+  .electric-blue {
+    background-color: rgba(0, 255, 255, 0.1);
+    color: #00FFFF;
+  }
+  .bright-pink {
+    background-color: rgba(255, 0, 128, 0.1);
+    color: #FF0080;
+  }
+  .acid-green {
+    background-color: rgba(173, 255, 47, 0.1);
+    color: #ADFF2F;
+  }
   
   .cube-face:hover .module-icon {
     filter: none;
   }
-
-  .module-icon.neon-purple { color: #9D00FF; }
-  .module-icon.electric-blue { color: #00FFFF; }
-  .module-icon.bright-pink { color: #FF007F; }
-  .module-icon.acid-green { color: #39FF14; }
   
   .cube-face h3 {
     color: #ffffff;

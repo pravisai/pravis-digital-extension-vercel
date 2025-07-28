@@ -13,8 +13,4 @@ export const ai = genkit({
     plugins: [
         googleAI(),
     ],
-    // Log errors to the console.
-    logLevel: 'error',
-    // Enable telemetry to capture errors and traces.
-    enableTelemetry: true,
 });

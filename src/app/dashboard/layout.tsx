@@ -1,3 +1,4 @@
+
 "use client"
 
 import { BrainCircuit, Mail, ListChecks, Bot, User, Settings, LogOut, ArrowLeft, LineChart, CheckCircle2, MessageSquare, Timer, Sun, Moon, RefreshCw, Loader2 } from "lucide-react"
@@ -28,38 +29,35 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { EmailProvider, useEmail } from "@/contexts/email-context"
 import { PravisLogo } from "@/components/pravis-logo"
-
-// ====== AGENTIC LOGIC IMPORTS ======
-import { AgentAutoNavigator } from "@/components/AgentAutoNavigator";
-// ===================================
+import { useChat } from "@/contexts/chat-context"
 
 const statCards = [
   {
     title: "Tasks Completed",
     value: "24",
     change: "+12%",
-    changeColor: "text-green-500",
+    changeColor: "text-accent",
     icon: CheckCircle2,
   },
   {
     title: "Emails Processed",
     value: "156",
     change: "+8%",
-    changeColor: "text-green-500",
+    changeColor: "text-accent",
     icon: Mail,
   },
   {
     title: "AI Conversations",
     value: "42",
     change: "+23%",
-    changeColor: "text-green-500",
+    changeColor: "text-accent",
     icon: MessageSquare,
   },
   {
     title: "Time Saved",
     value: "3.2h",
     change: "+15%",
-    changeColor: "text-green-500",
+    changeColor: "text-accent",
     icon: Timer,
   },
 ]
@@ -239,18 +237,11 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
     return (
         <div className="flex min-h-screen w-full flex-col">
-            {/* --- Agentic: Auto intent-based navigation for ALL dashboard child pages --- */}
-            <AgentAutoNavigator />
-            {/* --- Optional: Agent command box for manual NL testing --- */}
-            <div className="py-2 px-4 bg-muted/40 border-b border-muted">
-              
-            </div>
             <DashboardHeader />
             <main className={cn(
                 "flex-1",
                 {
                     "p-4 md:p-8": !isFullHeightPage,
-                    "h-[calc(100vh-4rem)]": isFullHeightPage,
                 },
                  pathname === '/dashboard' && "p-0 md:p-0"
             )}>

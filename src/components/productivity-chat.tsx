@@ -16,6 +16,7 @@ import { Skeleton } from "./ui/skeleton"
 import { Label } from "./ui/label"
 import { FadeIn } from "./animations/fade-in"
 import { copyToClipboard } from "@/lib/clipboard"
+<<<<<<< HEAD
 
 // ---- HELPER: Secure API fetch for server LLM ----
 async function fetchServerGeneratedText(prompt: string) {
@@ -28,6 +29,8 @@ async function fetchServerGeneratedText(prompt: string) {
   if (!data.reply) throw new Error(data.error || "AI Error");
   return data.reply;
 }
+=======
+>>>>>>> 3dabb8b897697fd81238fef3f5fc7b737edf502e
 
 const productivitySchema = z.object({
   task: z.string().min(1, { message: "Please select a task." }),
@@ -52,8 +55,9 @@ export function ProductivityChat() {
   async function onGenerate(values: ProductivityValues) {
     setIsGenerating(true);
     setGeneratedContent("");
-  
+
     try {
+<<<<<<< HEAD
       // Step 1: Always clarify and repair vague/short instructions
       const clarifier = `
 You are a productivity AI agent.
@@ -66,6 +70,9 @@ Instruction: "${values.instructions}"
 
       // Step 2: Continue as before, but use the improved instructions
       const result = await analyzeText({ text: improvedInstruction });
+=======
+      const result = await analyzeText({ text: values.instructions });
+>>>>>>> 3dabb8b897697fd81238fef3f5fc7b737edf502e
       setGeneratedContent(result.analysis);
     } catch (error) {
       console.error("Failed to generate content:", error);

@@ -9,10 +9,14 @@ import React, {
   useCallback,
   useEffect
 } from "react";
-import { clarityChat } from "@/ai/flows/clarity-chat";
-import { textToSpeech } from "@/ai/flows/text-to-speech";
 import { useToast } from "@/hooks/use-toast";
+import { textToSpeech } from "@/ai/flows/text-to-speech";
+import { clarityChat } from "@/ai/flows/clarity-chat";
 import { useIntent } from "./intent-context";
+import { auth, type User } from "@/lib/firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
+import { getInitialGreeting } from "@/ai/flows/get-initial-greeting";
+
 
 interface Message {
   role: "user" | "pravis";
@@ -53,14 +57,23 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const { handleIntent } = useIntent();
 
   useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([
-        {
-          role: "pravis",
-          content: "Shall we begin, sir?"
-        }
-      ]);
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && messages.length === 0) {
+        // Call the server action to get the initial greeting
+        getInitialGreeting()
+          .then(initialMessage => {
+            setMessages([{ role: 'pravis', content: initialMessage }]);
+          })
+          .catch(e => {
+            console.error("Failed to generate greeting:", e);
+            setMessages([{ role: 'pravis', content: `Welcome back, ${user.displayName || 'Sir'}. I am ready for your command.` }]);
+          });
+      } else if (!user && messages.length === 0) {
+        setMessages([{ role: "pravis", content: "Shall we begin?" }]);
+      }
+    });
+
+    return () => unsubscribe();
   }, [messages.length]);
 
   useEffect(() => {
@@ -115,10 +128,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       }
 
       try {
-        const result = await clarityChat({
-          prompt: originalInput,
-          imageDataUri
-        });
+        const result = await clarityChat({ prompt: originalInput, imageDataUri });
 
         if (result.toolRequest) {
           handleIntent(result.toolRequest);
@@ -133,13 +143,9 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
           const pravisMessage: Message = { role: "pravis", content: pravisResponse };
           setMessages((prev) => [...prev, pravisMessage]);
           if (isVoiceInput) {
-            const audioResult = await textToSpeech(pravisResponse);
-            setAudioDataUri(audioResult.media);
+            const { media } = await textToSpeech(pravisResponse);
+            setAudioDataUri(media);
           }
-        } else {
-            // Handle case where AI returns neither reply nor toolRequest
-             const errorMessage: Message = { role: "pravis", content: "I'm sorry, I wasn't able to process that. Could you please try rephrasing?" };
-             setMessages((prev) => [...prev, errorMessage]);
         }
       } catch (error: any) {
         console.error("Pravis chatbot error:", error);
@@ -154,7 +160,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(false);
       }
     },
-    [toast, attachment, attachmentPreview, handleIntent, setAttachment, setInput, setMessages, setPanelOpen, setIsLoading, setAudioDataUri]
+    [toast, attachment, attachmentPreview, handleIntent, setAttachment, setInput, setMessages, setPanelOpen, setAudioDataUri]
   );
 
   const value = {

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -38,10 +37,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className={cn(
-      "h-full flex flex-col items-center justify-center space-y-8 transition-all duration-300",
-      isPanelOpen ? "pb-40 md:pb-8" : "pb-32 md:pb-0"
-    )}>
+    <div className="flex flex-col h-full items-center justify-center space-y-8">
       {/* Agent Command Box for agent command input testing */}
       <div className="w-full max-w-md px-4">
       
@@ -50,13 +46,10 @@ export default function DashboardPage() {
       <FadeIn className="w-full">
         <div className="text-center">
           {getGreeting()}
-          <p className="text-muted-foreground mt-2">
-            Here's a snapshot of your digital extension.
-          </p>
         </div>
       </FadeIn>
-      <div className="w-full">
-        <FadeIn delay={0.2}>
+      <div className="w-full flex-1 min-h-0">
+        <FadeIn delay={0.2} className="h-full">
           <Modules size={isPanelOpen ? 'small' : 'default'} />
         </FadeIn>
       </div>
