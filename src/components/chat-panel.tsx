@@ -16,7 +16,7 @@ export function ChatPanel() {
                     animate={{ y: 0 }}
                     exit={{ y: "100%" }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="fixed bottom-0 left-0 right-0 z-50 h-1/3 w-full bg-transparent md:w-96 md:left-auto md:bottom-4 md:right-4 md:h-1/3 md:rounded-lg"
+                    className="fixed bottom-0 left-0 right-0 z-50 h-1/3 w-full border-t border-border bg-background md:h-full md:w-96 md:border-l md:border-t-0 md:left-auto md:bottom-0 md:right-0"
                 >
                     <ClarityChat />
                 </motion.div>
