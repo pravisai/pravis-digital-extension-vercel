@@ -61,7 +61,7 @@ export function EmailAssistantContent({ size = 'default' }: EmailAssistantConten
   return (
     <div className={cn(
         "h-full w-full flex flex-col items-center justify-center text-foreground bg-background p-4 md:p-8 space-y-6 transition-all duration-300",
-        isPanelOpen ? "pb-32 md:pb-8" : "pb-32 md:pb-0"
+        isPanelOpen ? "pb-40 md:pb-8" : "pb-32 md:pb-0"
     )}>
       <div className="text-center">
         <Typewriter text="Welcome back. Shall I prepare your environment?" className="text-3xl md:text-4xl font-bold tracking-tight justify-center" />
