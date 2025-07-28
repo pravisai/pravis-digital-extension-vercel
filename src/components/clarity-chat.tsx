@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -96,7 +95,6 @@ export function ClarityChat() {
     if (!input.trim() && !attachmentPreview) return;
     handleSendMessage(input);
   };
-  
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -108,26 +106,9 @@ export function ClarityChat() {
   const handleAttachmentClick = () => {
     fileInputRef.current?.click();
   };
-  
+
   return (
-<<<<<<< HEAD
-    <div className="flex flex-col h-full bg-transparent">
-      <header className="p-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-        </div>
-        {isMobile && isPanelOpen && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setPanelOpen(false)}
-          >
-            <ChevronDown className="h-5 w-5" />
-          </Button>
-        )}
-      </header>
-=======
     <div className="flex flex-col h-full rounded-lg bg-transparent">
->>>>>>> 3dabb8b897697fd81238fef3f5fc7b737edf502e
       <ScrollArea className="flex-1 w-full" ref={scrollAreaRef}>
         <div className="space-y-4 p-4">
           {messages.map((message, index) => (
@@ -154,7 +135,7 @@ export function ClarityChat() {
                         : "chat-bubble-pravis"
                     )}
                   >
-                  {typeof message.content === "string" ? (
+                   {typeof message.content === "string" ? (
                     <p className="text-sm whitespace-pre-wrap">
                       {message.content}
                     </p>
@@ -191,11 +172,7 @@ export function ClarityChat() {
           )}
         </div>
       </ScrollArea>
-<<<<<<< HEAD
-      <footer className="p-2">
-=======
       <footer className="p-2 border-t">
->>>>>>> 3dabb8b897697fd81238fef3f5fc7b737edf502e
         {attachmentPreview && (
           <div className="p-2 relative w-fit">
             <img
@@ -250,7 +227,6 @@ export function ClarityChat() {
               variant="ghost"
               size="icon"
               type="button"
-              className="shrink-0 rounded-full"
             >
               <Camera className="h-5 w-5 text-muted-foreground" />
             </Button>
