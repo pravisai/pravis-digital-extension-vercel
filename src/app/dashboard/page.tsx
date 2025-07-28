@@ -8,11 +8,14 @@ import { Modules } from "@/components/daily-rhythms";
 import { FadeIn } from "@/components/animations/fade-in";
 import { Typewriter } from "@/components/animations/typewriter";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useChat } from "@/contexts/chat-context";
+import { cn } from "@/lib/utils";
 
 
 export default function DashboardPage() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { isPanelOpen } = useChat();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -35,7 +38,10 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="h-full flex flex-col items-center justify-center space-y-8 pb-32 md:pb-0">
+    <div className={cn(
+      "h-full flex flex-col items-center justify-center space-y-8 transition-all duration-300",
+      isPanelOpen ? "pb-48 md:pb-8" : "pb-32 md:pb-0"
+    )}>
       {/* Agent Command Box for agent command input testing */}
       <div className="w-full max-w-md px-4">
       
@@ -51,7 +57,7 @@ export default function DashboardPage() {
       </FadeIn>
       <div className="w-full">
         <FadeIn delay={0.2}>
-          <Modules />
+          <Modules size={isPanelOpen ? 'small' : 'default'} />
         </FadeIn>
       </div>
     </div>

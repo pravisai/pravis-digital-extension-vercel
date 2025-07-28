@@ -19,12 +19,13 @@ export interface CubeFace {
 
 interface InteractiveCubeProps {
   faces: CubeFace[];
+  size?: 'default' | 'small';
 }
 
 const AUTO_ROTATE_SPEED = 0.1;
 const DRAG_SENSITIVITY = 0.625;
 
-export function InteractiveCube({ faces }: InteractiveCubeProps) {
+export function InteractiveCube({ faces, size = 'default' }: InteractiveCubeProps) {
     const cubeRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
@@ -146,7 +147,10 @@ export function InteractiveCube({ faces }: InteractiveCubeProps) {
     return (
         <section className="relative">
             <div 
-                className="cube-wrapper"
+                className={cn("cube-wrapper", {
+                    "size-default": size === 'default',
+                    "size-small": size === 'small',
+                })}
                 ref={containerRef}
                 style={{ cursor: isInteractingRef.current ? 'grabbing' : 'grab', touchAction: 'none' }}
                 onPointerDown={handlePointerDown}

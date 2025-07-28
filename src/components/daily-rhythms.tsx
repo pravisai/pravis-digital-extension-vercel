@@ -62,10 +62,14 @@ const modules: CubeFace[] = [
     },
 ];
 
-export function Modules() {
+interface ModulesProps {
+    size?: 'default' | 'small';
+}
+
+export function Modules({ size = 'default' }: ModulesProps) {
     return (
         <section>
-            <InteractiveCube faces={modules} />
+            <InteractiveCube faces={modules} size={size} />
         </section>
     );
 }
