@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useChat } from "@/contexts/chat-context"
@@ -15,7 +16,7 @@ export function ChatPanel() {
                     animate={{ y: 0 }}
                     exit={{ y: "100%" }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="fixed bottom-0 left-0 right-0 z-50 h-1/4 w-full border-t border-border/20 bg-transparent shadow-lg md:h-[40%] md:w-96 md:left-auto md:bottom-4 md:right-4 md:rounded-lg md:border"
+                    className="fixed bottom-0 left-0 right-0 z-50 h-1/4 w-full bg-transparent md:h-[40%] md:w-96 md:left-auto md:bottom-4 md:right-4 md:rounded-lg"
                 >
                     <ClarityChat />
                 </motion.div>
