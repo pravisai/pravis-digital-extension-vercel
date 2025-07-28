@@ -8,12 +8,10 @@
 import { genkit } from 'genkit';
 import { googleAI } from '@genkit-ai/googleai';
 
-// Initialize the AI plugin only once.
+// Initialize Genkit with the Google AI plugin
 export const ai = genkit({
     plugins: [
-        googleAI({
-            apiVersion: 'v1beta', // Required for advanced models
-        }),
+        googleAI(),
     ],
     // Log errors to the console.
     logLevel: 'error',
