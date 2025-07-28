@@ -113,9 +113,16 @@ export function ClarityChat() {
   };
   
   return (
-    <div className="flex flex-col h-full bg-transparent shadow-sm">
-      <header className="p-3 flex items-center justify-between">
+    <div className="flex flex-col h-full bg-card shadow-sm rounded-lg">
+      <header className="p-3 border-b flex items-center justify-between">
         <div className="flex items-center gap-2">
+           <Avatar className="p-1.5 h-9 w-9">
+              <PravisLogo size={20} />
+           </Avatar>
+           <div>
+              <h2 className="font-semibold text-lg">Pravis</h2>
+              <p className="text-xs text-muted-foreground">Online</p>
+           </div>
         </div>
         {isMobile && isPanelOpen && (
           <Button
@@ -190,7 +197,7 @@ export function ClarityChat() {
           )}
         </div>
       </ScrollArea>
-      <footer className="p-2 border-t border-white/10">
+      <footer className="p-2 border-t">
         {attachmentPreview && (
           <div className="p-2 relative w-fit">
             <img
@@ -209,7 +216,7 @@ export function ClarityChat() {
           </div>
         )}
         <form onSubmit={handleFormSubmit} ref={formRef} className="flex items-center gap-2">
-          <div className="flex-1 flex items-center bg-secondary/50 rounded-full px-2">
+          <div className="flex-1 flex items-center bg-secondary rounded-full px-2">
             <Button
               variant="ghost"
               size="icon"

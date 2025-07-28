@@ -13,8 +13,11 @@ import { useToast } from "@/hooks/use-toast";
 import { textToSpeech } from "@/ai/flows/text-to-speech";
 import { clarityChat } from "@/ai/flows/clarity-chat";
 import { useIntent } from "./intent-context";
-import { auth } from "@/lib/firebase/auth";
+import { auth, type User } from "@/lib/firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
+import { generateGreeting } from "@/ai/flows/generate-greeting";
+import { fetchCalendarEvents } from "@/lib/calender";
+import { getValidAccessToken } from "@/lib/firebase/auth";
 
 interface Message {
   role: "user" | "pravis";
@@ -54,18 +57,37 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
   const { handleIntent } = useIntent();
 
+  const initializeChat = useCallback(async (user: User) => {
+    const validToken = getValidAccessToken();
+    let events: any[] = [];
+    if (validToken) {
+        const { events: fetchedEvents } = await fetchCalendarEvents(validToken);
+        events = fetchedEvents.map(e => ({ summary: e.summary, start: e.start?.dateTime || e.start?.date || '' }));
+    }
+
+    try {
+        const { greeting } = await generateGreeting({
+            userName: user.displayName || 'Sir',
+            events: events,
+        });
+        setMessages([{ role: 'pravis', content: greeting }]);
+    } catch (e) {
+        console.error("Failed to generate greeting:", e);
+        setMessages([{ role: 'pravis', content: `Welcome back, ${user.displayName || 'Sir'}. I was unable to fetch your schedule, but I am ready for your command.` }]);
+    }
+  }, []);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user && messages.length === 0) {
-        setMessages([{ role: "pravis", content: "Shall we begin, sir?" }]);
+        initializeChat(user);
       } else if (!user && messages.length === 0) {
-        setMessages([{ role: "pravis", content: "Shall we begin, sir?" }]);
+        setMessages([{ role: "pravis", content: "Shall we begin?" }]);
       }
     });
 
     return () => unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [messages.length, initializeChat]);
 
   useEffect(() => {
     if (audioDataUri) {
