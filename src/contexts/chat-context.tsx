@@ -15,9 +15,8 @@ import { clarityChat } from "@/ai/flows/clarity-chat";
 import { useIntent } from "./intent-context";
 import { auth, type User } from "@/lib/firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
-import { generateGreeting } from "@/ai/flows/generate-greeting";
-import { fetchCalendarEvents } from "@/lib/calender";
-import { getValidAccessToken } from "@/lib/firebase/auth";
+import { getInitialGreeting } from "@/ai/flows/get-initial-greeting";
+
 
 interface Message {
   role: "user" | "pravis";
@@ -57,37 +56,25 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
   const { handleIntent } = useIntent();
 
-  const initializeChat = useCallback(async (user: User) => {
-    const validToken = getValidAccessToken();
-    let events: any[] = [];
-    if (validToken) {
-        const { events: fetchedEvents } = await fetchCalendarEvents(validToken);
-        events = fetchedEvents.map(e => ({ summary: e.summary, start: e.start?.dateTime || e.start?.date || '' }));
-    }
-
-    try {
-        const { greeting } = await generateGreeting({
-            userName: user.displayName || 'Sir',
-            events: events,
-        });
-        setMessages([{ role: 'pravis', content: greeting }]);
-    } catch (e) {
-        console.error("Failed to generate greeting:", e);
-        setMessages([{ role: 'pravis', content: `Welcome back, ${user.displayName || 'Sir'}. I was unable to fetch your schedule, but I am ready for your command.` }]);
-    }
-  }, []);
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user && messages.length === 0) {
-        initializeChat(user);
+        // Call the server action to get the initial greeting
+        getInitialGreeting()
+          .then(initialMessage => {
+            setMessages([{ role: 'pravis', content: initialMessage }]);
+          })
+          .catch(e => {
+            console.error("Failed to generate greeting:", e);
+            setMessages([{ role: 'pravis', content: `Welcome back, ${user.displayName || 'Sir'}. I am ready for your command.` }]);
+          });
       } else if (!user && messages.length === 0) {
         setMessages([{ role: "pravis", content: "Shall we begin?" }]);
       }
     });
 
     return () => unsubscribe();
-  }, [messages.length, initializeChat]);
+  }, [messages.length]);
 
   useEffect(() => {
     if (audioDataUri) {
