@@ -13,7 +13,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { useSpeechToText } from "@/hooks/use-speech-to-text"
 import { cn } from "@/lib/utils"
 import { PravisLogo } from "./pravis-logo"
-import { generateText } from "@/ai/openrouter";
 
 enum Stage {
   Topic,
@@ -115,27 +114,7 @@ export function BrainstormChat() {
       setIsLoading(true);
       setMessages(prev => [...prev, { role: "pravis", content: stagePrompts[Stage.Ready] }]);
       try {
-          // Clarify/repair user input step-by-step (safer async way and TS-friendly)
-    let repairedInput = { ...formValues.current };
-    const entries = Object.entries(formValues.current);
-    
-    for (let i = 0; i < entries.length; i++) {
-      const [key, value] = entries[i];
-      if (!value || String(value).trim().length < 3) {
-        const clarifier = `
-    You are an AI brainstorming facilitator. The user gave: "${value}". 
-    If it's vague, short, or unclear, rewrite it as a useful prompt for brainstorming.
-    If still not fixable, suggest a follow-up or offer two likely options.
-        `;
-        // Cast to any here to satisfy TS index signature
-        (repairedInput as any)[key] = await generateText(clarifier);
-      }
-    }
-    
-    // Now call the brainstorming function with repaired input
-    const result = await facilitateCreativeBrainstorming(repairedInput as FacilitateCreativeBrainstormingInput);    
-        // ----------- AGENTIC UPDATE END -------------
-
+        const result = await facilitateCreativeBrainstorming(formValues.current as FacilitateCreativeBrainstormingInput);
         const pravisResponse: Message = {
             role: "pravis",
             content: <BrainstormingResults results={result} />

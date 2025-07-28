@@ -15,7 +15,6 @@ import { FadeIn } from '@/components/animations/fade-in';
 import { draftEmailReply } from '@/ai/flows/draft-email-reply';
 import { useIntent } from '@/contexts/intent-context';
 import { Card, CardContent } from '@/components/ui/card';
-import { generateText } from '@/ai/openrouter';
 
 export default function ComposeEmailPage() {
   const router = useRouter();
@@ -61,17 +60,7 @@ export default function ComposeEmailPage() {
     }
     setIsGenerating(true);
     try {
-      // Step 1: Clarify, repair, or upgrade ANY user prompt so it always works
-      const clarifier = `
-  You are an expert email-writing agent.
-  If the user's instructions are vague, short, or hard to understand, rewrite it as a clear and complete command for an email.
-  If you still aren't sure, suggest a likely action or ask a helpful follow-up question.
-  User instruction: "${aiPrompt}"
-  `;
-      const improvedPrompt = await generateText(clarifier);
-  
-      // Step 2: Continue with main workflow using the clarified/rewritten prompt
-      const result = await draftEmailReply({ prompt: improvedPrompt });
+      const result = await draftEmailReply({ prompt: aiPrompt });
       setTo(prev => prev || result.to);
       setSubject(result.subject);
       setBody(result.body);
@@ -86,7 +75,6 @@ export default function ComposeEmailPage() {
       setIsGenerating(false);
     }
   };
-  
 
   const handleSendEmail = async () => {
     if (!to || !subject || !body) {
