@@ -40,16 +40,11 @@ function RootLayoutClient({
     >
       <AgentAutoNavigator />
       <RouteLoaderProvider>
-        <div className="flex h-full">
-            <main className={cn(
-              "flex-1 h-full transition-all duration-300 ease-in-out",
-              isPanelOpen ? "md:mr-[33.333333%]" : "md:mr-0"
-            )}>
+        <div className="flex h-full w-full">
+            <main className="flex-1 h-full w-full transition-all duration-300 ease-in-out">
               {children}
             </main>
-            <div className="hidden md:block">
-              <ChatPanel />
-            </div>
+            <ChatPanel />
         </div>
 
         <Toaster />
