@@ -11,7 +11,9 @@ export default function EmailAssistantPage() {
   const { isPanelOpen } = useChat();
   return (
     <FadeIn className="h-full w-full">
-        <EmailAssistantContent size={isPanelOpen ? 'small' : 'default'} />
+        <EmailProvider>
+            <EmailAssistantContent size={isPanelOpen ? 'small' : 'default'} />
+        </EmailProvider>
     </FadeIn>
   );
 }
