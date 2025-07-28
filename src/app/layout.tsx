@@ -18,6 +18,7 @@ import { AgentAutoNavigator } from "@/components/AgentAutoNavigator";
 // ========================
 
 import RouteLoaderProvider from "@/components/RouteLoaderProvider"; // IMPORTANT: import your loader provider
+import { useIsMobile } from '@/hooks/use-mobile';
 
 function RootLayoutClient({
   children,
@@ -27,9 +28,15 @@ function RootLayoutClient({
   const pathname = usePathname();
   const { isPanelOpen } = useChat();
   const isDashboard = pathname.startsWith('/dashboard');
+  const isMobile = useIsMobile();
 
   // Show persistent chat only on dashboard pages when panel is closed.
   const showPersistentChat = isDashboard && !isPanelOpen;
+
+  const mainVariants = {
+    open: { height: isMobile ? '100%' : '66.666667%' },
+    closed: { height: '100%' },
+  };
 
   return (
     <ThemeProvider
@@ -40,10 +47,11 @@ function RootLayoutClient({
     >
       <AgentAutoNavigator />
       <RouteLoaderProvider>
-        <div className="flex h-svh w-full overflow-hidden">
+        <div className="flex flex-col h-svh w-full overflow-hidden">
            <motion.main
               initial={false}
-              animate={{ width: isPanelOpen ? "66.666667%" : "100%"}}
+              animate={isPanelOpen ? "open" : "closed"}
+              variants={mainVariants}
               transition={{ duration: 0.3, ease: "easeInOut" }}
               className="flex-1"
             >
