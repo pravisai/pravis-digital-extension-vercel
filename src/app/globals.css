@@ -119,37 +119,13 @@
   }
 
   .chat-bubble-user {
-    @apply chat-bubble-base rounded-lg bg-primary text-primary-foreground;
-    border-bottom-right-radius: 0;
+    @apply chat-bubble-base rounded-2xl bg-primary text-primary-foreground;
   }
   
-  .chat-bubble-user::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: -10px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 10px 0 0 10px;
-    border-color: transparent transparent transparent hsl(var(--primary));
-  }
-
   .chat-bubble-pravis {
-    @apply chat-bubble-base rounded-lg border border-border;
-    border-bottom-left-radius: 0;
-  }
-
-  .chat-bubble-pravis::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: -10px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 0 10px 10px 0;
-    border-color: transparent hsl(var(--border)) transparent transparent;
+    @apply chat-bubble-base rounded-2xl border bg-transparent;
+    box-shadow: 0 0 8px hsl(var(--primary) / 0.5);
+    border-color: hsl(var(--primary) / 0.6);
   }
   
   /* --- 3D Translucent Cube Logo --- */
@@ -475,3 +451,5 @@
     .size-small .bottom { transform: rotateX(-90deg) translateZ(75px); }
   }
 }
+
+    
