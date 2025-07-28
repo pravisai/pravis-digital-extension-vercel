@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview This file drafts email replies based on a user prompt using OpenRouter.
@@ -31,7 +30,7 @@ Your tasks are:
 3. Draft a well-written email body that accurately reflects the user's instructions.
 
 User Prompt:
-"{{{prompt}}}"
+"${input.prompt}"
 
 Respond ONLY with a valid JSON object in the following format, with no additional text or explanation:
 {
@@ -39,12 +38,15 @@ Respond ONLY with a valid JSON object in the following format, with no additiona
   "subject": "...",
   "body": "..."
 }
-`.replace('{{{prompt}}}', input.prompt);
+`;
 
   const responseText = await generateText(prompt);
   try {
     const jsonStart = responseText.indexOf('{');
     const jsonEnd = responseText.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1) {
+        throw new Error("No JSON object found in the AI response.");
+    }
     const jsonString = responseText.substring(jsonStart, jsonEnd + 1);
     const parsed = JSON.parse(jsonString);
     return DraftEmailReplyOutputSchema.parse(parsed);

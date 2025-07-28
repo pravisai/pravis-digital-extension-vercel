@@ -36,7 +36,7 @@ The brainstorming session should cover the following:
 - Desired Outcome: ${input.desiredOutcome}
 ${input.knownConstraints ? `- Known Constraints: ${input.knownConstraints}` : ''}
 
-Based on the above, respond ONLY with this JSON (no extra text):
+Based on the above, respond ONLY with a valid JSON object in the following format. Do not add any extra text, comments, or explanation before or after the JSON object.
 
 {
   "brainstormingSession": "...",
@@ -51,11 +51,15 @@ Based on the above, respond ONLY with this JSON (no extra text):
   try {
     const jsonStart = response.indexOf('{');
     const jsonEnd = response.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1) {
+        throw new Error("No JSON object found in the AI response.");
+    }
     const jsonString = response.substring(jsonStart, jsonEnd + 1);
     const data = JSON.parse(jsonString);
 
     return FacilitateCreativeBrainstormingOutputSchema.parse(data);
   } catch (error) {
-    throw new Error('Failed to parse Gemini response as JSON: ' + (error as any)?.toString());
+    console.error("Failed to parse brainstorming response from AI:", error, "Raw response:", response);
+    throw new Error('Failed to parse AI response as JSON. The format was invalid.');
   }
 }

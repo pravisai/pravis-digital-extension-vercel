@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview This is the OpenRouter version of the Clarity Chatbot.
@@ -17,22 +16,20 @@ export type ClarityChatInput = z.infer<typeof ClarityChatInputSchema>;
 
 const ClarityChatOutputSchema = z.object({
   reply: z.string().optional().describe('The conversational reply from Pravis.'),
-  toolRequest: z.object({
-    action: z.enum(['navigateToEmailCompose', 'navigateToCalendar']),
-    params: z.record(z.any()).optional(),
-  }).optional().describe('Navigation/tool request, if any.'),
+  toolRequest: z
+    .object({
+      action: z.enum(['navigateToEmailCompose', 'navigateToCalendar']),
+      params: z.record(z.any()).optional(),
+    })
+    .optional()
+    .describe('Navigation/tool request, if any.'),
 });
 export type ClarityChatOutput = z.infer<typeof ClarityChatOutputSchema>;
 
 export async function clarityChat(input: ClarityChatInput): Promise<ClarityChatOutput> {
-    const handlebarsContext = {
-        prompt: input.prompt,
-        imageDataUri: input.imageDataUri,
-    };
-
-    const promptTemplate = `
+  const promptTemplate = `
 You are Pravis, a personal AI assistant. Be compassionate, empathetic, and always guide the user with kindness.
-You can perform special actions. Based on the user's message, decide if a tool is needed or if a conversational reply is best.
+Based on the user's message, decide if a special action is needed or if a conversational reply is best.
 
 Your tasks are:
 - If the user asks to compose an email, you MUST respond with a "toolRequest" field. The action should be "navigateToEmailCompose". Extract parameters like 'to', 'subject', or 'body'.
@@ -40,32 +37,25 @@ Your tasks are:
 - For ALL OTHER requests, you MUST provide a conversational response in the "reply" field.
 - If an image is provided, comment on it as part of your conversational reply.
 
-User message: "{{prompt}}"
-{{#if imageDataUri}}
-(Image data is attached)
-{{/if}}
+User message: "${input.prompt}"
+${input.imageDataUri ? `(Image data is attached for context)` : ''}
 
-Respond ONLY with a valid JSON object in the format { "reply": "..." } or { "toolRequest": { "action": "...", "params": { ... } } }. Do not add any extra text or explanation.
+Respond ONLY with a valid JSON object in the format { "reply": "..." } or { "toolRequest": { "action": "...", "params": { ... } } }. Do not add any extra text, comments, or explanations.
 `;
 
-    const finalPrompt = promptTemplate
-      .replace('{{prompt}}', handlebarsContext.prompt)
-      .replace('{{#if imageDataUri}}', handlebarsContext.imageDataUri ? '' : '{{/if}}')
-      .replace('{{/if}}', '');
-
   try {
-    const responseText = await generateText(finalPrompt);
+    const responseText = await generateText(promptTemplate);
     const jsonStart = responseText.indexOf('{');
     const jsonEnd = responseText.lastIndexOf('}');
     if (jsonStart === -1 || jsonEnd === -1) {
-        // If no JSON object is found, assume it's a direct conversational reply.
-        return { reply: responseText };
+      // If no JSON object is found, assume it's a direct conversational reply.
+      return { reply: responseText };
     }
     const jsonString = responseText.substring(jsonStart, jsonEnd + 1);
     const parsed = JSON.parse(jsonString);
     return ClarityChatOutputSchema.parse(parsed);
   } catch (error) {
-    console.error("Error in clarityChat:", error);
+    console.error('Error in clarityChat:', error);
     return {
       reply: "I'm sorry, I encountered an issue processing your request. Please try again.",
     };

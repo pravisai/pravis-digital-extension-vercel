@@ -7,7 +7,7 @@
  */
 
 import { z } from 'zod';
-import { generateText } from '@/ai/openrouter';  // <-- The Gemini helper you just created
+import { generateText } from '@/ai/openrouter';
 
 const AnalyzeConversationEmotionsInputSchema = z.object({
   conversation: z
@@ -31,7 +31,6 @@ export type AnalyzeConversationEmotionsOutput = z.infer<typeof AnalyzeConversati
 export async function analyzeConversationEmotions(
   input: AnalyzeConversationEmotionsInput
 ): Promise<AnalyzeConversationEmotionsOutput> {
-  // Craft the prompt exactly
   const prompt = `You are an AI assistant designed to analyze conversations and determine if they need a more empathetic touch.
 
 A conversation needs a more empathetic touch if it contains negative emotions, conflict, or misunderstanding.
@@ -40,26 +39,26 @@ Analyze the following conversation:
 
 "${input.conversation}"
 
-Based on your analysis, respond with a JSON object:
+Based on your analysis, respond ONLY with a valid JSON object in the format:
 {
-  "needsEmpatheticTouch": true|false, // True if needs more empathy
+  "needsEmpatheticTouch": true|false,
   "summary": "Short summary of the emotional content"
 }
 `;
 
   const responseText = await generateText(prompt);
 
-  // Attempt to parse the result as JSON
   try {
-    // Find the JSON in the model's response (in case it adds extra text)
     const jsonStart = responseText.indexOf('{');
     const jsonEnd = responseText.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1) {
+      throw new Error("No JSON object found in the AI response.");
+    }
     const jsonString = responseText.substring(jsonStart, jsonEnd + 1);
     const parsed = JSON.parse(jsonString);
-
-    // Validate result via schema
     return AnalyzeConversationEmotionsOutputSchema.parse(parsed);
   } catch (err) {
-    throw new Error('Failed to parse Gemini response as JSON: ' + err?.toString() || '');
+    console.error("Failed to parse conversation analysis from AI:", err, "Raw response:", responseText);
+    throw new Error('Failed to parse AI response as JSON. The format was invalid.');
   }
 }
