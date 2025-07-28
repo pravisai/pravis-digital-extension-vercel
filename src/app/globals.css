@@ -14,28 +14,28 @@
     --popover: 0 0% 5%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 0 90% 65%; /* Neon Red */
+    --primary: 30 90% 60%; /* Neon Copper */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 90% 60%; /* Neon Copper */
+    --secondary: 310 90% 60%; /* Neon Purple/Magenta */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 220 10% 20%;
     --muted-foreground: 220 10% 65%;
 
-    --accent: 310 90% 60%; /* Neon Purple/Magenta */
+    --accent: 190 95% 55%; /* Electric Cyan */
     --accent-foreground: 0 0% 5%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 0 80% 20%;
-    --input: 30 90% 20%; /* Neon Copper based input */
-    --ring: 0 90% 60%;
+    --border: 30 80% 20%;
+    --input: 30 90% 20%;
+    --ring: 30 90% 60%;
 
-    --chart-1: 0 90% 65%; /* neon red */
-    --chart-2: 30 90% 60%; /* neon copper */
-    --chart-3: 310 90% 60%; /* neon purple */
+    --chart-1: 30 90% 60%; /* neon copper */
+    --chart-2: 310 90% 60%; /* neon purple */
+    --chart-3: 190 95% 55%; /* electric cyan */
     --chart-4: 70 95% 55%; /* neon yellow-green */
     --chart-5: 220 10% 65%; /* muted foreground */
   }
@@ -47,7 +47,7 @@
     --card-foreground: 224 71% 4%;
     --popover: 0 0% 100%;
     --popover-foreground: 224 71% 4%;
-    --primary: 0 75% 50%;
+    --primary: 25 95% 53%; /* Strong Orange for Light Mode */
     --primary-foreground: 0 0% 98%;
     --secondary: 240 5% 90%;
     --secondary-foreground: 240 6% 10%;
@@ -59,11 +59,11 @@
     --destructive-foreground: 0 0% 98%;
     --border: 240 6% 90%;
     --input: 240 6% 90%;
-    --ring: 0 75% 55%;
+    --ring: 25 95% 55%;
 
-    --chart-1: 0 75% 50%;
-    --chart-2: 180 70% 45%;
-    --chart-3: 310 75% 55%;
+    --chart-1: 25 95% 53%;
+    --chart-2: 310 75% 55%;
+    --chart-3: 190 80% 50%;
     --chart-4: 70 70% 40%;
     --chart-5: 220 10% 45%;
   }
