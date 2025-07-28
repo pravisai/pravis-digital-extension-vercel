@@ -10,14 +10,14 @@ export function ChatPanel() {
     
     return (
         <>
-            {/* Desktop Panel: part of the flex layout */}
+            {/* Desktop Panel: part of the flex layout, appears at the bottom */}
             <motion.aside
                 initial={false}
-                animate={{ width: isPanelOpen ? '33.333333%' : '0%' }}
+                animate={{ height: isPanelOpen ? '33.333333%' : '0%' }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="hidden md:block h-full bg-transparent overflow-hidden"
+                className="hidden md:block w-full bg-transparent overflow-hidden"
             >
-                <div className="h-full p-4 border-l">
+                <div className="h-full p-4 border-t">
                      <ClarityChat />
                 </div>
             </motion.aside>
