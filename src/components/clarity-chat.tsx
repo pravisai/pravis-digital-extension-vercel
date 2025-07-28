@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -6,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Send, User, Paperclip, Mic, Smile, Camera, Waves, X, ChevronDown
+  Send, User, Paperclip, Mic, Smile, Camera, Waves, X
 } from "lucide-react";
 import React, { useRef, useState, useEffect } from "react";
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
@@ -29,8 +28,6 @@ export function ClarityChat() {
     setAudioDataUri,
     attachmentPreview,
     setAttachment,
-    isPanelOpen,
-    setPanelOpen,
   } = useChat();
 
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -39,7 +36,6 @@ export function ClarityChat() {
   const formRef = useRef<HTMLFormElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const isMobile = useIsMobile();
 
   const router = useRouter();
 
@@ -99,7 +95,6 @@ export function ClarityChat() {
     if (!input.trim() && !attachmentPreview) return;
     handleSendMessage(input);
   };
-  
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -111,22 +106,9 @@ export function ClarityChat() {
   const handleAttachmentClick = () => {
     fileInputRef.current?.click();
   };
-  
+
   return (
-    <div className="flex flex-col h-full bg-transparent">
-      <header className="p-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-        </div>
-        {isMobile && isPanelOpen && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setPanelOpen(false)}
-          >
-            <ChevronDown className="h-5 w-5" />
-          </Button>
-        )}
-      </header>
+    <div className="flex flex-col h-full rounded-lg bg-transparent">
       <ScrollArea className="flex-1 w-full" ref={scrollAreaRef}>
         <div className="space-y-4 p-4">
           {messages.map((message, index) => (
@@ -153,7 +135,7 @@ export function ClarityChat() {
                         : "chat-bubble-pravis"
                     )}
                   >
-                  {typeof message.content === "string" ? (
+                   {typeof message.content === "string" ? (
                     <p className="text-sm whitespace-pre-wrap">
                       {message.content}
                     </p>
@@ -190,7 +172,7 @@ export function ClarityChat() {
           )}
         </div>
       </ScrollArea>
-      <footer className="p-2">
+      <footer className="p-2 border-t">
         {attachmentPreview && (
           <div className="p-2 relative w-fit">
             <img
@@ -209,7 +191,7 @@ export function ClarityChat() {
           </div>
         )}
         <form onSubmit={handleFormSubmit} ref={formRef} className="flex items-center gap-2">
-          <div className="flex-1 flex items-center bg-secondary/50 rounded-full px-2">
+          <div className="flex-1 flex items-center bg-transparent border border-primary/50 shadow-[0_0_8px_hsl(var(--primary)/0.5)] rounded-full px-2">
             <Button
               variant="ghost"
               size="icon"
@@ -245,7 +227,6 @@ export function ClarityChat() {
               variant="ghost"
               size="icon"
               type="button"
-              className="shrink-0 rounded-full"
             >
               <Camera className="h-5 w-5 text-muted-foreground" />
             </Button>
