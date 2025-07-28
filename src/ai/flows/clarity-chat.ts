@@ -7,6 +7,7 @@
 
 import { z } from 'zod';
 import { generateText } from '@/ai/openrouter';
+import { ai } from '../genkit';
 
 const ClarityChatInputSchema = z.object({
   prompt: z.string().describe("The user's message to Pravis."),
@@ -26,8 +27,15 @@ const ClarityChatOutputSchema = z.object({
 });
 export type ClarityChatOutput = z.infer<typeof ClarityChatOutputSchema>;
 
-export async function clarityChat(input: ClarityChatInput): Promise<ClarityChatOutput> {
-  const promptTemplate = `
+
+export const clarityChatFlow = ai.defineFlow(
+  {
+    name: 'clarityChatFlow',
+    inputSchema: ClarityChatInputSchema,
+    outputSchema: ClarityChatOutputSchema,
+  },
+  async (input) => {
+    const promptTemplate = `
 You are Pravis, a personal AI assistant. Be compassionate, empathetic, and always guide the user with kindness.
 Based on the user's message, decide if a special action is needed or if a conversational reply is best.
 
@@ -43,21 +51,28 @@ ${input.imageDataUri ? `(Image data is attached for context)` : ''}
 Respond ONLY with a valid JSON object in the format { "reply": "..." } or { "toolRequest": { "action": "...", "params": { ... } } }. Do not add any extra text, comments, or explanations.
 `;
 
-  try {
-    const responseText = await generateText(promptTemplate);
-    const jsonStart = responseText.indexOf('{');
-    const jsonEnd = responseText.lastIndexOf('}');
-    if (jsonStart === -1 || jsonEnd === -1) {
-      // If no JSON object is found, assume it's a direct conversational reply.
-      return { reply: responseText };
+    try {
+      const responseText = await generateText(promptTemplate);
+      const jsonStart = responseText.indexOf('{');
+      const jsonEnd = responseText.lastIndexOf('}');
+      
+      if (jsonStart === -1 || jsonEnd === -1) {
+        return { reply: responseText };
+      }
+      const jsonString = responseText.substring(jsonStart, jsonEnd + 1);
+      const parsed = JSON.parse(jsonString);
+      return ClarityChatOutputSchema.parse(parsed);
+
+    } catch (error) {
+      console.error('Error in clarityChat:', error);
+      return {
+        reply: "I'm sorry, I encountered an issue processing your request. Please try again.",
+      };
     }
-    const jsonString = responseText.substring(jsonStart, jsonEnd + 1);
-    const parsed = JSON.parse(jsonString);
-    return ClarityChatOutputSchema.parse(parsed);
-  } catch (error) {
-    console.error('Error in clarityChat:', error);
-    return {
-      reply: "I'm sorry, I encountered an issue processing your request. Please try again.",
-    };
   }
+);
+
+
+export async function clarityChat(input: ClarityChatInput): Promise<ClarityChatOutput> {
+  return clarityChatFlow(input);
 }
