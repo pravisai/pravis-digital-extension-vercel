@@ -1,14 +1,14 @@
 
 'use server';
 /**
- * @fileOverview This file generates a personalized greeting message for the user.
+ * @fileOverview This file generates a personalized greeting message for the user using OpenRouter.
  * - generateGreeting - A function that crafts a welcome message including a summary of today's events.
  * - GenerateGreetingInput - The input type for the function.
  * - GenerateGreetingOutput - The return type for the function.
  */
 
 import { z } from 'zod';
-import { ai } from '@/ai/genkit';
+import { generateText } from '@/ai/openrouter';
 
 const EventSchema = z.object({
     summary: z.string().describe("The title of the calendar event."),
@@ -26,11 +26,15 @@ const GenerateGreetingOutputSchema = z.object({
 });
 export type GenerateGreetingOutput = z.infer<typeof GenerateGreetingOutputSchema>;
 
-const greetingPrompt = ai.definePrompt({
-    name: 'generateGreetingPrompt',
-    input: { schema: GenerateGreetingInputSchema },
-    output: { schema: GenerateGreetingOutputSchema },
-    prompt: `
+export async function generateGreeting(
+  input: GenerateGreetingInput
+): Promise<GenerateGreetingOutput> {
+  let eventsString = "No events scheduled.";
+  if (input.events && input.events.length > 0) {
+    eventsString = input.events.map(e => `- ${e.summary} at ${e.start}`).join('\n');
+  }
+
+  const promptTemplate = `
 You are Pravis, a personal AI assistant. Your tone is professional, respectful, and helpful.
 
 Generate a brief, welcoming greeting for the user, {{userName}}.
@@ -46,31 +50,17 @@ Keep the entire message to a maximum of 3-4 sentences.
 ---
 User Name: {{userName}}
 Today's Events:
-{{#if events}}
-  {{#each events}}
-  - {{this.summary}} at {{this.start}}
-  {{/each}}
-{{else}}
-  No events scheduled.
-{{/if}}
+{{events}}
 ---
-`,
-});
 
-const generateGreetingFlow = ai.defineFlow(
-  {
-    name: 'generateGreetingFlow',
-    inputSchema: GenerateGreetingInputSchema,
-    outputSchema: GenerateGreetingOutputSchema,
-  },
-  async (input) => {
-    const { output } = await greetingPrompt(input);
-    return output!;
-  }
-);
+Respond with only the greeting message, no extra conversational text.
+`;
 
-export async function generateGreeting(
-  input: GenerateGreetingInput
-): Promise<GenerateGreetingOutput> {
-    return generateGreetingFlow(input);
+  const prompt = promptTemplate
+    .replace('{{userName}}', input.userName)
+    .replace('{{events}}', eventsString);
+
+  const greeting = await generateText(prompt);
+
+  return { greeting };
 }
