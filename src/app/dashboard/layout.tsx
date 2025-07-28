@@ -1,3 +1,4 @@
+
 "use client"
 
 import { BrainCircuit, Mail, ListChecks, Bot, User, Settings, LogOut, ArrowLeft, LineChart, CheckCircle2, MessageSquare, Timer, Sun, Moon, RefreshCw, Loader2 } from "lucide-react"
@@ -28,6 +29,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { EmailProvider, useEmail } from "@/contexts/email-context"
 import { PravisLogo } from "@/components/pravis-logo"
+import { useChat } from "@/contexts/chat-context"
 
 // ====== AGENTIC LOGIC IMPORTS ======
 import { AgentAutoNavigator } from "@/components/AgentAutoNavigator";
@@ -190,6 +192,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
     const { toast } = useToast();
+    const { isPanelOpen } = useChat();
     const [isLoading, setIsLoading] = useState(true);
   
     const isFullHeightPage = pathname === '/dashboard' || pathname === '/dashboard/creative-partner' || pathname === '/dashboard/productivity-suite' || pathname === '/dashboard/clarity-chat' || pathname.startsWith('/dashboard/email-assistant') || pathname === '/dashboard/tasks' || pathname === '/dashboard/social-media';
@@ -247,10 +250,11 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
             </div>
             <DashboardHeader />
             <main className={cn(
-                "flex-1",
+                "flex-1 transition-all duration-300",
                 {
                     "p-4 md:p-8": !isFullHeightPage,
-                    "h-[calc(100vh-4rem)]": isFullHeightPage,
+                    "h-[calc(100vh-4rem)]": isFullHeightPage && !isPanelOpen,
+                    "h-[calc(67vh-4rem)]": isFullHeightPage && isPanelOpen,
                 },
                  pathname === '/dashboard' && "p-0 md:p-0"
             )}>
