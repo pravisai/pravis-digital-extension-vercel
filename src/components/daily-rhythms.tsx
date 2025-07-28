@@ -13,7 +13,7 @@ const modules: CubeFace[] = [
       label: "Productivity Suite",
       description: "Access your AI-powered productivity tools.",
       face: "front",
-      colorClass: "theme-primary"
+      colorClass: "neon-purple"
     },
     {
       id: "tasks",
@@ -22,7 +22,7 @@ const modules: CubeFace[] = [
       label: "My Flow",
       description: "your day perfectly orchestrated",
       face: "right",
-      colorClass: "theme-accent"
+      colorClass: "electric-blue"
     },
     {
       id: "social-media",
@@ -31,7 +31,7 @@ const modules: CubeFace[] = [
       label: "Socials",
       description: "Connect and manage your social media presence.",
       face: "back",
-      colorClass: "theme-secondary"
+      colorClass: "bright-pink"
     },
     {
       id: "email-assistant",
@@ -40,7 +40,7 @@ const modules: CubeFace[] = [
       label: "Comms",
       description: "your AI amplified emails",
       face: "left",
-      colorClass: "theme-primary"
+      colorClass: "acid-green"
     },
     {
       id: "pravis-core",
@@ -49,7 +49,7 @@ const modules: CubeFace[] = [
       label: "Pravis Core",
       description: "design your digital mind, your legacy",
       face: "top",
-      colorClass: "theme-accent"
+      colorClass: "neon-purple"
     },
     {
       id: "settings",
@@ -58,7 +58,7 @@ const modules: CubeFace[] = [
       label: "Connect",
       description: "Configure your experience",
       face: "bottom",
-      colorClass: "theme-secondary"
+      colorClass: "electric-blue"
     },
 ];
 

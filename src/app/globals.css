@@ -271,9 +271,22 @@
     transition: all 0.3s ease;
   }
 
-  .theme-primary { @apply bg-primary/20 text-primary; }
-  .theme-secondary { @apply bg-secondary/20 text-secondary; }
-  .theme-accent { @apply bg-accent/20 text-accent; }
+  .neon-purple {
+    background-color: rgba(191, 95, 255, 0.1);
+    color: #BF5FFF;
+  }
+  .electric-blue {
+    background-color: rgba(0, 255, 255, 0.1);
+    color: #00FFFF;
+  }
+  .bright-pink {
+    background-color: rgba(255, 0, 128, 0.1);
+    color: #FF0080;
+  }
+  .acid-green {
+    background-color: rgba(173, 255, 47, 0.1);
+    color: #ADFF2F;
+  }
   
   .cube-face:hover .module-icon {
     filter: none;
